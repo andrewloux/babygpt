@@ -1,0 +1,15 @@
+.highlight {
+  color: var(--accent-yellow);
+  font-weight: 700;
+}
+
+.term {
+  color: var(--accent-cyan);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9em;
+}
+
+.paragraph {
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}

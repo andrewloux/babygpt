@@ -1,0 +1,35 @@
+.callout {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 25px;
+  margin: 25px 0;
+  border-left: 4px solid var(--accent-cyan);
+}
+
+.callout.info {
+  border-left-color: var(--accent-cyan);
+}
+
+.callout.warning {
+  border-left-color: var(--accent-yellow);
+}
+
+.callout.insight {
+  border-left-color: var(--accent-magenta);
+}
+
+.title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: var(--text-primary);
+}
+
+.content p {
+  margin-bottom: 15px;
+}
+
+.content p:last-child {
+  margin-bottom: 0;
+}

@@ -1,0 +1,20 @@
+.mathBlock {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 25px 30px;
+  margin: 25px 0;
+  text-align: center;
+}
+
+.equation {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  color: var(--accent-cyan);
+  margin-bottom: 12px;
+}
+
+.explanation {
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-style: italic;
+}

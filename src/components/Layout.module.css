@@ -1,0 +1,82 @@
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 60px 30px;
+}
+
+.chapterHeader {
+  margin-bottom: 80px;
+  position: relative;
+}
+
+.chapterNumber {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: var(--accent-cyan);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chapterNumber::before {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: var(--accent-cyan);
+}
+
+.chapterTitle {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(48px, 8vw, 72px);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.chapterSubtitle {
+  font-size: 22px;
+  color: var(--text-secondary);
+  font-style: italic;
+  max-width: 600px;
+}
+
+.section {
+  margin-bottom: 80px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.sectionNumber {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--accent-magenta);
+  background: rgba(255, 0, 110, 0.1);
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 0, 110, 0.3);
+}
+
+.sectionTitle {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 40px 20px;
+  }
+}
