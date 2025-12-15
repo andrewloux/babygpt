@@ -1,0 +1,18 @@
+.corpusDisplay {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 20px 25px;
+  margin: 25px 0;
+}
+
+.sentence {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--accent-yellow);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sentence:last-child {
+  border-bottom: none;
+}

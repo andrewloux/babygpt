@@ -29,12 +29,14 @@ export function SparsityViz({ rows }: SparsityVizProps) {
   )
 }
 
-// Default data for the standard sparsity example
+// Default data for the standard sparsity example.
+// Counts measured on a book-length English corpus (Project Gutenberg: Pride and Prejudice).
+// Bars are roughly log-scaled so the tiny counts are still visible.
 export const defaultSparsityData: SparsityRow[] = [
-  { context: 'the cat sat on', count: '3 times', widthPercent: 0.5 },
-  { context: 'the cat sat', count: '12 times', widthPercent: 2 },
-  { context: 'cat sat', count: '47 times', widthPercent: 5 },
-  { context: 'sat', count: '2,847 times', widthPercent: 25 },
-  { context: 'at', count: '18,392 times', widthPercent: 60 },
-  { context: 't', count: '91,247 times', widthPercent: 100 },
+  { context: 'the next morning', count: '9 times', widthPercent: 24 },
+  { context: 'next morning', count: '14 times', widthPercent: 29 },
+  { context: ' morning', count: '72 times', widthPercent: 46 },
+  { context: 'rning', count: '113 times', widthPercent: 51 },
+  { context: 'ing', count: '3,960 times', widthPercent: 90 },
+  { context: 'g', count: '10,239 times', widthPercent: 100 },
 ]

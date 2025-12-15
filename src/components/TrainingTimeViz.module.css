@@ -1,0 +1,150 @@
+.container {
+  margin: 2rem 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.header {
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-tertiary, rgba(0, 0, 0, 0.2));
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.bars {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+.barLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.barTrack {
+  height: 28px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 1s ease-out;
+  position: relative;
+}
+
+.barFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+}
+
+.slow {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+.medium {
+  background: linear-gradient(90deg, #f97316, #ea580c);
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+}
+
+.fast {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+.barTime {
+  text-align: right;
+  min-width: 100px;
+}
+
+.timeValue {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.timeDetail {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.1rem;
+}
+
+.footer {
+  padding: 1rem 1.5rem;
+  background: var(--bg-tertiary, rgba(0, 0, 0, 0.2));
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .barRow {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .barLabel {
+    font-size: 0.8rem;
+  }
+
+  .barTime {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+    text-align: left;
+  }
+
+  .timeValue {
+    display: inline;
+  }
+
+  .timeDetail {
+    display: inline;
+    margin-top: 0;
+  }
+}

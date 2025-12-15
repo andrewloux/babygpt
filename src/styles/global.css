@@ -1,6 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;700&family=Crimson+Pro:ital,wght@0,400;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;700&family=Crimson+Pro:ital,wght@0,400;1,400&display=swap');
 
 :root {
+  /* Fonts */
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+  --font-code: 'Fira Code', 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  --font-sans: 'Space Grotesk', system-ui, sans-serif;
+  --font-serif: 'Crimson Pro', Georgia, serif;
+
+  /* Colors */
   --bg-primary: #0a0a0f;
   --bg-secondary: #12121a;
   --bg-tertiary: #1a1a25;

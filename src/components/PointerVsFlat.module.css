@@ -1,0 +1,178 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 24px 0;
+  font-family: var(--font-mono);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+.diagramRow {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.diagramCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.colTitle {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.colSubtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Graph Node Styles */
+.nodeBox {
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-tertiary);
+  width: 180px;
+  padding: 8px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.memoryBlock {
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: rgba(0,0,0,0.7);
+  font-weight: 600;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.overhead {
+  background: #ff6b6b; /* Red-ish for overhead */
+  color: white;
+}
+
+.payload {
+  background: #39ff14; /* Green for actual data */
+  color: black;
+}
+
+.ptrArrow {
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  width: 20px;
+  height: 2px;
+  background: var(--text-muted);
+}
+
+.ptrArrow::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -3px;
+  border-left: 6px solid var(--text-muted);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+
+/* Flat Array Styles */
+.arrayRow {
+  display: flex;
+  width: 100%;
+  max-width: 220px;
+  height: 40px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.arrayCell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--border-color);
+  background: var(--code-bg);
+  position: relative;
+}
+
+.arrayCell:last-child {
+  border-right: none;
+}
+
+.cellLabel {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.cellValue {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cellHighlight {
+  color: var(--accent-cyan);
+}
+
+.comparison {
+  margin-top: 12px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border-color);
+  width: 100%;
+}
+
+.mathRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.mathLabel {
+  color: var(--text-secondary);
+}
+
+.mathValue {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.bad {
+  color: var(--accent-red);
+}
+
+.good {
+  color: var(--accent-green);
+}

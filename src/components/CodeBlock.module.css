@@ -1,0 +1,53 @@
+.codeBlock {
+  background: var(--code-bg);
+  border-radius: 8px;
+  margin: 30px 0;
+  overflow: hidden;
+}
+
+.header {
+  background: var(--bg-tertiary);
+  padding: 10px 20px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.content {
+  padding: 20px;
+  overflow-x: auto;
+  font-family: var(--font-code);
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0;
+  font-feature-settings: "liga" 1, "calt" 1;
+  letter-spacing: 0.02em;
+}
+
+/* Shiki outputs <pre><code>...</code></pre> - style it */
+.content pre {
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  font-feature-settings: inherit;
+  letter-spacing: inherit;
+}
+
+.content code {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  font-feature-settings: inherit;
+  letter-spacing: inherit;
+}
+
+/* Override shiki background */
+.content :global(.shiki) {
+  background: transparent !important;
+  margin: 0;
+  padding: 0;
+}

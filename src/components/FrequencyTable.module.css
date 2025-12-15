@@ -1,0 +1,47 @@
+.frequencyTable {
+  background: var(--code-bg);
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 15px 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 80px 120px;
+  padding: 10px 15px;
+  border-bottom: 1px solid var(--border-color);
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.header {
+  background: var(--bg-tertiary);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+}
+
+.sum {
+  background: var(--bg-tertiary);
+  border-top: 2px solid var(--border-color);
+  color: var(--accent-green);
+}
+
+.char {
+  color: var(--accent-yellow);
+}
+
+.count {
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.prob {
+  color: var(--accent-cyan);
+  text-align: right;
+}

@@ -1,0 +1,260 @@
+.demo {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  border: 1px solid var(--border-color);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.title {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.contextControl {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.controlLabel {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.slider {
+  width: 100px;
+  accent-color: var(--accent-cyan);
+}
+
+.contextValue {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-cyan);
+  min-width: 1.5ch;
+}
+
+/* Character tape */
+.tape {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  margin-bottom: 1.5rem;
+}
+
+.cell {
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.char {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 0.75rem 0.6rem;
+  min-width: 2.5rem;
+  border-radius: 4px 4px 0 0;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.index {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 0.25rem;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 0 0 4px 4px;
+}
+
+/* Cell states */
+.past .char {
+  opacity: 0.3;
+}
+
+.context .char {
+  background: var(--accent-yellow);
+  color: var(--bg-primary);
+}
+
+.target .char {
+  background: var(--accent-magenta);
+  color: white;
+}
+
+.future .char {
+  opacity: 0.5;
+}
+
+/* Current example display */
+.currentExample {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--code-bg);
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+}
+
+.exampleLabel {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.contextBox {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-yellow);
+  background: rgba(255, 204, 0, 0.1);
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+}
+
+.arrow {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+}
+
+.targetBox {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-magenta);
+  background: rgba(255, 0, 128, 0.1);
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+}
+
+/* Step controls */
+.stepControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stepButton {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.stepButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-color: var(--accent-cyan);
+}
+
+.stepButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.stepIndicator {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dot:hover {
+  background: var(--text-muted);
+}
+
+.activeDot {
+  background: var(--accent-cyan);
+}
+
+/* Examples table */
+.examplesTable {
+  background: var(--code-bg);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.tableHeader {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tableBody {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 0.75rem;
+}
+
+.tableRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.tableRow:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.activeRow {
+  background: rgba(0, 217, 255, 0.1);
+  outline: 1px solid var(--accent-cyan);
+}
+
+.rowNum {
+  color: var(--text-muted);
+  min-width: 1.5ch;
+}
+
+.rowContext {
+  color: var(--accent-yellow);
+}
+
+.rowArrow {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.rowTarget {
+  color: var(--accent-magenta);
+}

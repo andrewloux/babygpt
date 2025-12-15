@@ -1,0 +1,144 @@
+.container {
+  font-family: var(--font-mono);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: -12px;
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: var(--bg-tertiary);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.queryBox {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.label {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.value {
+  color: var(--accent-cyan);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.actionBtn {
+  background: var(--accent-magenta);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.actionBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+}
+
+.memoryMap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slot {
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--code-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  align-items: center;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.slot.active {
+  border-color: var(--accent-yellow);
+  background: rgba(255, 214, 10, 0.05);
+  box-shadow: 0 0 0 1px var(--accent-yellow);
+}
+
+.slot.match {
+  border-color: var(--accent-green);
+  background: rgba(57, 255, 20, 0.05);
+  box-shadow: 0 0 0 1px var(--accent-green);
+}
+
+.slot.collision {
+  border-color: var(--accent-red);
+  background: rgba(255, 107, 107, 0.05);
+}
+
+.slotIndex {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.slotContent {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.slotContent.empty {
+  color: var(--text-muted);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.slotValue {
+  color: var(--accent-cyan);
+  text-align: right;
+}
+
+.log {
+  font-size: 13px;
+  color: var(--text-secondary);
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logStep {
+  display: inline-block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}

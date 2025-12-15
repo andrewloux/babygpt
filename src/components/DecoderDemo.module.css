@@ -1,0 +1,184 @@
+.container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 2rem 0;
+  font-family: var(--font-mono);
+}
+
+.header {
+  padding: 12px 16px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stats {
+  display: flex;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.statItem strong {
+  color: var(--accent-cyan);
+}
+
+.controls {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  gap: 24px;
+  background: var(--code-bg);
+}
+
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+}
+
+.value {
+  color: var(--accent-magenta);
+  font-weight: 700;
+}
+
+.slider {
+  width: 100%;
+  accent-color: var(--accent-magenta);
+}
+
+.vizContainer {
+  position: relative;
+  padding: 20px;
+  overflow-x: auto;
+  min-height: 400px;
+  display: flex;
+}
+
+.svgOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.column {
+  flex: 0 0 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.columnHeader {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.node {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 12px;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.node.survivor {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 4px 12px rgba(34, 211, 238, 0.1);
+  transform: scale(1.02);
+}
+
+.node.pruned {
+  opacity: 0.4;
+  border-style: dashed;
+  filter: grayscale(1);
+}
+
+.node.best {
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+}
+
+.word {
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  justify-content: space-between;
+}
+
+.score {
+  font-size: 10px;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+}
+
+.barContainer {
+  height: 4px;
+  background: var(--bg-tertiary);
+  border-radius: 2px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: var(--accent-cyan);
+  transition: width 0.3s ease;
+}
+
+.node.pruned .barFill {
+  background: var(--text-muted);
+}
+
+.node.best .barFill {
+  background: var(--accent-green);
+}
+
+/* Custom scrollbar for horizontal scrolling */
+.vizContainer::-webkit-scrollbar {
+  height: 8px;
+}
+.vizContainer::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+}
+.vizContainer::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}

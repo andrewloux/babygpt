@@ -1,0 +1,44 @@
+.trainingExamples {
+  background: var(--code-bg);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 25px 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 60px 1fr 80px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-color);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  align-items: center;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.header {
+  background: var(--bg-tertiary);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+}
+
+.row:not(.header):hover {
+  background: var(--bg-tertiary);
+}
+
+.step {
+  color: var(--text-muted);
+}
+
+.context {
+  color: var(--accent-cyan);
+}
+
+.target {
+  color: var(--accent-magenta);
+}

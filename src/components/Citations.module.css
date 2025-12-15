@@ -1,0 +1,47 @@
+.cite {
+  font-size: 0.75em;
+  vertical-align: super;
+  margin-left: 4px;
+}
+
+.cite a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.cite a:hover {
+  color: var(--accent-cyan);
+  text-decoration: underline;
+}
+
+.container {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.title {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.list li {
+  margin-bottom: 6px;
+}
+
+.list li:last-child {
+  margin-bottom: 0;
+}

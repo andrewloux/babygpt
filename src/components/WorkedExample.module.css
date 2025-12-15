@@ -1,0 +1,80 @@
+.workedExample {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 25px;
+  margin: 30px 0;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+}
+
+.workedStep {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.workedStep:last-child {
+  margin-bottom: 0;
+}
+
+.final {
+  padding-top: 20px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.stepNumber {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--accent-magenta);
+  background: rgba(255, 0, 110, 0.1);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stepContent {
+  flex: 1;
+}
+
+.stepContent p {
+  margin-bottom: 10px;
+}
+
+.stepContent p:last-child {
+  margin-bottom: 0;
+}
+
+.workedNote {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 8px;
+}
+
+.workedEquation {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--text-primary);
+  background: var(--code-bg);
+  padding: 15px 20px;
+  border-radius: 6px;
+  border-left: 3px solid var(--accent-yellow);
+}

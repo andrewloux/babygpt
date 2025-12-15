@@ -1,0 +1,37 @@
+.chapterNav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 80px;
+  padding-top: 40px;
+  border-top: 1px solid var(--border-color);
+}
+
+.prev,
+.next {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  padding: 15px 25px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-primary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.prev:hover,
+.next:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(0, 217, 255, 0.1);
+}
+
+.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}

@@ -1,0 +1,69 @@
+.container {
+  padding: 1rem;
+  background: var(--bg-paper);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  margin: 1.5rem 0;
+}
+
+.vocabGrid {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+}
+
+.tokenBtn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-main);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.tokenBtn:hover {
+  border-color: var(--primary);
+  background: var(--bg-hover);
+}
+
+.tokenBtn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.vectorDisplay {
+  font-family: var(--font-mono);
+  background: #111;
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  color: #888;
+}
+
+.vectorValue {
+  display: inline-block;
+  width: 2ch;
+  text-align: center;
+  margin: 0 2px;
+}
+
+.hot {
+  color: var(--accent);
+  font-weight: bold;
+  transform: scale(1.2);
+  display: inline-block;
+}
+
+.label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}

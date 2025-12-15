@@ -1,0 +1,223 @@
+.container {
+  margin: 2rem 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.inputSection {
+  padding: 1.5rem;
+  background: var(--bg-tertiary, rgba(0, 0, 0, 0.2));
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+  font-family: var(--font-serif);
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.input {
+  width: 100px;
+  padding: 0.6rem 0.8rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  text-align: center;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--accent-cyan);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+}
+
+.input::-webkit-inner-spin-button,
+.input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.unit {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.mathSection {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.mathLine {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  line-height: 1.6;
+}
+
+.mathLabel {
+  color: var(--text-muted);
+  min-width: 140px;
+}
+
+.mathValue {
+  color: var(--text-secondary);
+}
+
+.mathValue strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.comparisonSection {
+  padding: 1.5rem;
+}
+
+.comparisonHeader {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.barRow:last-of-type {
+  margin-bottom: 0;
+}
+
+.barLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.barTrack {
+  height: 32px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.4s ease-out;
+  position: relative;
+}
+
+.barFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  );
+}
+
+.slow {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+.fast {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+.barTime {
+  text-align: right;
+  min-width: 90px;
+}
+
+.timeValue {
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.timeUnit {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-left: 0.25rem;
+}
+
+.footer {
+  padding: 1rem 1.5rem;
+  background: var(--bg-tertiary, rgba(0, 0, 0, 0.2));
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .inputRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .input {
+    width: 100%;
+    max-width: 150px;
+  }
+
+  .mathLine {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .mathLabel {
+    min-width: unset;
+  }
+
+  .barRow {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .barTime {
+    display: flex;
+    gap: 0.25rem;
+    align-items: baseline;
+    text-align: left;
+  }
+}

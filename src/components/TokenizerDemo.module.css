@@ -1,0 +1,133 @@
+.tokenizerDemo {
+  display: flex;
+  gap: 2rem;
+  background-color: var(--bg-secondary);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.inputSection {
+  flex: 2;
+}
+
+.inputLabel {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.textInput {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.textInput:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+}
+
+.tokensLabel {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.tokenArray {
+  color: var(--accent-yellow);
+}
+
+.tokens {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.token {
+  text-align: center;
+}
+
+.tokenId {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 0.5rem;
+  border-radius: 0.25rem 0.25rem 0 0;
+  min-width: 2.5rem;
+  font-size: 0.9rem;
+  font-family: var(--font-mono);
+}
+
+.tokenChar {
+  font-family: var(--font-mono);
+  background-color: var(--accent-yellow);
+  color: var(--bg-primary);
+  padding: 0.5rem;
+  border-radius: 0 0 0.25rem 0.25rem;
+  font-weight: 700;
+}
+
+.vocabSection {
+  flex: 1;
+  border-left: 1px solid var(--border-color);
+  padding-left: 2rem;
+}
+
+.vocabHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1rem;
+}
+
+.vocabTitle {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vocabSize {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.vocab {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(4rem, 1fr));
+  gap: 0.5rem;
+}
+
+.vocabItem {
+  text-align: center;
+}
+
+.vocabId {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 0.25rem;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  border-radius: 0.25rem 0.25rem 0 0;
+}
+
+.vocabChar {
+  font-family: var(--font-mono);
+  background-color: var(--accent-cyan);
+  color: var(--bg-primary);
+  padding: 0.5rem 0.25rem;
+  font-weight: 700;
+  border-radius: 0 0 0.25rem 0.25rem;
+}
