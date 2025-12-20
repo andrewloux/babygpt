@@ -19,6 +19,10 @@
   --accent-yellow: #ffd60a;
   --accent-green: #39ff14;
   --accent-red: #ff6b6b;
+  /* Legacy theme alias used by components */
+  --primary: #00d9ff;
+  --primary-rgb: 0, 217, 255;
+  --primary-dark: #00a6c2;
   --border-color: #2a2a3a;
   --code-bg: #0d0d14;
 }
@@ -76,4 +80,47 @@ ul, ol {
 
 li {
   margin-bottom: 8px;
+}
+
+details.collapsible {
+  margin: 1.25rem 0;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.85rem 1rem;
+}
+
+details.collapsible > summary {
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+details.collapsible > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.collapsible > summary::before {
+  content: '▸';
+  color: rgba(255, 255, 255, 0.45);
+  transform: translateY(-1px);
+  transition: transform 140ms ease;
+}
+
+details.collapsible[open] > summary::before {
+  transform: rotate(90deg) translateX(1px);
+}
+
+details.collapsible > summary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.25);
+  border-radius: 12px;
+  padding: 0.25rem 0.35rem;
+  margin: -0.25rem -0.35rem 0.35rem -0.35rem;
 }

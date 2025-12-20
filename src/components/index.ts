@@ -1,6 +1,6 @@
 // Layout components
 export { KenLMDemo } from './KenLMDemo'
-export { Container, ChapterHeader, Section } from './Layout'
+export { Container, ChapterHeader, Section, SectionLink } from './Layout'
 export { ChapterNav } from './ChapterNav'
 
 // Typography components
@@ -8,6 +8,8 @@ export { Highlight, Term, Paragraph } from './Typography'
 
 // Content components
 export { Callout } from './Callout'
+export { CausalMaskViz } from './CausalMaskViz'
+export { ChapterMap } from './ChapterMap'
 export { Cite, Citations } from './Citations'
 export { ProbabilityExample } from './ProbabilityExample'
 export { MathBlock } from './MathBlock'
@@ -30,10 +32,15 @@ export { MarkovChainViz } from './MarkovChainViz'
 export { SparseMarkovViz } from './SparseMarkovViz'
 export { DecoderDemo } from './DecoderDemo'
 export { PointerVsFlat } from './PointerVsFlat'
+export { NgramGraphViz } from './NgramGraphViz'
+export { NgramSamplingDemo } from './NgramSamplingDemo'
 
 // Interactive demos
 export { CorridorDemo } from './CorridorDemo'
 export { ExplosionDemo } from './ExplosionDemo'
+export { CharacterClusterViz } from './CharacterClusterViz'
+export { DotProductViz } from './DotProductViz'
+export { TensorShapeBuilder } from './TensorShapeBuilder'
 export { TokenizerDemo } from './TokenizerDemo'
 export { SlidingWindowDemo } from './SlidingWindowDemo'
 export { OneHotViz } from './OneHotViz'
@@ -43,3 +50,16 @@ export { NeuralTrainingDemo } from './NeuralTrainingDemo'
 export { MatrixRowSelectViz } from './MatrixRowSelectViz'
 export { TrainingTimeViz } from './TrainingTimeViz'
 export { ScaleCalculator } from './ScaleCalculator'
+
+
+export { ContextExplosionViz } from './ContextExplosionViz'
+export { GrassmannViz } from './GrassmannViz'
+export { PhoneticPatternViz } from './PhoneticPatternViz'
+export { AbstractionChainViz } from './AbstractionChainViz'
+export { DiscreteContinuousViz } from './DiscreteContinuousViz'
+export { AxiomViz } from './AxiomViz'
+export { GradientDescentViz } from './GradientDescentViz'
+export { EmbeddingGradientViz } from './EmbeddingGradientViz'
+export { CrossEntropyViz } from './CrossEntropyViz'
+export { TrainingDynamicsViz } from './TrainingDynamicsViz'
+export { EmbeddingInspector } from './EmbeddingInspector'

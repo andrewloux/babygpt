@@ -1,0 +1,365 @@
+.container {
+  margin: 2rem 0;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dots {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.red { background: #ff5f57; }
+.yellow { background: #febc2e; }
+.green { background: #28c840; }
+
+.title {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.sectionLabel {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.textarea {
+  width: 100%;
+  resize: none;
+  font-family: var(--font-code);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.textarea:focus {
+  border-color: var(--accent-cyan);
+}
+
+/* Controls Row */
+.controlsRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 100px;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.value {
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+.slider {
+  width: 100%;
+  min-width: 80px;
+}
+
+.input {
+  font-family: var(--font-code);
+  font-size: 0.85rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  outline: none;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--accent-yellow);
+  width: 100px;
+}
+
+.input:focus {
+  border-color: var(--accent-cyan);
+}
+
+.buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.buttonPrimary,
+.buttonSecondary {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  transition: all 0.15s ease;
+}
+
+.buttonPrimary {
+  background: rgba(0, 217, 255, 0.15);
+  color: var(--accent-cyan);
+  border-color: rgba(0, 217, 255, 0.3);
+}
+
+.buttonPrimary:hover {
+  background: rgba(0, 217, 255, 0.25);
+}
+
+.buttonSecondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+}
+
+.buttonSecondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Output */
+.output {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-code);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  padding: 0.75rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+/* Advanced Toggle */
+.advancedToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0;
+  margin-top: 0.25rem;
+}
+
+.advancedToggle:hover {
+  color: var(--text-secondary);
+}
+
+.toggleIcon {
+  font-size: 0.7rem;
+}
+
+/* Advanced Section */
+.advanced {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.advancedRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.stats {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.stats strong {
+  color: var(--text-secondary);
+}
+
+/* Lookup Section */
+.lookupSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.lookupInput {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.lookupHint {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.lookupHint code {
+  color: var(--accent-yellow);
+}
+
+.lookupGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 600px) {
+  .lookupGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lookupCard {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.6rem;
+}
+
+.lookupTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.4rem;
+}
+
+.badgeFound,
+.badgeNotFound {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.badgeFound {
+  color: #4caf50;
+  background: rgba(76, 175, 80, 0.15);
+}
+
+.badgeNotFound {
+  color: #f44336;
+  background: rgba(244, 67, 54, 0.12);
+}
+
+.lookupNote {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.lookupEmpty {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.dist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.distRow {
+  display: grid;
+  grid-template-columns: 2ch 1fr 3.5ch;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.distChar {
+  text-align: center;
+  color: var(--text-primary);
+}
+
+.distProb {
+  text-align: right;
+  color: var(--text-muted);
+}
+
+.barTrack {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-magenta), var(--accent-cyan));
+  border-radius: 3px;
+}

@@ -182,7 +182,7 @@ export function DecoderDemo() {
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.title}>
-          <span>🔦</span> Beam Search Visualizer
+          Beam Search (Toy Decoder)
         </div>
         <div className={styles.stats}>
           <div className={styles.statItem}>Total LM Lookups: <strong>{totalLookups.toLocaleString()}</strong></div>
@@ -317,7 +317,6 @@ function NodeCard({ node, type, min, range }: { node: Node, type: 'survivor' | '
     >
       <div className={styles.word}>
         <span>{node.word}</span>
-        {node.isBest && <span>🏆</span>}
       </div>
       <div className={styles.score}>
         <span>Log: {node.totalLog.toFixed(2)}</span>

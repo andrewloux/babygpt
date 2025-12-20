@@ -1,6 +1,15 @@
 import { ReactNode } from 'react'
 import styles from './Layout.module.css'
 
+function sectionId(number: string) {
+  const cleaned = number
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^0-9a-z.-]/g, '')
+  return `section-${cleaned.replace(/\./g, '-')}`
+}
+
 interface ContainerProps {
   children: ReactNode
 }
@@ -32,13 +41,30 @@ interface SectionProps {
 }
 
 export function Section({ number, title, children }: SectionProps) {
+  const id = sectionId(number)
   return (
-    <section className={styles.section}>
+    <section className={styles.section} id={id}>
       <div className={styles.sectionHeader}>
-        <span className={styles.sectionNumber}>{number}</span>
+        <a className={styles.sectionNumber} href={`#${id}`} aria-label={`Link to section ${number}`}>
+          {number}
+        </a>
         <h2 className={styles.sectionTitle}>{title}</h2>
       </div>
       {children}
     </section>
+  )
+}
+
+interface SectionLinkProps {
+  to: string
+  children?: ReactNode
+}
+
+export function SectionLink({ to, children }: SectionLinkProps) {
+  const id = sectionId(to)
+  return (
+    <a className={styles.sectionLink} href={`#${id}`} aria-label={`Jump to section ${to}`}>
+      {children ?? `Section ${to}`}
+    </a>
   )
 }

@@ -28,21 +28,42 @@ function getNode(id: string) {
   return nodes.find(n => n.id === id)
 }
 
-// Create a curved path between two points
-function createPath(from: { x: number; y: number }, to: { x: number; y: number }, curve: number = 0) {
+function segmentEndpoints(
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+  radius: number,
+) {
   const dx = to.x - from.x
   const dy = to.y - from.y
   const dist = Math.sqrt(dx * dx + dy * dy)
+  if (dist === 0) {
+    return {
+      startX: from.x,
+      startY: from.y,
+      endX: to.x,
+      endY: to.y,
+      nx: 0,
+      ny: 0,
+    }
+  }
 
-  // Shorten to not overlap nodes (radius 28)
-  const r = 32
   const nx = dx / dist
   const ny = dy / dist
+  return {
+    startX: from.x + nx * radius,
+    startY: from.y + ny * radius,
+    endX: to.x - nx * radius,
+    endY: to.y - ny * radius,
+    nx,
+    ny,
+  }
+}
 
-  const startX = from.x + nx * r
-  const startY = from.y + ny * r
-  const endX = to.x - nx * r
-  const endY = to.y - ny * r
+// Create a curved path between two points
+function createPath(from: { x: number; y: number }, to: { x: number; y: number }, curve: number = 0) {
+  // Shorten to not overlap nodes (radius 28)
+  const r = 32
+  const { startX, startY, endX, endY, nx, ny } = segmentEndpoints(from, to, r)
 
   if (curve === 0) {
     return `M ${startX} ${startY} L ${endX} ${endY}`
@@ -55,16 +76,13 @@ function createPath(from: { x: number; y: number }, to: { x: number; y: number }
 }
 
 function getLabelPos(from: { x: number; y: number }, to: { x: number; y: number }, _curve: number = 0) {
-  const dx = to.x - from.x
-  const dy = to.y - from.y
-  const dist = Math.sqrt(dx * dx + dy * dy)
-  const nx = dx / dist
-  const ny = dy / dist
+  const r = 32
+  const { startX, startY, endX, endY, nx, ny } = segmentEndpoints(from, to, r)
 
-  // Perpendicular offset to push label OUTSIDE the square
-  const perpOffset = 20
-  const midX = (from.x + to.x) / 2 + ny * perpOffset
-  const midY = (from.y + to.y) / 2 - nx * perpOffset
+  // Perpendicular offset to keep labels away from edges.
+  const perpOffset = 46
+  const midX = (startX + endX) / 2 + ny * perpOffset
+  const midY = (startY + endY) / 2 - nx * perpOffset
   return { x: midX, y: midY }
 }
 
@@ -143,6 +161,7 @@ export function MarkovChainViz() {
                 y={labelPos.y}
                 textAnchor="middle"
                 dominantBaseline="middle"
+                className={styles.edgeLabel}
                 fill={isActive ? '#f97316' : 'var(--text-secondary)'}
                 fontSize="14"
                 fontWeight="600"

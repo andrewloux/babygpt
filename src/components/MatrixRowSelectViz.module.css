@@ -1,257 +1,312 @@
-.container {
-  padding: 1.5rem;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  margin: 1.5rem 0;
+.viewport {
+  margin: 1.75rem 0;
+  padding: 1.25rem 1.25rem 1.15rem 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 0%, rgba(0, 217, 255, 0.08), transparent 60%),
+    rgba(0, 0, 0, 0.22);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 22px 50px -35px rgba(0, 0, 0, 0.85);
+  font-family: var(--font-sans);
+  color: rgba(255, 255, 255, 0.92);
 }
 
-.section {
-  margin-bottom: 1.5rem;
-}
-
-.label {
-  display: block;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.75rem;
-  font-weight: 500;
-}
-
-.vocabGrid {
+.layout {
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
   justify-content: center;
+  align-items: flex-start;
+  gap: 1.1rem;
+  flex-wrap: wrap;
 }
 
-.tokenBtn {
-  width: 50px;
-  height: 50px;
-  border: 2px solid var(--border-color);
-  background: var(--bg-primary);
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: var(--font-mono);
-  font-size: 1.25rem;
-  color: var(--text-primary);
-  transition: all 0.2s ease;
-}
-
-.tokenBtn:hover {
-  border-color: var(--accent-cyan);
-  background: var(--code-bg);
-  transform: translateY(-2px);
-}
-
-.tokenBtn.active {
-  background: var(--accent-cyan);
-  color: var(--bg-primary);
-  border-color: var(--accent-cyan);
-  transform: scale(1.05);
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-}
-
-.vectorDisplay {
-  font-family: var(--font-mono);
-  background: var(--code-bg);
-  padding: 1rem 1.5rem;
-  border-radius: 6px;
-  overflow-x: auto;
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  border: 1px solid var(--border-color);
-}
-
-.vectorValue {
-  display: inline-block;
-  width: 2.5ch;
-  text-align: center;
-  margin: 0 3px;
-  transition: all 0.3s ease;
-}
-
-.vectorValue.hot {
-  color: var(--accent-cyan);
-  font-weight: bold;
-  transform: scale(1.3);
-  text-shadow: 0 0 10px var(--accent-cyan);
-}
-
-.vectorValue.result {
-  color: var(--accent-yellow);
-  font-weight: 600;
-  animation: fadeInUp 0.4s ease forwards;
-  opacity: 0;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.matrixContainer {
-  overflow-x: auto;
-}
-
-.matrix {
+.vectorWrap {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  padding: 1rem;
-  background: var(--code-bg);
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
+  align-items: center;
+}
+
+.matrixWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.caption {
+  margin-bottom: 0.5rem;
+  text-align: center;
   font-family: var(--font-mono);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.vectorFrame {
+  border-radius: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.times {
+  margin-top: 1.35rem;
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+  color: rgba(255, 255, 255, 0.25);
+  user-select: none;
+}
+
+/* The Matrix W */
+.matrixTable {
+  border-collapse: collapse;
 }
 
 .matrixRow {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem;
-  border-radius: 4px;
-  transition: all 0.3s ease;
+  transition: opacity 160ms ease;
 }
 
-.matrixRow.selectedRow {
-  background: rgba(0, 255, 255, 0.1);
-  border: 2px solid var(--accent-cyan);
-  padding: 0.75rem;
-  transform: scale(1.02);
-  box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+.matrixRowActive {
+  opacity: 1;
 }
 
-.rowLabel {
-  width: 30px;
-  text-align: center;
-  font-weight: bold;
-  color: var(--text-secondary);
-  font-size: 1rem;
-}
-
-.selectedRow .rowLabel {
-  color: var(--accent-cyan);
-  font-size: 1.1rem;
-}
-
-.rowCells {
-  display: flex;
-  gap: 8px;
-  flex: 1;
+.matrixRowInactive {
+  opacity: 0.55;
 }
 
 .cell {
-  flex: 1;
-  padding: 0.6rem 0.4rem;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
+  width: 54px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   text-align: center;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  min-width: 45px;
-  transition: all 0.3s ease;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(0, 0, 0, 0.16);
 }
 
-.cell.highlighted {
-  background: var(--accent-cyan);
-  color: var(--bg-primary);
-  border-color: var(--accent-cyan);
-  font-weight: bold;
-  animation: pulse 0.5s ease forwards;
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+.labelCell {
+  padding-right: 0.6rem;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.45);
+  border: 1px solid transparent;
+  background: transparent;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-.arrowContainer {
+.vectorCell {
+  width: 52px;
+  height: 34px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  margin: 1rem 0;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.45);
+  background: rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  user-select: none;
 }
 
-.arrow {
-  font-size: 2rem;
-  color: var(--accent-magenta);
-  animation: bounce 1s ease infinite;
-  line-height: 1;
+.vectorCell:last-child {
+  border-bottom: none;
 }
 
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(5px);
-  }
+.vectorCellActive {
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(0, 217, 255, 0.12);
+  text-shadow: 0 0 10px rgba(0, 217, 255, 0.18);
 }
 
-.insight {
-  font-size: 0.9rem;
-  color: var(--accent-magenta);
-  font-weight: 600;
-  margin-top: 0.5rem;
-  font-style: italic;
+.cellActive {
+  color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 217, 255, 0.32);
+  background: rgba(0, 217, 255, 0.06);
 }
 
-.explanation {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  background: var(--code-bg);
-  border-left: 4px solid var(--accent-yellow);
-  border-radius: 4px;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
+.labelCellActive {
+  color: rgba(255, 255, 255, 0.85);
 }
 
-.explanation strong {
-  color: var(--accent-yellow);
+.pulse .cellActive {
+  box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.1);
 }
 
-.explanation code {
-  background: var(--bg-primary);
-  padding: 0.2rem 0.4rem;
-  border-radius: 3px;
+.controls {
+  margin-top: 1.1rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn {
+  width: 42px;
+  height: 36px;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.18);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 217, 255, 0.28);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.btnSelected {
+  color: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 217, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.12);
+}
+
+.equationCard {
+  margin-top: 1.15rem;
+  padding: 0.95rem 0.95rem 0.85rem 0.95rem;
+  border-radius: 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  text-align: center;
+}
+
+.equationTitle {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0.65rem;
+}
+
+.equationLine {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.25;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.equationEquals {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.resultMono {
   font-family: var(--font-mono);
   color: var(--accent-cyan);
-  font-size: 0.85rem;
+  font-weight: 800;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .container {
-    padding: 1rem;
-  }
+.expandBtn {
+  margin-top: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.18);
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
 
-  .tokenBtn {
-    width: 45px;
-    height: 45px;
-    font-size: 1.1rem;
+.expandBtn:hover {
+  border-color: rgba(255, 0, 110, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.expansion {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.expansionLine {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  line-height: 1.35;
+}
+
+.expansionText {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.65);
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 0.1rem 0.2rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.expansionNote {
+  margin-top: 0.55rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.resultCard {
+  margin-top: 0.95rem;
+  text-align: center;
+}
+
+.resultLabel {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.resultValue {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.resultArrow {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.resultVector {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.72);
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.18);
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 520px) {
+  .viewport {
+    padding: 1rem 1rem 0.95rem 1rem;
   }
 
   .cell {
-    min-width: 40px;
-    padding: 0.5rem 0.3rem;
-    font-size: 0.8rem;
-  }
-
-  .matrixRow.selectedRow {
-    padding: 0.5rem;
+    width: 48px;
   }
 }

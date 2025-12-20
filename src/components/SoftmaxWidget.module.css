@@ -1,78 +1,217 @@
 .container {
+  /* Using similar variables and aesthetic to AxiomViz */
+  --accent: var(--accent-cyan);
+  --bg-gradient: radial-gradient(ellipse 70% 45% at 50% 0%, rgba(0, 217, 255, 0.08), transparent 60%);
+  
+  margin: 2rem 0;
+  position: relative;
+  font-family: var(--font-sans);
+  border-radius: 1rem;
   padding: 1.5rem;
-  background: var(--bg-paper);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  margin: 1.5rem 0;
+  background:
+    var(--bg-gradient),
+    linear-gradient(180deg, rgba(11, 12, 21, 1), rgba(15, 17, 28, 1));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 25px 50px -12px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
 }
 
-.row {
+.tempRow {
+  display: grid;
+  grid-template-columns: 140px 1fr 90px;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  padding: 0.9rem 0.95rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 700px) {
+  .tempRow {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+    text-align: center;
+  }
+}
+
+.tempLabel {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.tempSliderWrap {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1rem;
 }
 
-.logitLabel {
-  width: 60px;
+.tempValue {
   font-family: var(--font-mono);
-  font-size: 0.9rem;
-  color: var(--text-secondary);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.75);
+  width: 42px;
+  text-align: right;
 }
 
+.tempHint {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: right;
+}
+
+.tempHint strong {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 40px 1fr 200px; /* Label | Slider+Value | Bar */
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.2s ease;
+}
+
+.row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Label styling */
+.logitLabel {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.25rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Slider section */
 .sliderContainer {
-  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sliderWrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .slider {
-  width: 100%;
-  margin: 0;
+  flex: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  outline: none;
   cursor: pointer;
 }
 
-.logitValue {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  text-align: right;
-  font-variant-numeric: tabular-nums;
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  border: 2px solid var(--bg-secondary);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  cursor: grab;
+  transition: transform 0.1s;
 }
 
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  background: var(--accent);
+}
+
+.logitValue {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  width: 45px;
+  text-align: right;
+}
+
+/* Probability Bar section */
 .probBarContainer {
-  flex: 1;
-  height: 24px;
-  background: var(--bg-main);
-  border-radius: 4px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 0.5rem;
   overflow: hidden;
   position: relative;
-  display: flex;
-  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .probBar {
   height: 100%;
-  background: var(--primary);
-  transition: width 0.2s ease-out;
+  background: linear-gradient(90deg, var(--accent) 0%, rgba(0, 217, 255, 0.6) 100%);
+  transition: width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 0 15px var(--accent-cyan);
 }
 
 .probValue {
   position: absolute;
-  left: 8px;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
   font-size: 0.85rem;
   color: var(--text-primary);
-  font-weight: bold;
-  font-family: var(--font-mono);
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
   z-index: 2;
-  mix-blend-mode: difference;
 }
 
-.math {
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-subtle);
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
+.formulaBox {
+  margin-top: 1.75rem;
+  padding: 1.05rem 1rem 0.95rem 1rem;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   text-align: center;
-  color: var(--text-secondary);
+}
+
+.formulaLabel {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0.7rem;
+}
+
+.formula :global(.katex-display) {
+  margin: 0;
+}
+
+.formula :global(.katex) {
+  color: var(--accent-cyan);
+  font-size: 1.12rem;
+}
+
+.formulaHint {
+  margin-top: 0.65rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-style: italic;
 }

@@ -1,0 +1,211 @@
+.map {
+  margin: 14px 0 18px 0;
+  padding: 14px 14px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--accent-cyan);
+  background:
+    radial-gradient(circle at 18% 22%, rgba(var(--primary-rgb), 0.12), transparent 46%),
+    radial-gradient(circle at 72% 84%, rgba(255, 0, 110, 0.08), transparent 52%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.035), rgba(255,255,255,0.035) 1px, transparent 1px, transparent 26px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.035), rgba(255,255,255,0.035) 1px, transparent 1px, transparent 26px),
+    var(--bg-secondary);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+  position: relative;
+}
+
+.map::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--primary-rgb), 0.12),
+    transparent 38%,
+    transparent 62%,
+    rgba(var(--primary-rgb), 0.06)
+  );
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(var(--primary-rgb), 0.22);
+  border: 1px solid rgba(var(--primary-rgb), 0.75);
+  box-shadow:
+    0 0 0 3px rgba(var(--primary-rgb), 0.10),
+    0 0 18px rgba(var(--primary-rgb), 0.18);
+}
+
+.legendText {
+  opacity: 0.9;
+}
+
+.route {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.step {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.rail {
+  width: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.marker {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(var(--primary-rgb), 0.65);
+  box-shadow:
+    0 0 0 4px rgba(var(--primary-rgb), 0.10),
+    0 0 22px rgba(var(--primary-rgb), 0.16),
+    0 12px 26px rgba(0, 0, 0, 0.36);
+  color: var(--text-primary);
+}
+
+.markerNumber {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.connector {
+  width: 2px;
+  flex: 1;
+  margin-top: 5px;
+  background: linear-gradient(
+    180deg,
+    rgba(var(--primary-rgb), 0.65),
+    rgba(var(--primary-rgb), 0.18)
+  );
+  border-radius: 999px;
+  position: relative;
+}
+
+.connector::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.12) 0px,
+    rgba(255, 255, 255, 0.12) 6px,
+    rgba(255, 255, 255, 0) 6px,
+    rgba(255, 255, 255, 0) 12px
+  );
+  opacity: 0.35;
+}
+
+.stepBody {
+  padding-bottom: 10px;
+}
+
+.step:last-child .stepBody {
+  padding-bottom: 0;
+}
+
+.stepTitle {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.25;
+  color: var(--text-primary);
+  margin-top: 0;
+}
+
+.stepLink {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.25;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.stepLink:hover {
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--primary-rgb), 0.75);
+  text-underline-offset: 4px;
+}
+
+.stepLink:focus-visible {
+  outline: 2px solid rgba(var(--primary-rgb), 0.65);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.stepDescription {
+  margin-top: 3px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+@media (max-width: 520px) {
+  .map {
+    padding: 12px 12px 12px;
+  }
+
+  .stepTitle {
+    font-size: 13px;
+  }
+
+  .stepLink {
+    font-size: 13px;
+  }
+
+  .stepDescription {
+    font-size: 12px;
+  }
+}

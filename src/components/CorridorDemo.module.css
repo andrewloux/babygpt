@@ -151,3 +151,224 @@
   color: var(--accent-yellow);
   font-weight: 700;
 }
+
+.corpus {
+  background: var(--code-bg);
+  border-radius: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 18px;
+}
+
+.corpusLabel {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+.sentence {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 3px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.lineNum {
+  color: var(--text-muted);
+  font-size: 11px;
+  min-width: 1.8ch;
+  text-align: right;
+  opacity: 0.5;
+}
+
+.sentenceText {
+  color: var(--text-primary);
+  white-space: pre;
+}
+
+.dimText {
+  opacity: 0.35;
+}
+
+.highlight {
+  background: rgba(0, 217, 255, 0.18);
+  color: var(--accent-cyan);
+  padding: 0.08em 0.2em;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+.statsRow {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.stat {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.statLabel {
+  color: var(--text-muted);
+}
+
+.statValue {
+  color: var(--accent-yellow);
+  font-weight: 700;
+}
+
+.main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.main .viz {
+  margin-bottom: 0;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+@media (max-width: 900px) {
+  .main {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nextSection {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 14px 14px 12px 14px;
+}
+
+.nextHeader {
+  margin-bottom: 10px;
+}
+
+.nextTitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.nextSubtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.nextEmpty {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 10px;
+  margin-bottom: 12px;
+}
+
+.nextList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.nextOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.06s ease;
+}
+
+.nextOption:hover {
+  border-color: rgba(0, 217, 255, 0.5);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.nextOption:active {
+  transform: translateY(1px);
+}
+
+.nextChar {
+  width: 2.2ch;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: var(--accent-cyan);
+  font-weight: 700;
+}
+
+.nextBarContainer {
+  flex: 1;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.nextBar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-magenta), var(--accent-cyan));
+  border-radius: 999px;
+}
+
+.nextProb {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-secondary);
+  min-width: 110px;
+  text-align: right;
+}
+
+.suggestions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.suggestLabel {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.suggestBtn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.suggestBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  border-color: rgba(0, 217, 255, 0.5);
+}

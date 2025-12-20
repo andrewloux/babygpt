@@ -47,6 +47,131 @@ Good voice **serves the explanation**. Bad voice **serves the author's ego**.
 
 ---
 
+## The Three-Sweep Editorial Process
+
+After drafting a section, run three sequential editorial sweeps. Order matters—each builds on the previous.
+
+### Sweep 1: Hemingway (Subtractive)
+
+**Purpose:** Strip cheap rhetorical tricks. Earn the right to add texture.
+
+**Kill these patterns:**
+- "It's not X, it's Y" — cheap contrast
+- "Not because X, but because Y" — over-explaining causation
+- "Notice how..." / "The key insight is..." — telling reader what to think
+- "That's it. No magic." — mic-drop energy
+- Any sentence that TELLS the reader what to feel about the previous sentence
+
+**Hemingway's rule:** State the fact. Stop. If it's important, the reader will feel it.
+
+```
+BEFORE: "This isn't just a lookup table — it's the compressed soul of language."
+AFTER:  "The table holds 6,912 numbers. They encode what the model knows about which characters follow which."
+```
+
+### Sweep 2: DFW (Additive — Texture)
+
+**Purpose:** Add intellectual texture where spare prose loses the *struggle* of understanding.
+
+**DFW isn't just "add precision." He does something harder:**
+- Precision that leads somewhere unexpected (a rabbit hole that reveals the thing beneath)
+- Meta-awareness of the difficulty of explaining ("which is the part that's hard to keep straight")
+- Genuine intellectual wrestling visible on the page, not just polished conclusions
+- Often turns the question back on the reader
+- Length that earns itself by holding multiple ideas in tension
+
+**DFW's rule:** Don't just clarify—take the reader down the rabbit hole with you.
+
+**NOT DFW** (precision bolted on, goes nowhere):
+```
+"The gradient points toward the error (or rather, toward the direction where
+ error increases fastest—a distinction that matters in high dimensions)."
+```
+
+**ACTUAL DFW** (precision leads to revelation, turns back on reader):
+```
+"The gradient points toward the error—or rather, and this is the part that's
+ hard to keep straight, toward the direction where error increases fastest,
+ which is not the same thing, though in two or three dimensions you can blur
+ the distinction and get away with it. We are not in two or three dimensions.
+ We're in 6,912 dimensions, which is a number I'd like you to actually sit
+ with for a second rather than letting your eyes slide past it: six thousand
+ nine hundred and twelve separate axes, each perpendicular to all the others,
+ a space your visual cortex has no hardware for. The gradient still works.
+ The math doesn't require you to see it. Whether that's reassuring or
+ terrifying says more about you than about the math."
+```
+
+**The key moves:**
+- "this is the part that's hard to keep straight" — meta-awareness
+- "sit with for a second rather than letting your eyes slide past" — invites genuine engagement
+- "your visual cortex has no hardware for" — operationalized, not vague
+- "says more about you than about the math" — turns it back on the reader
+
+**Other DFW patterns:**
+- "which is to say" — translates between frames, reveals that framing matters
+- "I'm aware this sounds [grandiose/mystical/insane]" — earns the weird claim through precision
+- Questions he doesn't fully answer — the uncertainty is texture, not weakness
+
+**Be selective:** 3-5 places per section. DFW is exhausting if overdone.
+
+### Sweep 3: Radiolab (Additive — Feeling)
+
+**Purpose:** Make the reader FEEL the idea before fully understanding it.
+
+**Add these patterns:**
+- "Picture this..." / "Imagine..." — puts reader in the scene
+- "Stop. Think about what that means." — pace-slowing at crucial moments
+- Make the weird feel weird — don't normalize the remarkable
+- Sensory grounding — what would this look/sound/feel like?
+- Human entry points to technical ideas
+
+**Radiolab's rule:** Earn the emotion through specificity, not drama.
+
+```
+BEFORE: "The embedding space has 64 dimensions."
+AFTER:  "Sixty-four dimensions. You can't picture it. Nobody can. But the math
+         doesn't care what you can picture—it works anyway."
+```
+
+```
+BEFORE: "Gradient descent minimizes the loss function."
+AFTER:  "Here's the strange part: nobody tells the model where to go. It just...
+         feels its way downhill. Each step, it asks: 'which direction makes me
+         slightly less wrong?' And it takes that step. A billion times. And
+         somehow, out of that blind fumbling, structure emerges."
+```
+
+**Be selective:** 5-7 places per section. Strategic pauses, not constant drama.
+
+### Why This Order?
+
+1. **Hemingway first** — You can't add precision to bloated prose. Cut first.
+2. **DFW second** — You can't add emotion to imprecise ideas. Sharpen first.
+3. **Radiolab third** — Now the spare, precise prose can carry feeling.
+
+### The Checklist
+
+After writing a section, ask:
+
+- [ ] **Hemingway:** Did I cut all "not X, it's Y" and metacommentary?
+- [ ] **DFW:** Did I operationalize vague terms? Acknowledge where metaphors break?
+- [ ] **Radiolab:** Did I slow down at the crucial moment? Make the weird feel weird?
+
+### Anti-Patterns to Avoid
+
+Even after sweeps, watch for:
+
+| Pattern | Why it fails | Fix |
+|---------|--------------|-----|
+| "In other words..." | You already said it | Cut the repetition |
+| "Simply put..." | Condescending | Just say the simple thing |
+| "Interestingly..." | Tells reader what to find interesting | Let them decide |
+| "It turns out that..." | Filler | Delete, start with the fact |
+| Ending with a question you immediately answer | Cheap suspense | Just make the point |
+
+---
+
 ## Project Structure
 
 ```

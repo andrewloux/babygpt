@@ -1,80 +1,80 @@
-import { useState, useMemo } from 'react';
-import styles from './ExplosionDemo.module.css';
+import { useMemo, useState } from 'react'
+import styles from './ExplosionDemo.module.css'
 
 export function ExplosionDemo() {
-  const [length, setLength] = useState(3);
-  const vocabSize = 27; // a-z + space
-  const trainingDataSize = 1_000_000; // 1 million examples
+  const [T, setT] = useState(3)
+  const vocabSize = 27 // a-z + space
+  const trainingDataSize = 1_000_000 // 1 million examples
 
   const data = useMemo(() => {
-    const possibilities = Math.pow(vocabSize, length);
-    const ratio = trainingDataSize / possibilities;
-    const coverage = ratio * 100;
+    const possibilities = Math.pow(vocabSize, T)
+    const ratio = trainingDataSize / possibilities
+    const coverage = ratio * 100
 
     // Log scale position for the bar (0-100)
     // At ratio=1, we want ~50%. Use log scale.
-    const logRatio = Math.log10(ratio);
-    // logRatio ranges from ~6 (at N=1) to ~-8 (at N=10)
+    const logRatio = Math.log10(ratio)
+    // logRatio ranges from ~6 (at T=1) to ~-8 (at T=10)
     // Map this to 0-100 where 50 = crossover
-    const barPosition = Math.max(0, Math.min(100, 50 + logRatio * 8));
+    const barPosition = Math.max(0, Math.min(100, 50 + logRatio * 8))
 
-    return { possibilities, ratio, coverage, barPosition };
-  }, [length]);
+    return { possibilities, ratio, coverage, barPosition }
+  }, [T])
 
   const formatPossibilities = (num: number) => {
-    if (num >= 1e15) return `${(num / 1e15).toFixed(1)}×10¹⁵`;
-    if (num >= 1e12) return `${(num / 1e12).toFixed(1)}×10¹²`;
-    if (num >= 1e9) return `${(num / 1e9).toFixed(1)}×10⁹`;
-    if (num >= 1e6) return `${(num / 1e6).toFixed(1)}×10⁶`;
-    if (num >= 1e3) return num.toLocaleString();
-    return num.toString();
-  };
+    if (num >= 1e15) return `${(num / 1e15).toFixed(1)}×10¹⁵`
+    if (num >= 1e12) return `${(num / 1e12).toFixed(1)}×10¹²`
+    if (num >= 1e9) return `${(num / 1e9).toFixed(1)}×10⁹`
+    if (num >= 1e6) return `${(num / 1e6).toFixed(1)}×10⁶`
+    if (num >= 1e3) return num.toLocaleString()
+    return num.toString()
+  }
 
   const formatCoverage = (ratio: number) => {
-    if (ratio >= 100) return `${ratio.toFixed(0)}×`;
-    if (ratio >= 10) return `${ratio.toFixed(0)}×`;
-    if (ratio >= 1) return `${ratio.toFixed(1)}×`;
-    if (ratio >= 0.01) return `${(ratio * 100).toFixed(1)}%`;
-    if (ratio >= 0.0001) return `${(ratio * 100).toFixed(3)}%`;
-    if (ratio >= 0.000001) return `${(ratio * 100).toExponential(1)}`;
-    return `${(ratio * 100).toExponential(1)}`;
-  };
+    if (ratio >= 100) return `${ratio.toFixed(0)}×`
+    if (ratio >= 10) return `${ratio.toFixed(0)}×`
+    if (ratio >= 1) return `${ratio.toFixed(1)}×`
+    if (ratio >= 0.01) return `${(ratio * 100).toFixed(1)}%`
+    if (ratio >= 0.0001) return `${(ratio * 100).toFixed(3)}%`
+    if (ratio >= 0.000001) return `${(ratio * 100).toExponential(1)}`
+    return `${(ratio * 100).toExponential(1)}`
+  }
 
   const getState = (ratio: number) => {
-    if (ratio >= 10) return { state: 'oversaturated', label: 'OVERSATURATED', desc: 'More data than possibilities' };
-    if (ratio >= 1) return { state: 'covered', label: 'FULL COVERAGE', desc: 'Data covers all possibilities' };
-    if (ratio >= 0.1) return { state: 'sparse', label: 'GETTING SPARSE', desc: 'Starting to miss sequences' };
-    if (ratio >= 0.001) return { state: 'critical', label: 'SPARSE', desc: 'Most sequences unseen' };
-    return { state: 'void', label: 'THE VOID', desc: 'Virtually nothing covered' };
-  };
+    if (ratio >= 10) return { state: 'oversaturated', label: 'OVERSATURATED', desc: 'More data than possibilities' }
+    if (ratio >= 1) return { state: 'covered', label: 'FULL COVERAGE', desc: 'Data covers all possibilities' }
+    if (ratio >= 0.1) return { state: 'sparse', label: 'GETTING SPARSE', desc: 'Starting to miss sequences' }
+    if (ratio >= 0.001) return { state: 'critical', label: 'SPARSE', desc: 'Most sequences unseen' }
+    return { state: 'void', label: 'THE VOID', desc: 'Virtually nothing covered' }
+  }
 
-  const { state, label, desc } = getState(data.ratio);
+  const { state, label, desc } = getState(data.ratio)
 
   // Generate the exponent chain: 27 × 27 × 27 × ...
-  const exponentChain = Array(length).fill('27').join(' × ');
+  const exponentChain = Array(T).fill('27').join(' × ')
 
   return (
     <div className={styles.container}>
       {/* Header */}
       <div className={styles.header}>
-        <span className={styles.title}>The Combinatorial Explosion</span>
-        <span className={styles.subtitle}>Why counting doesn't scale</span>
+        <span className={styles.title}>The Generalization Wall</span>
+        <span className={styles.subtitle}>Why counting doesn&apos;t scale</span>
       </div>
 
       {/* Slider */}
       <div className={styles.sliderSection}>
-        <label className={styles.sliderLabel}>Sequence Length</label>
+        <label className={styles.sliderLabel}>Context length (T)</label>
         <div className={styles.sliderRow}>
           <input
             type="range"
             min="1"
             max="10"
             step="1"
-            value={length}
-            onChange={(e) => setLength(parseInt(e.target.value))}
+            value={T}
+            onChange={(e) => setT(parseInt(e.target.value))}
             className={styles.slider}
           />
-          <span className={styles.lengthValue}>N = {length}</span>
+          <span className={styles.lengthValue}>T = {T}</span>
         </div>
       </div>
 
@@ -83,7 +83,7 @@ export function ExplosionDemo() {
         <div className={styles.equationLine}>
           <span className={styles.equationLabel}>Possibilities</span>
           <span className={styles.equationMath}>
-            27<sup>{length}</sup> = {exponentChain} = <strong>{formatPossibilities(data.possibilities)}</strong>
+            27<sup>{T}</sup> = {exponentChain} = <strong>{formatPossibilities(data.possibilities)}</strong>
           </span>
         </div>
         <div className={styles.equationLine}>
@@ -133,13 +133,13 @@ export function ExplosionDemo() {
       </div>
 
       {/* The Insight */}
-      {length >= 6 && (
+      {T >= 6 && (
         <div className={styles.insight}>
-          <strong>The problem:</strong> At N={length}, there are {formatPossibilities(data.possibilities)} possible sequences.
+          <strong>The problem:</strong> At T={T}, there are {formatPossibilities(data.possibilities)} possible sequences.
           Your 1M training examples cover {formatCoverage(data.ratio)} of them.
-          {data.ratio < 0.01 && " Most sequences the model encounters will be ones it's never seen before."}
+          {data.ratio < 0.01 && " Most sequences the model encounters will be ones it’s never seen before."}
         </div>
       )}
     </div>
-  );
+  )
 }

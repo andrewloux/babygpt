@@ -1,0 +1,117 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  background: var(--bg-paper);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  max-width: 400px;
+  margin: 2rem auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 40px repeat(5, 40px); /* Label + 5 columns */
+  gap: 4px;
+}
+
+.cornerCell {
+  /* Empty top-left corner */
+}
+
+.headerCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.rowLabel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.cell {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.visible {
+  background-color: rgba(16, 185, 129, 0.1); /* Emerald 500 with opacity */
+  color: var(--color-success);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.hidden {
+  background-color: rgba(239, 68, 68, 0.05); /* Red 500 with opacity */
+  color: var(--text-tertiary);
+  opacity: 0.5;
+}
+
+.cell.hovered {
+  transform: scale(1.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.cell.visible.hovered {
+  background-color: rgba(16, 185, 129, 0.2);
+  border-color: var(--color-success);
+}
+
+.cell.hidden.hovered {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: var(--color-error);
+  color: var(--color-error);
+  opacity: 1;
+}
+
+.caption {
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.explanation {
+  color: var(--text-primary);
+}
+
+.visibleText {
+  color: var(--color-success);
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.hiddenText {
+  color: var(--color-error);
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.placeholder {
+  color: var(--text-tertiary);
+  font-style: italic;
+}

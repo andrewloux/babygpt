@@ -26,3 +26,10 @@
   font-style: normal;
   font-weight: 500;
 }
+
+.edgeLabel {
+  paint-order: stroke;
+  stroke: var(--bg-secondary);
+  stroke-width: 6px;
+  stroke-linejoin: round;
+}

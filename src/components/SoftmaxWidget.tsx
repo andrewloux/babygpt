@@ -1,42 +1,76 @@
-import { useState } from 'react';
-import styles from './SoftmaxWidget.module.css';
+import katex from 'katex'
+import 'katex/dist/katex.min.css'
+import { useMemo, useState } from 'react'
+import styles from './SoftmaxWidget.module.css'
 
 export function SoftmaxWidget() {
-  const [logits, setLogits] = useState([2.0, 1.0, 0.1, -1.0, -0.5]);
-  const labels = ['h', 'e', 'l', 'o', '␣'];
+  const [logits, setLogits] = useState([2.0, 1.0, 0.1, -1.0, -0.5])
+  const [temperature, setTemperature] = useState(1.0)
+  const labels = ['h', 'e', 'l', 'o', '␣']
+  const safeT = Math.max(0.1, temperature)
+
+  // Stable softmax: subtract max so exp() stays well-behaved
+  const maxLogit = Math.max(...logits)
+  const shifted = useMemo(() => logits.map(l => (l - maxLogit) / safeT), [logits, maxLogit, safeT])
 
   // 1. Exponentiate
-  const exps = logits.map(l => Math.exp(l));
+  const exps = useMemo(() => shifted.map(l => Math.exp(l)), [shifted])
   
   // 2. Sum
-  const sumExps = exps.reduce((a, b) => a + b, 0);
+  const sumExps = useMemo(() => exps.reduce((a, b) => a + b, 0), [exps])
   
   // 3. Normalize (Probs)
-  const probs = exps.map(e => e / sumExps);
+  const probs = useMemo(() => exps.map(e => e / sumExps), [exps, sumExps])
+
+  const formulaHtml = useMemo(() => {
+    const equation = String.raw`\text{Softmax}_T(\ell_i) = \frac{e^{(\ell_i - m)/T}}{\sum_j e^{(\ell_j - m)/T}} \quad \text{where } m = \max_j \ell_j`
+    return katex.renderToString(equation, { throwOnError: false, displayMode: true })
+  }, [])
 
   const updateLogit = (idx: number, val: string) => {
-    const newLogits = [...logits];
-    newLogits[idx] = parseFloat(val);
-    setLogits(newLogits);
-  };
+    const newLogits = [...logits]
+    newLogits[idx] = parseFloat(val)
+    setLogits(newLogits)
+  }
 
   return (
     <div className={styles.container}>
+      <div className={styles.tempRow}>
+        <div className={styles.tempLabel}>Temperature</div>
+        <div className={styles.tempSliderWrap}>
+          <input
+            type="range"
+            min="0.1"
+            max="5.0"
+            step="0.1"
+            value={temperature}
+            className={styles.slider}
+            onChange={(e) => setTemperature(parseFloat(e.target.value))}
+          />
+          <span className={styles.tempValue}>{safeT.toFixed(1)}</span>
+        </div>
+        <div className={styles.tempHint}>
+          {safeT < 1 ? 'sharper' : safeT > 1 ? 'flatter' : 'neutral'}
+        </div>
+      </div>
+
       {labels.map((label, i) => (
         <div key={label} className={styles.row}>
           <div className={styles.logitLabel}>{label}</div>
           
           <div className={styles.sliderContainer}>
-            <input 
-              type="range" 
-              min="-5" 
-              max="5" 
-              step="0.1"
-              value={logits[i]}
-              className={styles.slider}
-              onChange={(e) => updateLogit(i, e.target.value)}
-            />
-            <span className={styles.logitValue}>Logit: {logits[i].toFixed(1)}</span>
+            <div className={styles.sliderWrapper}>
+              <input 
+                type="range" 
+                min="-5" 
+                max="5" 
+                step="0.1"
+                value={logits[i]}
+                className={styles.slider}
+                onChange={(e) => updateLogit(i, e.target.value)}
+              />
+              <span className={styles.logitValue}>{logits[i].toFixed(1)}</span>
+            </div>
           </div>
 
           <div className={styles.probBarContainer}>
@@ -44,14 +78,21 @@ export function SoftmaxWidget() {
               className={styles.probBar} 
               style={{ width: `${probs[i] * 100}%` }} 
             />
-            <span className={styles.probValue}>{(probs[i] * 100).toFixed(1)}%</span>
+            <span className={styles.probValue}>
+              {(probs[i] * 100).toFixed(1)}%
+            </span>
           </div>
         </div>
       ))}
       
-      <div className={styles.math}>
-        Formula: e^{`{logit}`} / Σ(e^{`{all_logits}`})
+      <div className={styles.formulaBox}>
+        <div className={styles.formulaLabel}>Softmax (stable + temperature)</div>
+        <div
+          className={styles.formula}
+          dangerouslySetInnerHTML={{ __html: formulaHtml }}
+        />
+        <div className={styles.formulaHint}>Same probabilities, safer numerics.</div>
       </div>
     </div>
-  );
+  )
 }

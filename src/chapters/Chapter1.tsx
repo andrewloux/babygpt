@@ -338,6 +338,12 @@ export function Chapter1() {
           explanation={`"The probability of A and B" = "probability of A" × "probability of B given A already happened"`}
         />
         <Paragraph>
+          But wait—why per-token? Why not decompose into pairs, or chunks, or something else entirely? The answer is that this is the <em>only</em> valid decomposition. The chain rule isn't a modeling choice; it's a mathematical identity that holds for any joint probability distribution. You can verify it from the definition of conditional probability: P(B|A) = P(A,B)/P(A), so P(A,B) = P(A) × P(B|A). No approximation, no assumptions—just algebra.
+        </Paragraph>
+        <Paragraph>
+          The per-token structure also matches how we <em>generate</em> text. At inference time, we produce one token, then the next, then the next. We can't condition on future tokens—we don't know them yet. So the only information available when predicting token <Term>t</Term> is tokens 1 through <Term>t-1</Term>. The chain rule's left-to-right structure exactly mirrors this constraint.
+        </Paragraph>
+        <Paragraph>
           Let's make it concrete. For the sequence "ca" (two characters):
         </Paragraph>
         <MathBlock
@@ -616,6 +622,17 @@ P(x_1, x_2, \\ldots, x_t) &= P(x_1) \\\\
         <Paragraph>
           This is the <Term>Sparsity Problem</Term>. Language is combinatorial; you will never see every valid two-word combination, no matter how much text you read.
         </Paragraph>
+        <Callout variant="warning" title="When Memorization Fails: A Concrete Example">
+          <Paragraph>
+            Imagine training on 1 million sentences. Sounds huge—but English has roughly 170,000 common words. The number of possible two-word combinations is 170,000 × 170,000 = 29 billion. Your 1 million training sentences contain maybe 10 million bigrams. That's 10 million / 29 billion ≈ 0.03% coverage.
+          </Paragraph>
+          <Paragraph>
+            Here's what this means concretely. Suppose "dog" appears 5,000 times in your corpus. You'd expect it to pair with roughly 5,000 / 170,000 ≈ 3% of the vocabulary. So for most words—97% of them—P(word | "dog") = 0. Not "low probability." <strong>Zero</strong>. The model literally cannot generate "dog frisbee" or "dog veterinarian" if those exact pairs never appeared, even though they're perfectly valid English.
+          </Paragraph>
+          <Paragraph>
+            This isn't a minor smoothing issue. It's a fundamental failure mode: <strong>memorization doesn't generalize</strong>. The fix requires something that can share information between similar contexts—which is exactly what embeddings do in Chapter 2.
+          </Paragraph>
+        </Callout>
         <Paragraph>
           Now look at what happens when we switch to characters. We decompose the words into atoms.
         </Paragraph>
@@ -629,6 +646,9 @@ P(x_1, x_2, \\ldots, x_t) &= P(x_1) \\\\
         </ul>
         <Paragraph>
           The <Term>space</Term> character acts as a mechanical bridge. The model learned "words end with space" and "words start after space." It can now stitch together <em>any</em> word ending in space with <em>any</em> word starting after space.
+        </Paragraph>
+        <Paragraph>
+          Why does frequency help? It's the law of large numbers. If you've seen 'space' followed by various characters 10,000 times, your estimate of P(next|space) is stable — adding one more example barely changes it. If you've seen 'q' only 50 times, each new example shifts your estimate significantly. High frequency means low variance in your probability estimates, which means reliable predictions even for new combinations.
         </Paragraph>
         <Callout variant="info" title="Overlap vs. Understanding">
           <Paragraph>
@@ -882,6 +902,9 @@ Input: [h, e, l]    Target: l`}</CodeBlock>
           There is just one rule to this game: <Highlight>looking to the right is forbidden</Highlight>. Even though <code>30</code> is sitting right there at index 2, the model, standing at index 1, must pretend it doesn't exist. It can only look left.
         </Paragraph>
         <Paragraph>
+          Why is this rule so strict? Because at test time, the future doesn't exist yet. When generating text, you predict token 5 before token 6 exists. If the model learned to peek at token 6 during training, it would fail at inference — the cheat it relied on is gone. Training must match deployment: predict using only what you'd have available when it counts.
+        </Paragraph>
+        <Paragraph>
           It's a free lunch. We process one big block of text, but because of this time-arrow constraint, we are mathematically training on every single prefix contained within it.
         </Paragraph>
       </Section>
@@ -1110,8 +1133,25 @@ print(f"First Y: {Y[0]}")               # [2, 4, 4, 5] ("ello")`}</CodeBlock>
         <Paragraph>
           So the gap is: shared structure that <em>isn't</em> spelling. We need something that can figure out "cat" and "dog" belong together—not because we told it, but because it noticed they keep showing up in similar situations.
         </Paragraph>
+        <Callout variant="insight" title="What A Solution Must Provide">
+          <Paragraph>
+            Any fix for the sparsity problem must satisfy three requirements:
+          </Paragraph>
+          <ol style={{ marginLeft: '1.5em', marginBottom: '1em' }}>
+            <li><strong>Compositionality:</strong> New contexts must be expressible as combinations of seen parts. An unseen phrase like "dog veterinarian" should be computable from the pieces "dog" and "veterinarian" even if the pair never appeared together.</li>
+            <li><strong>Similarity transfer:</strong> Similar inputs should produce similar outputs. If "cat sat" has high probability, then "dog sat" should too—because cats and dogs behave similarly in this position.</li>
+            <li><strong>Continuous representation:</strong> Instead of discrete keys (where "dog" ≠ "cat" is a hard boundary), we need a space where "dog" and "cat" can be <em>close</em>. Closeness enables interpolation.</li>
+          </ol>
+          <Paragraph>
+            A lookup table fails all three. Embeddings—vectors that position each token in a continuous space—satisfy all three. That's why they work.
+          </Paragraph>
+        </Callout>
         <Paragraph>
-          Let's see if we can teach a machine to notice that in Chapter 2.
+          Here's how embeddings solve the sparsity problem. With embeddings, an unseen context like{' '}
+          <Term>"the dog"</Term> becomes a <strong>combination</strong> of vectors you've seen:{' '}
+          <code>E['t'] + E['h'] + E['e'] + E[' '] + E['d'] + E['o'] + E['g']</code>. You've trained on each of those
+          vectors in other contexts. The model can interpolate—it doesn't need to have seen this exact string, because
+          it's built from known parts. Similarity in embedding space enables similarity in predictions.
         </Paragraph>
         <Paragraph>
           <strong>Something that can scale.</strong> Even a simple model becomes expensive when you repeat it billions of

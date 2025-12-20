@@ -1,194 +1,1964 @@
+import { useState } from 'react'
+
 import {
   Container,
   ChapterHeader,
   Section,
+  SectionLink,
   Paragraph,
   Highlight,
   Term,
   Callout,
+  ChapterMap,
   MathBlock,
-  OneHotViz,
-  SoftmaxWidget,
-  LossGraph,
-  NeuralTrainingDemo,
+  Cite,
+  Citations,
+  CodeBlock,
+  CodeChallenge,
+  WorkedExample,
+  WorkedStep,
+  WorkedNote,
   MatrixRowSelectViz,
+  CharacterClusterViz,
+  ContextExplosionViz,
+  DotProductViz,
+  TensorShapeBuilder,
+  Invariants,
+  InvariantItem,
+  Exercise,
   ChapterNav,
-  Exercise
+  GrassmannViz,
+  AxiomViz,
+  PhoneticPatternViz,
+  AbstractionChainViz,
+  GradientDescentViz,
+  DiscreteContinuousViz,
+  EmbeddingInspector,
+  SoftmaxWidget,
+  CrossEntropyViz,
+  EmbeddingGradientViz,
+  TrainingDynamicsViz,
 } from '../components'
 
+const DEFAULT_SHARED_CORPUS = `It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.
+
+The quick brown fox jumps over the lazy dog.`
+
 export function Chapter2() {
+  const [corpus, setCorpus] = useState(DEFAULT_SHARED_CORPUS)
+  const [charA, setCharA] = useState('a')
+  const [charB, setCharB] = useState('e')
+  const [showEmbeddingInspector, setShowEmbeddingInspector] = useState(false)
+  const [showTrainingReplay, setShowTrainingReplay] = useState(false)
+  const [trainingReplayCorpus, setTrainingReplayCorpus] = useState(DEFAULT_SHARED_CORPUS)
+
   return (
     <Container>
       <ChapterHeader
         number="02"
-        title="The Neural Network"
-        subtitle="We stop counting and start hallucinating with math. Introducing vectors, weights, and the scorecard of shame."
+        title="The Map"
+        subtitle="Token IDs are just name tags. Let's draw a map (embeddings) so the model can tell what's near what."
       />
 
-      {/* Section 2.1 */}
-      <Section number="2.1" title="The Great Switcheroo">
+      <ChapterMap
+        title="Chapter 2 Map"
+        steps={[
+          {
+            to: '2.1',
+            title: "Grassmann's Insight",
+            description: 'Abstract objects can be coordinates (colors → language). This is the basic move embeddings use.',
+          },
+          {
+            to: '2.2',
+            title: 'The Reuse Question',
+            description: "Context explosion — the scaling limit we're trying to beat.",
+          },
+          {
+            to: '2.3',
+            title: 'The Ground Truth',
+            description: <>Define similarity: characters that predict similar next characters should be close.</>,
+          },
+          {
+            to: '2.4',
+            title: 'The Embedding Table',
+            description: (
+              <>
+                Store <Term>D</Term> numbers per token. Lookup = row selection.
+              </>
+            ),
+          },
+          {
+            to: '2.6',
+            title: 'Dot Product',
+            description: 'A similarity score you can compute (and differentiate).',
+          },
+          {
+            to: '2.10',
+            title: 'The Handoff',
+            description: "How do we update the numbers when we're wrong?",
+          },
+        ]}
+      />
+
+      <Section number="2.1" title="Grassmann's Insight">
         <Paragraph>
-          In Chapter 1, we hit a wall. Counting every sequence requires storage larger than the universe.
+          In Chapter 1, we ran into a scaling limit: the number of possible contexts explodes exponentially. We can't store them all. We need a way to <strong>compress</strong> infinite variations of language into something finite.
         </Paragraph>
         <Paragraph>
-          So we're going to pull a trick. Instead of <em>storing</em> the probabilities in a table, we're going to build a machine that <em>computes</em> them on the fly.
+          In 1844, a schoolteacher in Stettin had an insight that wouldn't be fully understood for 120 years: <strong>abstract relationships can be coordinates.</strong>
+        </Paragraph>
+            <Paragraph>
+              His point was broader than physics: if you can measure relationships, you can build coordinates. Colors, sounds, and linguistic
+              patterns can all live in a space where "near" and "far" mean something.
+            </Paragraph>
+        <Paragraph>
+          His name was Hermann Grassmann. He wasn't a university professor with a lab and research funding. He taught high school, studied theology, and did mathematics on the side because he couldn't help himself.<Cite n={1} />
         </Paragraph>
         <Paragraph>
-          This machine is a <Highlight>Neural Network</Highlight>. Specifically, we're building the simplest possible one: a <strong>Bigram Neural Network</strong>.
+          The question that drives this entire chapter: <strong>What if language works the same way as colors?</strong>
         </Paragraph>
-        <Callout variant="info" title="The Goal">
-          <p>Input: One character (e.g., "c")</p>
-          <p>Output: A probability distribution for the next character (e.g., 50% "a", 30% "o", ...)</p>
-          <p>Constraint: No lookup tables. Pure math.</p>
+
+        <Paragraph>
+          Grassmann proved this with color. He didn't just use it as a metaphor — he did actual experimental color science and showed something remarkable: if you pick a few "primaries," you can describe <em>any</em> color by its coordinates in that basis.
+        </Paragraph>
+        <MathBlock
+          equation={String.raw`\text{Purple} = 0.5 \cdot \text{Red} + 0.5 \cdot \text{Blue}`}
+          explanation="This is an algebra of attributes: you can average properties (redness), not identities ('red' the token). Grassmann showed that this kind of add-and-scale math works for more than just light."
+        />
+        <Callout variant="info" title="How colors turn into numbers">
+          <Paragraph>
+            The coefficients come from a matching experiment. Put a target color patch on one side, give yourself a few "primaries" on the other, and turn the knobs until both patches look the same.
+          </Paragraph>
+          <Paragraph>
+            Those knob settings are the coordinates: how much "redness", "greenness", "blueness" you needed to match the experience.
+          </Paragraph>
+          <Paragraph>
+            Then you can compare, interpolate, and do geometry on colors — because you built the coordinates out of something measurable.
+          </Paragraph>
         </Callout>
+        <Paragraph>
+          He called it the <em>Ausdehnungslehre</em> — literally "theory of extension." Looks scary, says the same thing: once something has coordinates, you can do coordinate math on it.
+        </Paragraph>
+        <Paragraph>
+          That gives you a new move: take a weighted average. Slide <Term>t</Term> below and watch the blend. In "Colors" mode it's just purple showing up. In "Characters" mode, you're blending two next‑character distributions from Chapter 1 and watching the model's bets morph smoothly.
+        </Paragraph>
+        <GrassmannViz />
+        <Paragraph>
+          Colors aren't numbers. They're sensory experiences. Characters aren't numbers either — they're symbols. But both can be treated as coordinates in a space where <em>blending makes sense</em>. Purple is "half red, half blue." And a blend of 'q' and 'u' predicts a mix of what follows each.
+        </Paragraph>
+
+        <Paragraph>
+          Why does this work? Two properties make the algebra possible:
+        </Paragraph>
+        <AxiomViz />
+        <Paragraph>
+          If your objects satisfy these rules — linearity and commutativity — you get a <em>vector space</em>. In plain English:
+          you can treat things as <em>attributes</em>, mix them, scale them, and the math doesn't start keeping grudges about the order.
+        </Paragraph>
+        <Paragraph>
+          The missing piece is always: <em>what are the attributes?</em> For colors, they were literally knob settings from a matching
+          experiment. For characters, we use something just as measurable: the distribution of what tends to come next. That fingerprint is already a vector (one coordinate per possible next character). We can compute it directly from counts.
+        </Paragraph>
+        <Paragraph>
+          One important clarification before we sprint off a cliff: the character <Term>'q'</Term> isn't "a vector." It's still just a
+          symbol. The vector is the little bundle of numbers we decide to represent it with.
+        </Paragraph>
+        <Callout variant="info" title="What actually lives in the space?">
+          <ol>
+            <li>
+              <strong>Symbol:</strong> <Term>'q'</Term> (discrete)
+            </li>
+            <li>
+              <strong>ID:</strong> <Term>stoi['q'] = 17</Term> (a name tag)
+            </li>
+            <li>
+              <strong>Embedding:</strong> <Term>e_q = [0.2, -1.3, ...]</Term> (coordinates we can move)
+            </li>
+          </ol>
+          <Paragraph>
+            Only the third thing is a point in the vector space. The first two just tell us which row to grab consistently.
+          </Paragraph>
+        </Callout>
+        <Paragraph>
+          When we blend things in the demo, we're blending <em>coordinates</em>, not identities. "Half red + half blue" makes sense
+          because redness is an attribute. Same move here: a blend of <Term>e_q</Term> and <Term>e_u</Term> is just "somewhere between
+          their learned attributes."
+        </Paragraph>
+        <Paragraph>
+          And this is where the "continuous" part starts to matter. Integer IDs can only jump: 17 → 18. There's no "a tiny bit more
+          like <Term>u</Term>." In a vector space, you can move one millimeter — add a tiny <Term>ε</Term> to one coordinate — and get a
+          nearby point.
+        </Paragraph>
+        <Paragraph>
+          But "nearby" isn't automatically "better." A vector space gives you a steering wheel; it doesn't pick the destination.
+          We still need two things: a target (what counts as a good prediction) and a scoreboard (a number that goes down when we improve).
+        </Paragraph>
+
+        <Paragraph>
+          Here's what makes this more than a mathematical curiosity: Grassmann wasn't just a mathematician who happened to pick colors as an example. He was also a serious linguist — and his linguistic work proved something crucial: <strong>language follows computable rules.</strong>
+        </Paragraph>
+        <Paragraph>
+          Quick translation before we use the word: an <em>aspirated</em> consonant is pronounced with a little extra puff of air. Put your hand in
+          front of your mouth and say <Term>pin</Term> vs <Term>spin</Term> — you'll feel the burst on the <Term>p</Term> in{' '}
+          <Term>pin</Term>, but not in <Term>spin</Term>.
+        </Paragraph>
+        <PhoneticPatternViz />
+        <Paragraph>
+          What you just saw is a modern English example — just to make the "rule-ness" feel real in your mouth.
+        </Paragraph>
+        <Paragraph>
+          Grassmann did this at a deeper, historical level. "Grassmann's law" is an actual rule in historical linguistics:<Cite n={2} /> when two aspirated consonants show up in neighboring syllables, the first one loses its puff. It's a <em>transformation</em>: input → rule → output. The same kind of systematic structure you'd write as a function.
+        </Paragraph>
+        <Paragraph>
+          The same person who showed that colors can be coordinates <em>also</em> proved that language has this kind of structure. That's the bridge: if linguistic patterns are systematic enough to write as rules, they're systematic enough to capture as coordinates. The patterns aren't in the sounds themselves — they're in the <em>relationships</em>. And relationships can be geometry.
+        </Paragraph>
+
+        <Paragraph>
+          Here's the chain — click each station to see the idea at that level:
+        </Paragraph>
+        <AbstractionChainViz />
+
+        <Paragraph>
+          So here's what Grassmann's work gives us — it's the foundational thesis for this entire chapter:
+        </Paragraph>
+        <Paragraph>
+          <strong>If colors can be coordinates — if you can ask "how far is purple from red?" and get a meaningful answer — we can do the same with characters.</strong>
+        </Paragraph>
+        <Paragraph>
+          That's the claim embeddings lean on: abstract things can have measurable relationships, and those relationships can be encoded as geometry. Once you have coordinates, you can compare points — and you can adjust them.
+        </Paragraph>
+        <Paragraph>
+          But there's a problem we need to solve first. Even if we accept that characters <em>can</em> have coordinates, we still need to answer: <strong>why do we need them?</strong> What breaks if we try to keep using the lookup tables from Chapter 1?
+        </Paragraph>
+        <Paragraph>
+          <strong>Training</strong> is a loop: make a prediction, score it, nudge the coordinates, repeat.
+        </Paragraph>
+        <Citations
+          title="Grassmann sources"
+          items={[
+            {
+              n: 1,
+              href: 'https://mathshistory.st-andrews.ac.uk/Biographies/Grassmann/',
+              label: 'MacTutor — Hermann Günther Grassmann (biography + reception + later influence)',
+            },
+            {
+              n: 2,
+              href: "https://en.wikipedia.org/wiki/Grassmann%27s_law",
+              label: "Grassmann's law (linguistics) — overview + examples",
+            },
+            {
+              n: 3,
+              href: 'https://mathshistory.st-andrews.ac.uk/Extras/Grassmann_1844/',
+              label: 'Grassmann (1844) — Foreword extract (MacTutor translation)',
+            },
+            {
+              n: 4,
+              href: 'https://mathshistory.st-andrews.ac.uk/Extras/Grassmann_1862/',
+              label: 'Grassmann (1862) — Foreword extract (MacTutor translation)',
+            },
+            {
+              n: 5,
+              href: 'https://en.wikipedia.org/wiki/Hermann_Grassmann',
+              label: 'Hermann Grassmann — biography + publishing letter ("waste paper") + linguistics work',
+            },
+          ]}
+        />
       </Section>
 
-      {/* Section 2.2 */}
-      <Section number="2.2" title="Computers Are Math Nerds">
+      <Section number="2.2" title="The Reuse Question">
         <Paragraph>
-          In Chapter 1, we converted "hello" into [3, 2, 4, 4, 5]. We have numbers! But here's the catch: these are just <Term>labels</Term>—indices that say "this is character #3, that is character #2". They're not <em>meaningful</em> numeric values. You can't multiply index 5 by a weight and get a sensible answer. The fact that 5 is bigger than 3 doesn't mean anything—they're just IDs we made up. To build a neural network that does actual math, we need to convert each index into a <Term>vector</Term> that represents the character's properties in a way that algebra can chew on.
+          Chapter 1 gave us a working model (N-grams), but it had a fatal flaw: <strong>every context was an island.</strong>
         </Paragraph>
         <Paragraph>
-          You can't multiply "c" by 5. Computers need numbers.
+          Picture this: you've seen "the cat" ten thousand times in your training data. You know <em>exactly</em> what tends to follow "the cat" — maybe "sat", "ran", "meowed". The model has learned this pattern cold.
         </Paragraph>
         <Paragraph>
-          We already turned characters into integers (0, 1, 2...). But integers have a secret problem: they imply order. Is "b" (1) half of "d" (2)? No. They are distinct categories.
+          Now the text shows you "a cat" for the first time.
         </Paragraph>
         <Paragraph>
-          The solution is <Highlight>One-Hot Encoding</Highlight>. We represent each character as a vector of all zeros, except for a single '1' at its index.
+          In a lookup-table N-gram, <Term>"the "</Term> and <Term>"a "</Term> are totally separate contexts. The model looks up "a cat", finds nothing, and shrugs. All that knowledge about cats? Useless. It can't transfer. The contexts are different strings, so they're different rows in the table, so they're <em>unrelated</em>. The model falls back to "never seen this exact thing before."
         </Paragraph>
-        <OneHotViz />
         <Paragraph>
-          If your vocabulary has 27 characters, every input is a vector of length 27. It's sparse, it's clean, and it allows us to do linear algebra.
+          Same pain with rare strings: <Term>supercalifragilisticexpialidocious</Term> is made of ordinary letters, but most longer contexts inside it are ones you'll never have seen in your tiny corpus. In a pure lookup table, "new context" just means "empty row."
         </Paragraph>
+        <Paragraph>
+          This is the problem of <strong>independent learning</strong>. In an N-gram model, if you haven't seen a specific context before, you know <em>nothing</em>. And as contexts get longer, "never seen this before" becomes the default state.
+        </Paragraph>
+        <Paragraph>
+          We need a way to <strong>share information</strong>. We need reusable parts.
+        </Paragraph>
+        <Paragraph>
+          The solution is to stop memorizing <em>contexts</em> and start modeling <em>tokens</em>. Instead of a giant table of answers for every possible situation, we give each token a <strong>portable identity</strong> — a set of numbers that travels with it wherever it goes. (Or rather: a set of numbers that the <em>model</em> can consult whenever that token appears, which amounts to the same thing mechanically but matters conceptually — we're not encoding intrinsic properties of 'a', we're learning what <em>role</em> 'a' tends to play when predicting what comes next.)
+        </Paragraph>
+        <Paragraph>
+          Here's the shift:
+        </Paragraph>
+        <ul>
+          <li>
+            <strong>Chapter 1:</strong> one probability distribution for every possible context (explodes).
+          </li>
+          <li>
+            <strong>Chapter 2:</strong> one shared vector per token (reusable).
+          </li>
+        </ul>
+        <Paragraph>
+          Slide the context length up and watch how the "memorize everything" strategy runs into a scaling limit, while the "reusable parts"
+          strategy stays efficient:
+        </Paragraph>
+        <ContextExplosionViz />
+        <Paragraph>
+          In this chapter, that reusable part is an <em>embedding table</em>: one learnable vector per token. It gives the model a place to store information about 'a' or 'b' that applies <em>everywhere</em>, not just in one specific context.
+        </Paragraph>
+        <Paragraph>
+          But this raises a deeper question. Token IDs are just integers — arbitrary labels. <Term>stoi['q'] = 17</Term> and <Term>stoi['u'] = 21</Term> tells us nothing about whether 'q' and 'u' are similar — yet they're extremely similar statistically, since 'q' is almost always followed by 'u'.
+        </Paragraph>
+        <Paragraph>
+          We need a representation where distance actually means something: <em>coordinates</em> in a space where nearby things behave similarly.
+        </Paragraph>
+        <Paragraph>
+          <strong>The question:</strong> can we treat characters as points in a coordinate space? If we can, what should the coordinates mean?
+        </Paragraph>
+
+        <details className="collapsible">
+          <summary>Optional: what do we mean by "model"?</summary>
+          <Paragraph>
+            In this book, a model is a function: input → output.
+          </Paragraph>
+          <ul>
+            <li><strong>Input:</strong> context characters</li>
+            <li><strong>Output:</strong> a probability distribution over the next character</li>
+            <li><strong>Parameters:</strong> the adjustable numbers that control the function's behavior</li>
+          </ul>
+          <Paragraph>
+            In Chapter 1, the parameters were counts in lookup tables. Here, the parameters are the embedding table <Term>E</Term> — one vector per token.
+          </Paragraph>
+          <Paragraph>
+            Learning means changing those numbers so the function assigns high probability to what actually happens.
+          </Paragraph>
+        </details>
       </Section>
 
-      {/* Section 2.3 */}
-      <Section number="2.3" title="The Weights (W)">
+      <Section number="2.3" title="What Can We Measure?">
         <Paragraph>
-          Here is the simplest neural network equation in the world:
+          Before we talk about <em>how</em> to store information about tokens, we need to answer a more fundamental question: <strong>what information should we store?</strong>
         </Paragraph>
-        <MathBlock 
-          equation="logits = x @ W" 
-          explanation={`"Output scores" = "Input vector" matrix-multiplied by "Weights"`}
+        <Paragraph>
+          <strong>Two characters should be close if they predict similar next characters.</strong>
+        </Paragraph>
+        <Paragraph>
+          If you had to bet money on what comes next after seeing <Term>'a'</Term> versus <Term>'e'</Term>, you'd offer similar odds. That's measurable. That's the geometry we're after.
+        </Paragraph>
+        <Callout variant="info" title="The target is computable">
+          <Paragraph>
+            <strong>Step 1: Compute the fingerprint.</strong> For each character <Term>c</Term>, count what follows it:
+          </Paragraph>
+          <MathBlock
+            equation={String.raw`P(\text{next}=x \mid c) = \frac{\text{count}(c \to x)}{\text{count}(c)}`}
+            explanation="For each possible next character x, divide 'how often x follows c' by 'how often c appears'. This gives a 27-dimensional probability vector per character."
+          />
+          <Paragraph>
+            <strong>Step 2: Compute fingerprint similarity.</strong> Two characters are "behaviorally similar" if their fingerprints overlap:
+          </Paragraph>
+          <MathBlock
+            equation={String.raw`\text{sim}(a, e) = \sum_{i} P(i \mid a) \cdot P(i \mid e)`}
+            explanation="The dot product of two fingerprints. High when both characters tend to precede the same next-characters."
+          />
+          <Paragraph>
+            <strong>Step 3: The target.</strong> We want the learned embeddings to reflect this:
+          </Paragraph>
+          <MathBlock
+            equation={String.raw`\text{dot}(E[a], E[e]) \approx \text{dot}(P(\cdot \mid a), P(\cdot \mid e))`}
+            explanation="Make embedding similarity correlate with fingerprint similarity. We make one computable thing match another computable thing."
+          />
+        </Callout>
+        <Paragraph>
+          If after 'a' you often see 'n', 't', 's', and after 'e' you also often see 'n', 't', 's' — then 'a' and 'e' should be nearby. That's not philosophy. That's a rule you can compute.
+        </Paragraph>
+        <Paragraph>
+          For each character <Term>c</Term>, we can build a "role vector": the distribution <Term>P(next | c)</Term>. Characters with similar role vectors should be close in embedding space. This is the ground truth we're aiming for.
+        </Paragraph>
+        <Paragraph>
+          The visualization below breaks this down. It shows the "Fingerprint" of each character (what tends to follow it).
+        </Paragraph>
+        <CharacterClusterViz
+          corpus={corpus}
+          onCorpusChange={setCorpus}
+          selectedA={charA}
+          onChangeA={setCharA}
+          selectedB={charB}
+          onChangeB={setCharB}
         />
         <Paragraph>
-          <Term>x</Term> is our one-hot input (1 × 27).
+          That similarity score isn't random. It's computed from the full{' '}
+          <Term>P(next | c)</Term> fingerprints (all 27 probabilities) using the corpus above. The plot is just a 2‑D slice so your eyeballs have something to look at.
         </Paragraph>
-        <Paragraph>
-          <Term>W</Term> is our <Highlight>Weight Matrix</Highlight> (27 × 27).
-        </Paragraph>
-        <Paragraph>
-          The result, <Term>logits</Term>, is a vector of 27 raw scores.
-        </Paragraph>
-        <Callout variant="insight" title="What is W?">
-          <p>Think of W as a control panel with 27 × 27 = 729 knobs.</p>
-          <p>If W[0][1] is high, it means "Input 0 (a) really likes Output 1 (b)".</p>
-          <p>Initially, these knobs are set randomly. Our job is to turn them until the model predicts English instead of gibberish.</p>
+        <Callout variant="insight" title="Why this definition?">
+          <Paragraph>
+            We're defining similarity based on <strong>predictive role</strong>. Two characters are similar if they make similar predictions about what comes next.
+          </Paragraph>
+          <Paragraph>
+            It's a definition you can compute from a corpus — and then ask a model to approximate.
+          </Paragraph>
         </Callout>
+      </Section>
+
+      <Section number="2.4" title="Vectors Are Just Storage">
         <Paragraph>
-          Here's the beautiful trick: when you multiply a one-hot vector by a matrix, you're not actually doing any multiplication. You're just <em>selecting a row</em>. Try it:
+          Now we know <em>what</em> we want to capture: the <Term>P(next | c)</Term> fingerprint. The question is: <em>how</em> do we store it?
+        </Paragraph>
+        <Paragraph>
+          We give every token a vector. Vectors fix a fundamental problem with integers.
+        </Paragraph>
+        <Paragraph>
+          <strong>Integers are like Proper Nouns (Identities).</strong> <Term>stoi['cat'] = 17</Term> is just a unique name tag. It tells you <em>which</em> one it is, but nothing about <em>what</em> it is. You can't compare 'John' and 'Alice' just by looking at their names. John is Person #457. Alice is Person #203. The number 254 separating them? Meaningless.
+        </Paragraph>
+        <Paragraph>
+          <strong>Vectors are like Adjectives (Attributes).</strong> A vector is a list of measurable qualities: <Term>[Furry, Small, Living]</Term>. Now you can ask: how similar is John to Alice? Compare their <em>attributes</em>. John = [tall, quiet, left-handed]. Alice = [tall, quiet, right-handed]. They're similar on two dimensions, different on one. You can measure that.
+        </Paragraph>
+        <Paragraph>
+          This shift—from "Who are you?" (<strong>Name</strong>) to "What are you like?" (<strong>Adjectives</strong>)—is what unlocks learning. You can't mathematically adjust a name. But you <em>can</em> adjust a description. You can make a vector slightly more "adjective-like" or slightly less "plural".
+        </Paragraph>
+        <DiscreteContinuousViz />
+        <Paragraph>
+          But why are we allowed to do this? Why should words have coordinates?
+        </Paragraph>
+        <Paragraph>
+          Words have properties you can measure: <strong>statistical ones</strong>. 'Apple' has a high probability of appearing near 'eat'. 'King' appears near 'throne'. Those relationships are numbers you can count. The geometry is a map built from those counts.
+        </Paragraph>
+
+        <Paragraph>
+          And then the math has to live somewhere. That means <em>data structures</em>.
+        </Paragraph>
+            <Paragraph>
+              We need one simple guarantee: every time the text contains an <Term>a</Term>, we fetch the <em>same</em> coordinates for
+              <Term>a</Term>. It's the same row of numbers every time.
+            </Paragraph>
+        <Paragraph>
+          If we have that, something important happens: evidence about <Term>a</Term> can accumulate. Whatever the model learns
+          about <Term>a</Term> in one sentence comes along the next time <Term>a</Term> shows up somewhere else. No more
+          one‑context islands.
+        </Paragraph>
+        <ul>
+          <li><strong>Store:</strong> one coordinate vector per token (reusable everywhere).</li>
+          <li><strong>Retrieve:</strong> given a token ID, grab its vector in one step.</li>
+        </ul>
+        <Paragraph>
+          The simplest structure that does this is just a matrix.
+        </Paragraph>
+        <ul>
+          <li><strong>Rows:</strong> one for every unique character in our vocabulary (27 of them).</li>
+          <li><strong>Columns:</strong> the coordinate slots for that character (let's say 64 numbers).</li>
+        </ul>
+        <Paragraph>
+          That's a <Term>27 × 64</Term> table. People usually call it an <strong>embedding table</strong>.
+        </Paragraph>
+        <CodeBlock filename="embeddings.py">{`import numpy as np
+
+vocab_size = 27      # rows: one for each token
+embed_dim = 64       # columns: how many attributes per token
+
+# The filing cabinet:
+E = np.random.randn(vocab_size, embed_dim).astype(np.float32)`}</CodeBlock>
+        <Paragraph>
+          Meet <Term>E</Term>: our first piece of <strong>shared memory</strong>. One row per character, one little bundle of coordinates per row.
+        </Paragraph>
+        <Paragraph>
+          Sixty-four dimensions. You can't picture it. Nobody can. But the math doesn't care what you can picture — it works anyway. Every character lives at a single point in this impossible space, and somehow, through training, the characters that behave similarly end up as neighbors.
+        </Paragraph>
+
+        <Paragraph>
+          Two quick grounding points before we talk about "meaning":
+        </Paragraph>
+        <ul>
+          <li>
+            <strong>Size:</strong> <Term>27 × 64</Term> float32s is <Term>6,912 bytes</Term> total (about 6.8 KB).
+          </li>
+          <li>
+            <strong>Initialization:</strong> those bytes start as random noise. Training is what turns "noise in RAM" into "a map you can use."
+          </li>
+        </ul>
+
+        <details className="collapsible">
+          <summary>Optional: why use 64 dimensions?</summary>
+          <Paragraph>
+            The <Term>P(next|c)</Term> fingerprint is 27-dimensional (one probability per character). So why store <Term>64</Term> numbers per row?
+          </Paragraph>
+          <Paragraph>
+            Because we're not trying to reconstruct the whole fingerprint from a single row. We want <strong>dot products in embedding space</strong> to behave like overlap between fingerprints.
+          </Paragraph>
+          <Paragraph>
+            That's a weaker requirement than "store all 27 probabilities," which is why it's even possible. <Term>D=64</Term> is just "enough room" for training to find a useful proxy.
+          </Paragraph>
+        </details>
+
+        <Paragraph>
+          The "adjectives" metaphor can feel a little unfair here, because right now it really is just 64 numbers.
+        </Paragraph>
+        <Paragraph>
+          One concrete way to see "attributes" emerge is to pick a <em>direction</em> in embedding space and score each character by how much it points that way. (Like "vowel‑ish" or "space‑ish.")
+        </Paragraph>
+        <details
+          className="collapsible"
+          onToggle={(e) => {
+            const el = e.currentTarget as HTMLDetailsElement
+            if (el.open) setShowEmbeddingInspector(true)
+          }}
+        >
+          <summary>Optional: inspect directions in a trained embedding table</summary>
+          {showEmbeddingInspector && <EmbeddingInspector corpus={corpus} />}
+        </details>
+        <Paragraph>
+          Don't overtrust any one axis. A model can rotate the space and keep the same information as a <em>direction</em>, not a named column. The point is simpler: training turns those 6,912 bytes into a structured table you can probe.
+        </Paragraph>
+
+            <Callout variant="insight" title="Why random? (Symmetry breaking is necessary)">
+          <Paragraph>
+            You might ask: why not initialize all embeddings to zero? Or all to the same value?
+          </Paragraph>
+          <Paragraph>
+            <strong>The problem: if all embeddings start identical, they stay identical forever.</strong>
+          </Paragraph>
+          <Paragraph>
+            If <Term>E['a'] = E['b'] = E['c'] = [0, 0, ..., 0]</Term>, then every character produces identical predictions. The loss is the same for each character. So the gradients are identical. Identical gradients → identical updates → they remain identical after the update.
+          </Paragraph>
+              <Paragraph>
+                Random initialization <em>breaks this symmetry</em>. Each character starts at a different point in the 64-dimensional space.
+                Even though the positions are arbitrary, they're different. That's enough to give them different gradients, and it compounds
+                over training.
+              </Paragraph>
+          <Paragraph>
+            We introduce noise to break the symmetry. If every character started at zero, they would all receive identical updates and remain clones forever.
+          </Paragraph>
+        </Callout>
+            <Paragraph>
+              That smallness is the point. Instead of trying to store <Term>27<sup>8</sup></Term> contexts (~282 billion), we store one reusable row per character.
+            </Paragraph>
+        <Paragraph>
+          Right now it's random, which means it has no structure yet. But it's <em>consistent</em> randomness: every time the text contains an <Term>a</Term>, you fetch the same row, so all the evidence about <Term>a</Term> keeps piling into the same 64 slots.
+        </Paragraph>
+        <Paragraph>
+          So the "no more islands" win is built into the data structure: the same row gets reused in every context. If the model learns something useful about <Term>q</Term> in one place, that information comes along the next time <Term>q</Term> shows up somewhere else.
+        </Paragraph>
+            <Callout variant="insight" title="So what fills the matrix?">
+          <Paragraph>
+            The data structure is the easy part. The hard part is this: <strong>what values should go in this matrix?</strong>
+          </Paragraph>
+          <Paragraph>
+            Random coordinates mean nothing. We need coordinates where <em>similar</em> characters end up <em>close together</em>. "Similar" here means "similar next‑character fingerprints."
+          </Paragraph>
+          <Paragraph>
+            The vectors are storage. The fingerprints are the target. Training is the process of moving the storage to match the target.
+          </Paragraph>
+        </Callout>
+      </Section>
+
+      <Section number="2.5" title="The Embedding Lookup">
+        <Paragraph>
+          Mechanically, an embedding layer is surprisingly simple. It's just a <Term>lookup table</Term>.
+        </Paragraph>
+        <CodeBlock filename="lookup.py">{`# stoi maps characters to ids. Example:
+ix = stoi['h']
+
+# A single embedding vector (shape [embed_dim])
+x = E[ix]`}</CodeBlock>
+        <Paragraph>
+          To create a rigorous link between "Identity" (Integer) and "Attributes" (Vector), we need a translator. That translator is the <strong>One-Hot Vector</strong>.
+        </Paragraph>
+        <Paragraph>
+          It is the simplest possible vector: a list of zeros with a single <Term>1</Term> at the index of the character we want.
+          <br />
+          For ID 3 (in a vocab of 5): <Term>[0, 0, 0, 1, 0]</Term>.
+        </Paragraph>
+        <Paragraph>
+          Why do this? Because matrix multiplication is just a weighted sum of rows. Multiply the one‑hot vector by the Embedding Table <Term>E</Term>:
+        </Paragraph>
+        <MathBlock
+          equation={String.raw`\begin{aligned}
+[0,0,0,1,0]\cdot E &= 0\cdot \text{Row}_0 + 0\cdot \text{Row}_1 + 0\cdot \text{Row}_2 + 1\cdot \text{Row}_3 + 0\cdot \text{Row}_4 \\
+&= \text{Row}_3
+\end{aligned}`}
+          explanation="Only one weight is 1, so only one row survives."
+        />
+        <Paragraph>
+          The result is exactly <Term>Row_3</Term>. A one-hot vector is a mathematical "selector switch."
+        </Paragraph>
+        <MathBlock
+          equation={String.raw`\begin{bmatrix} 0 & 1 & 0 \end{bmatrix} \cdot \begin{bmatrix} a & b \\ c & d \\ e & f \end{bmatrix} = \begin{bmatrix} c & d \end{bmatrix}`}
+          explanation="The 1 'activates' the second row. The 0s 'silence' the others."
+        />
+      </Section>
+
+      <Section number="2.5.1" title="Row Selection (You Can See It)">
+        <Paragraph>
+          This demo uses a tiny character vocabulary so you can watch the lookup happen.
         </Paragraph>
         <MatrixRowSelectViz />
         <Paragraph>
-          This is why one-hot encoding is so efficient in practice. The "matrix multiplication" is really just a lookup—grab the row corresponding to the input character. Those row values become the logits.
+          We call it a "lookup," but you can write it as <Term>xᵀW</Term>. That's just a linear layer. The one‑hot vector
+          decides which row gets credit (and which row gets gradients) when we start training.
         </Paragraph>
       </Section>
 
-      {/* Section 2.4 */}
-      <Section number="2.4" title="The Squishification (Softmax)">
+      <Section number="2.5.2" title="Do the Lookup (NumPy)">
         <Paragraph>
-          The output of our matrix multiplication (<code>logits</code>) can be anything. 5.2, -100.9, 0.0.
+          In real code, you don't loop over tokens and do 64 multiplications by hand. You just index the table.
+        </Paragraph>
+        <CodeChallenge phase="2.5.2" title="Batch embedding lookup">
+          <CodeChallenge.Setup>
+            <CodeBlock filename="lookup_batch.py">{`import numpy as np
+
+vocab_size = 27
+embed_dim = 64
+
+E = np.random.randn(vocab_size, embed_dim).astype(np.float32)
+
+# Two examples, context length 4 (shape [B=2, T=4])
+X = np.array([
+  [3, 2, 4, 4],
+  [2, 4, 4, 5],
+], dtype=np.int64)`}</CodeBlock>
+          </CodeChallenge.Setup>
+          <CodeChallenge.Prompt>
+            <Paragraph>
+              Write one line that turns token IDs <code>X</code> (shape <Term>[2, 4]</Term>) into embeddings (shape{' '}
+              <Term>[2, 4, 64]</Term>) using <code>E</code>.
+            </Paragraph>
+          </CodeChallenge.Prompt>
+          <CodeChallenge.Solution>
+            <CodeChallenge.Answer>
+              <CodeBlock>{`X_emb = E[X]
+print(X_emb.shape)  # (2, 4, 64)`}</CodeBlock>
+            </CodeChallenge.Answer>
+            <Paragraph>
+              This is NumPy's "fancy indexing". It performs the lookup for every ID in <code>X</code> simultaneously. The new embedding dimension just appears on the last axis.
+            </Paragraph>
+          </CodeChallenge.Solution>
+        </CodeChallenge>
+      </Section>
+
+          <Section number="2.6" title="Measuring Similarity: Overlap (Dot Product)">
+            <Paragraph>
+              Earlier we gave every character a "fingerprint": a full distribution <Term>P(next | c)</Term>.
+            </Paragraph>
+            <Paragraph>
+              Now we need one concrete question we can compute: do these two fingerprints put probability mass on the{' '}
+              <em>same</em> next characters?
+            </Paragraph>
+
+          <WorkedExample title="A tiny overlap calculation">
+            <WorkedStep n="1">
+              <Paragraph>
+                Shrink the universe. Pretend there are only three possible next characters: <Term>a</Term>, <Term>b</Term>, and space <Term>␣</Term>.
+              </Paragraph>
+              <Paragraph>
+                Two contexts give two next‑character distributions:
+              </Paragraph>
+              <MathBlock equation={String.raw`p(A) = [0.7,\; 0.2,\; 0.1] \qquad p(B) = [0.6,\; 0.1,\; 0.3]`} />
+            </WorkedStep>
+            <WorkedStep n="2">
+              <Paragraph>
+                Now do the "two weighted dice" thought experiment: roll once from A and once from B. They match only if they land on the same symbol.
+              </Paragraph>
+              <MathBlock
+                equation={String.raw`P(\text{match}) = (0.7\cdot 0.6) \;+\; (0.2\cdot 0.1) \;+\; (0.1\cdot 0.3) \;=\; 0.47`}
+                explanation="One term per symbol. Multiply, then add."
+              />
+            </WorkedStep>
+            <WorkedStep n="3" final>
+              <Paragraph>
+                Scale back up to a real vocabulary: it's the same sum, just longer:
+              </Paragraph>
+              <MathBlock equation={String.raw`P(\text{match}) = \sum_i p_i(A)\,p_i(B)`} />
+              <WorkedNote>
+                That's the dot product formula in disguise. For probability vectors, <Term>p(A)·p(B)</Term> is literally <Term>P(match)</Term>.
+              </WorkedNote>
+            </WorkedStep>
+          </WorkedExample>
+
+            <MathBlock
+              equation={String.raw`a \cdot b = \sum_{i=1}^{D} a_i b_i`}
+              explanation="Same sum: multiply matching coordinates, then add them up."
+            />
+
+            <Callout variant="insight" title="Grassmann's geometry made concrete">
+              <Paragraph>
+                This is Grassmann's insight from <SectionLink to="2.1">Section 2.1</SectionLink>, made usable. The dot product is the "projection"
+                tool: a single number that says how aligned two vectors are.
+              </Paragraph>
+            </Callout>
+
+        <Paragraph>
+          So why does this particular sum show up everywhere? Because it plays perfectly with the only move we've allowed
+          ourselves so far: <em>linear mixing</em>. If you blend vectors, dot products blend too:
+        </Paragraph>
+        <MathBlock
+          equation={String.raw`(\alpha a + \beta b)\cdot c = \alpha(a\cdot c) + \beta(b\cdot c)`}
+          explanation="'Similarity' distributes over addition and scaling. That's the whole reason it composes nicely."
+        />
+
+        <Paragraph>
+          One dot product is one similarity score. Stack vectors into matrices and you can compute a whole grid of scores at
+          once — that's just matrix multiplication. (We'll use that trick constantly.)
+        </Paragraph>
+
+        <Paragraph>
+          You'll also hear about <Term>cosine similarity</Term>. It's the dot product after you normalize both vectors to
+          length 1 — same comparison, but with magnitude factored out.
+        </Paragraph>
+
+        <Paragraph>
+          In the widget below, we're dotting two <em>probability vectors</em>, so every coordinate is non‑negative and the score
+          is pure overlap. Later, learned embeddings aren't probabilities: coordinates can go negative, dot products can cancel,
+          and "agreement vs conflict" becomes something the model can represent by direction.
+        </Paragraph>
+
+        <DotProductViz
+          corpus={corpus}
+          showCorpusEditor={false}
+          charA={charA}
+          charB={charB}
+          onCharAChange={setCharA}
+          onCharBChange={setCharB}
+        />
+        <CodeBlock filename="dot.py">{`import numpy as np
+
+score = float(np.dot(a, b))`}</CodeBlock>
+        <Paragraph>
+          One small grounding point: if two vectors are basically "uniform noise", the dot product has a predictable
+          baseline. For a uniform distribution over <Term>V</Term> characters, every coordinate is:
+        </Paragraph>
+        <MathBlock equation={String.raw`p_i = \frac{1}{V}`} />
+        <MathBlock equation={String.raw`p \cdot p = \sum_i p_i^2 = \frac{1}{V}`} />
+        <Paragraph>
+          That's why the gauge shows a <Term>1/V</Term> marker.
+        </Paragraph>
+
+        <details className="collapsible">
+          <summary>Optional: why dot products keep showing up</summary>
+          <Paragraph>
+            You might wonder: why this specific similarity score? Why not Euclidean distance (<Term>||a - b||</Term>) or cosine similarity?
+          </Paragraph>
+          <Paragraph>
+            If you're curious, flip the widget above from <Term>dot</Term> to <Term>euclidean</Term>. It's the same two fingerprints, just a different question.
+          </Paragraph>
+          <Paragraph>
+            <strong>The constraint:</strong> we need a score that behaves predictably when we add vectors.
+          </Paragraph>
+          <Paragraph>
+            L2 distance doesn't distribute: <Term>||a+b|| ≠ ||a|| + ||b||</Term>. But dot product does: <Term>(a+b)·c = a·c + b·c</Term>.
+          </Paragraph>
+          <details className="collapsible">
+            <summary>One quick counterexample</summary>
+            <Paragraph>
+              If <Term>context = [1, 0]</Term> and we have two candidates at <Term>[0.9, 0.1]</Term> and <Term>[0.1, 0.9]</Term>, L2 distance
+              says they're roughly equally close (~0.14 each). Dot product keeps the directional signal: <Term>0.9</Term> vs <Term>0.1</Term>.
+            </Paragraph>
+          </details>
+          <Paragraph>
+            One more practical link: in transformers, attention scores are dot products (up to scaling). That "relevance" computation is this same operation, just on learned vectors.
+          </Paragraph>
+          <Paragraph>
+            And a note on Euclidean distance: in high dimensions, random points become oddly equidistant. Dot products keep caring about <em>direction</em> (alignment), which tends to be what we want for "role" similarity.
+          </Paragraph>
+        </details>
+      </Section>
+
+      <Section number="2.7" title="From Scores to Probabilities (Softmax)">
+        <Paragraph>
+          We have a problem. The dot product gives us <strong>logits</strong>: raw numbers like <Term>-5</Term>, <Term>0.2</Term>, or <Term>14</Term>.
         </Paragraph>
         <Paragraph>
-          But we need <strong>probabilities</strong>. They must be positive and sum to 1.0.
+          But Chapter 1 established a hard rule: the model must output a <strong>probability distribution</strong>. The numbers must be between 0 and 1, and they must sum to exactly 1.
         </Paragraph>
         <Paragraph>
-          Enter <Highlight>Softmax</Highlight>. It takes ugly numbers and squishes them into a beautiful probability distribution.
+          Why do we use <strong>Softmax</strong>? Why not something simpler? Let's build it from first principles.
         </Paragraph>
-        <MathBlock 
-            equation="\text{Softmax}(x_i) = \frac{e^{x_i}}{\sum e^{x_j}}"
-            explanation="Exponentiate to make positive, then divide by the sum to normalize."
+        <Paragraph>
+          Your brain does this every time you hear hoofbeats and think "probably horse, maybe zebra, definitely not unicorn" — you're running softmax over hypotheses, turning vague confidence levels into something that sums to certainty.
+        </Paragraph>
+
+        <Callout variant="insight" title="Deriving Softmax">
+          <Paragraph><strong>Attempt 1: Linear Normalization (The Fail)</strong></Paragraph>
+          <Paragraph>
+            Why not just divide each score by the sum?
+            <br />
+            Scores: <Term>[2, -3, 4]</Term>. Sum: <Term>3</Term>.
+            <br />
+            Probs: <Term>[0.66, -1.0, 1.33]</Term>.
+            <br />
+            <strong>Fail:</strong> Probabilities cannot be negative.
+          </Paragraph>
+
+          <Paragraph><strong>Attempt 2: Make it Positive (Exponentiation)</strong></Paragraph>
+          <Paragraph>
+            We need a function that turns <em>any</em> number (even negative infinity) into a positive number.
+            <br />
+            We use <Term>e<sup>x</sup></Term>.
+            <br />
+            <Term>e<sup>-5</sup> ≈ 0.006</Term> (Tiny, but positive).
+            <br />
+            <Term>e<sup>0</sup> = 1</Term>.
+            <br />
+            <Term>e<sup>5</sup> ≈ 148</Term> (Huge).
+          </Paragraph>
+          <Paragraph>
+            This doesn't just make things positive. It <strong>amplifies differences</strong>. If Score A is slightly bigger than Score B, <Term>e<sup>A</sup></Term> will be <em>much</em> bigger than <Term>e<sup>B</sup></Term>.
+          </Paragraph>
+
+          <Paragraph><strong>Attempt 3: Normalize</strong></Paragraph>
+          <Paragraph>
+            Now that everything is positive, we just divide by the total to make them sum to 1.
+          </Paragraph>
+        </Callout>
+
+        <MathBlock
+          equation={String.raw`\text{Softmax}(x_i) = \frac{e^{x_i}}{\sum_{j} e^{x_j}}`}
+          explanation="Step 1: Exponentiate to ensure positivity and amplify the winner. Step 2: Divide by sum to normalize."
+        />
+
+            <Callout variant="info" title="Softmax only cares about differences (and that's a lifesaver)">
+              <Paragraph>
+                Softmax has a quiet superpower: if you add the same constant to every logit, the probabilities don't change. It's blind to absolute level — it only sees gaps.
+              </Paragraph>
+              <MathBlock
+                equation={String.raw`\text{Softmax}(x_i + c) = \frac{e^{x_i + c}}{\sum_j e^{x_j + c}} = \frac{e^c e^{x_i}}{e^c \sum_j e^{x_j}} = \text{Softmax}(x_i)`}
+                explanation="The same exp(c) factor appears in every term, so it cancels."
+              />
+              <Paragraph>
+                That means we can choose <Term>c</Term> for convenience. The most useful choice is <Term>c = -m</Term>, where <Term>m</Term> is the largest logit.
+              </Paragraph>
+              <MathBlock
+                equation={String.raw`\text{Softmax}(x_i) = \frac{e^{x_i - m}}{\sum_{j} e^{x_j - m}} \quad \text{where } m = \max_j x_j`}
+                explanation="Same probabilities, but now the largest exponent is e^0 = 1, and everything else is ≤ 1."
+              />
+            </Callout>
+
+        <Paragraph>
+          Drag the sliders below. Two things happen:
+        </Paragraph>
+        <ol>
+          <li><strong>No negatives:</strong> Even if you drag a logit to -5, the probability is just small, not negative.</li>
+          <li><strong>Winner takes all:</strong> Because of the exponential, the highest logit quickly dominates the others. We'd like the <em>max</em>, but we need it to be "soft" (differentiable) so we can train it. Hence: <strong>Softmax</strong>.</li>
+        </ol>
+        <SoftmaxWidget />
+        <Paragraph>
+          One extra knob you'll see in basically every LLM API is <Term>temperature</Term>. It's just a scale on the logits before softmax:
+        </Paragraph>
+        <MathBlock
+          equation={String.raw`\text{Softmax}_T(x_i) = \frac{e^{x_i / T}}{\sum_j e^{x_j / T}}`}
+          explanation="Low T sharpens the distribution. High T flattens it."
         />
         <Paragraph>
-          Try it yourself. See how a high logit dominates the probability mass:
-        </Paragraph>
-        <SoftmaxWidget />
-      </Section>
-
-      {/* Section 2.5 */}
-      <Section number="2.5" title="The Scorecard of Shame (Loss)">
-        <Paragraph>
-          The model makes a guess. It says P("a") = 0.05.
-        </Paragraph>
-        <Paragraph>
-          The actual next character was "a".
-        </Paragraph>
-        <Paragraph>
-          The model was wrong. We need to punish it. We need a number that says <em>how bad</em> this guess was. This number is the <Highlight>Loss</Highlight>.
-        </Paragraph>
-        <Paragraph>
-            We use <strong>Negative Log Likelihood (NLL)</strong>. It sounds scary, but it's just:
-        </Paragraph>
-        <MathBlock equation="Loss = -\log(P(\text{correct answer}))" explanation="If prob is 1.0, Loss is 0. If prob is 0.01, Loss is HUGE." />
-        <LossGraph />
-        <Paragraph>
-            We only care about the probability assigned to the <em>correct</em> target. We want that probability to be 1.0 (Loss = 0). Anything else gets a penalty.
+          In the widget, try sliding <Term>T</Term> down toward <Term>0.1</Term> and up toward <Term>5</Term>. You're not changing which logit is biggest — you're changing how aggressively softmax concentrates probability mass on the winner.
         </Paragraph>
       </Section>
 
-      {/* Section 2.6 */}
-      <Section number="2.6" title="Training (Gradient Descent)">
+      <Section number="2.8" title="Tensors: Batching Patterns">
         <Paragraph>
-            We have the components:
-        </Paragraph>
-        <ul>
-            <li>Input (x)</li>
-            <li>Weights (W)</li>
-            <li>Softmax</li>
-            <li>Loss (L)</li>
-        </ul>
-        <Paragraph>
-            Now, the magic loop. We calculate the Loss. Then we ask: <Highlight>"How should I change W to make the Loss slightly lower?"</Highlight>
+          Up to now, we've been drawing everything as "one sequence." But real data comes as a pile of sequences, and we want one notation that covers all of them.
         </Paragraph>
         <Paragraph>
-            Calculus gives us the <strong>Gradient</strong> (the direction of steepest ascent). We step in the <em>opposite</em> direction.
+          So we stack <Term>B</Term> sequences (a batch), each of length <Term>T</Term>, into a table of token IDs: <Term>[B, T]</Term>.
+          After embedding lookup, each ID becomes a <Term>D</Term>-dimensional vector, so the table grows a new axis: <Term>[B, T, D]</Term>.
+          That's a tensor here: same idea, more axes.
         </Paragraph>
-        <NeuralTrainingDemo />
         <Paragraph>
-            Watch the grid above. Initially, it's noise. As you step, the weights for the correct patterns (h→e, e→l, l→l, l→o) turn green. The model is learning the bigram structure of "hello".
+          Click any cell in the grid. The <em>same</em> token ID always points to the <em>same</em> row in <Term>E</Term> — even when it appears in different places in the batch.
+        </Paragraph>
+        <TensorShapeBuilder />
+        <Paragraph>
+          Mechanically, it's the exact same lookup you already understand — just applied to every cell at once: <Term>X_emb = E[X]</Term>.
+        </Paragraph>
+        <Paragraph>
+          From here on, we'll keep seeing these three letters: <Term>B</Term> (how many examples), <Term>T</Term> (context length), and <Term>D</Term> (features per token).
         </Paragraph>
       </Section>
 
-      <Section number="2.7" title="Exercises">
-          <Exercise 
-            number="2.1" 
-            title="The Perfect Loss"
-            solution={
-                <p>If the model assigns P=1.0 to the correct answer, Loss = -log(1.0) = 0. This is the theoretical minimum.</p>
+      <Section number="2.9" title="Synthesis: From Counts to Coordinates">
+        <Paragraph>
+          Let's trace the path we've taken:
+        </Paragraph>
+        <details className="collapsible">
+          <summary>Optional: the Chapter 2 arc (one list)</summary>
+          <ol>
+            <li>
+              <strong>Foundation (2.1):</strong> Grassmann showed abstract things can be coordinates. If colors can be vectors,
+              why not characters? This is the basic move embeddings use.
+            </li>
+            <li>
+              <strong>Problem (2.2):</strong> The <Term>(vocab_size)<sup>T</sup></Term> scaling limit. We can't store a distribution per
+              context — so what if similar tokens could share information?
+            </li>
+            <li>
+              <strong>Target (2.3):</strong> What ideal coordinates look like: characters with similar <Term>P(next | c)</Term> should be close.
+            </li>
+            <li>
+              <strong>Data structure (2.4):</strong> The embedding table: one row per token, each row a <Term>D</Term>-dimensional vector. Vectors
+              are just storage for attributes.
+            </li>
+            <li>
+              <strong>Mechanics (2.5):</strong> Embedding lookup is row selection: <Term>E[ix]</Term>.
+            </li>
+            <li>
+              <strong>Similarity (2.6):</strong> The dot product measures "fingerprint overlap" — it's how the model compares tokens.
+            </li>
+            <li>
+              <strong>Softmax (2.7):</strong> Scores become probabilities.
+            </li>
+            <li>
+              <strong>Batching (2.8):</strong> Shape bookkeeping: <Term>[B, T] → [B, T, D]</Term>.
+            </li>
+          </ol>
+        </details>
+
+        <Invariants title="Chapter 2 Invariants">
+          <InvariantItem>We replace giant context tables with shared, reusable number tables (matrices).</InvariantItem>
+          <InvariantItem>Token IDs are just labels; integer distance is meaningless.</InvariantItem>
+          <InvariantItem>Embeddings give tokens a learnable geometry — Grassmann's insight that abstract objects can be coordinates, now applied to language.</InvariantItem>
+
+          <InvariantItem>"Similar" means "similar predictive role" — the ground truth is computable from corpus statistics.</InvariantItem>
+          <InvariantItem>Embedding lookup is row selection: <Term>E[ix]</Term>.</InvariantItem>
+          <InvariantItem>Embedding adds a feature dimension: <Term>[B, T]</Term> → <Term>[B, T, D]</Term>.</InvariantItem>
+              <InvariantItem>Dot product is the main similarity metric — it's how we compare tokens.</InvariantItem>
+          <InvariantItem>Softmax converts raw dot products (logits) into a valid probability distribution.</InvariantItem>
+          <InvariantItem>Training repeatedly nudges those numbers based on prediction error.</InvariantItem>
+        </Invariants>
+            <Paragraph>
+              We now have the map. But right now, <Term>E</Term> is random — characters scattered arbitrarily in space. Next we make it
+              meaningful: <strong>how does random become meaningful?</strong>
+            </Paragraph>
+      </Section>
+
+      <Section number="2.10" title="The Nudge">
+        <Paragraph>
+          Right now, <Term>E</Term> is random. Here's what happens when we train:
+        </Paragraph>
+        <ol>
+          <li><strong>Initialize:</strong> Random coordinates. Characters are scattered arbitrarily in embedding space.</li>
+          <li><strong>Predict:</strong> The model uses these coordinates to predict the next token. It's wrong.</li>
+          <li><strong>Measure:</strong> We compute how wrong it was (the loss).</li>
+          <li><strong>Nudge:</strong> We adjust the coordinates slightly to make the prediction better next time.</li>
+          <li><strong>Repeat:</strong> Thousands of times. Millions of times.</li>
+        </ol>
+        <Paragraph>
+          Concretely: the model outputs a probability distribution for the next character. The training data then reveals what actually came next. The loss is the negative log‑probability the model assigned to the truth. If the model gave the truth a tiny probability, the loss is large.
+        </Paragraph>
+
+        <details className="collapsible">
+          <summary>Why cross-entropy? (From first principles)</summary>
+          <Paragraph>
+            We predicted a probability distribution over 27 characters. Reality revealed one specific character. Cross-entropy scores that moment by looking at the probability the model assigned to the truth.
+          </Paragraph>
+          <Paragraph>
+            Accuracy is too blunt here: a model predicting <Term>p['a']=0.34</Term> and one predicting <Term>p['a']=0.99</Term> both "got it right" if <Term>'a'</Term> was correct, but one is much more confident.
+          </Paragraph>
+          <Paragraph>
+            Shannon's move was to treat <Term>-log(p)</Term> as "how surprised you should be" when something happens. He wanted three properties:
+          </Paragraph>
+          <ol>
+            <li>Surprise = 0 when <Term>p=1</Term> (certain events aren't surprising)</li>
+            <li>Surprise → ∞ when <Term>p→0</Term> (impossible events are infinitely surprising)</li>
+            <li>Surprises should <strong>add</strong> for independent events</li>
+          </ol>
+          <MathBlock
+            equation={String.raw`\text{Surprise}(A \text{ and } B) = -\log(P(A) \cdot P(B)) = -\log P(A) + (-\log P(B))`}
+            explanation="Surprises add because log turns multiplication into addition."
+          />
+          <Paragraph>
+            Using log base 2 means the units are <strong>bits</strong>: <Term>p=0.5</Term> costs 1 bit, <Term>p=0.25</Term> costs 2 bits, and so on.
+          </Paragraph>
+        </details>
+
+        <Paragraph>
+          <strong>Cross-entropy is average surprise.</strong> Walk left‑to‑right. At each step, look at the probability the model gave to what
+          actually happened next, take <Term>-log₂</Term>, and average. Lower means fewer shocks.
+        </Paragraph>
+
+        <Callout variant="info" title="Concrete numbers">
+          <Paragraph>
+            Using <Term>-log₂(p)</Term> (bits):
+          </Paragraph>
+          <ul>
+            <li><strong>p = 0.03</strong> → loss ≈ <strong>5.06 bits</strong> — very wrong (gave truth 3%).</li>
+            <li><strong>p = 0.50</strong> → loss = <strong>1.00 bit</strong> — uncertain (a coin flip).</li>
+            <li><strong>p = 0.90</strong> → loss ≈ <strong>0.15 bits</strong> — pretty good (90% confident).</li>
+            <li><strong>p = 0.99</strong> → loss ≈ <strong>0.014 bits</strong> — excellent (nearly certain).</li>
+          </ul>
+        </Callout>
+
+        <Paragraph>
+          <strong>The scoreboard:</strong> Cross-entropy is the <em>only</em> thing we minimize. Every other concept — gradient, learning, structure — derives from reducing this number.
+        </Paragraph>
+
+        <CrossEntropyViz />
+
+        <Paragraph>
+          Now we need the thing that does the nudging. We'll use the smallest forward pass that can still learn:
+        </Paragraph>
+        <ol>
+          <li>
+            <strong>Lookup:</strong> given context character <Term>c</Term>, fetch its embedding <Term>e_c = E[c]</Term>
+          </li>
+          <li>
+            <strong>Score:</strong> for each candidate next character <Term>j</Term>, compute <Term>score_j = e_c · E[j]</Term>
+          </li>
+          <li>
+            <strong>Softmax:</strong> convert scores to probabilities <Term>p = softmax(scores)</Term>
+          </li>
+          <li>
+            <strong>Loss:</strong> <Term>L = -log(p[actual])</Term> where <Term>actual</Term> is what really came next
+          </li>
+        </ol>
+        <Paragraph>
+          In this "tied embeddings" setup, <Term>E</Term> plays both roles: it's the lookup table <em>and</em> the set of candidate targets.
+        </Paragraph>
+
+        <Paragraph>
+          Here's the punchline gradient for one training example (the calculus proof is below if you want it):
+        </Paragraph>
+        <MathBlock
+          equation={String.raw`\frac{\partial L}{\partial E[c]} = \underbrace{\sum_j p_j \cdot E[j]}_{\text{predicted centroid}} \;-\; \underbrace{E[\text{actual}]}_{\text{actual embedding}}`}
+          explanation="Gradient = (where your probabilities say the answer "is") minus (where the answer actually was)."
+        />
+
+        <WorkedExample title="Reading the gradient (in plain terms)">
+          <WorkedStep n="1">
+            <Paragraph>
+              <strong>Predicted centroid.</strong> First take a probability‑weighted average of candidate embeddings:
+            </Paragraph>
+            <MathBlock equation={String.raw`\hat{e} = \sum_j p_j \cdot E[j]`} />
+            <Paragraph>
+              If you're confident, the average collapses onto one row. If you're uncertain, it stays a blend.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="2">
+            <Paragraph>
+              <strong>Direction.</strong> The gradient points from <Term>E[actual]</Term> toward that centroid (uphill). It's the direction that
+              would increase loss the fastest.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="3" final>
+            <Paragraph>
+              <strong>Update.</strong> Gradient descent goes the other way:
+            </Paragraph>
+            <MathBlock
+              equation={String.raw`E[c] \leftarrow E[c] - \eta \cdot \frac{\partial L}{\partial E[c]}`}
+              explanation="Move opposite the gradient — nudging the context embedding toward the actual answer's embedding."
+            />
+          </WorkedStep>
+        </WorkedExample>
+
+        <WorkedExample title="Why neighborhoods form">
+          <WorkedStep n="1">
+            <Paragraph>
+              Take one tiny scene: the corpus contains <Term>"qu"</Term>. When the context is <Term>'q'</Term>, the correct next character is
+              usually <Term>'u'</Term>. If the model gives <Term>'u'</Term> low probability, the update nudges <Term>E['q']</Term> toward{' '}
+              <Term>E['u']</Term>.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="2">
+            <Paragraph>
+              Now zoom out. If two context characters tend to be followed by similar next characters, they keep getting similar gradient
+              directions. Similar nudges, repeated thousands of times.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="3" final>
+            <Paragraph>
+              That's the whole mechanism: <strong>similar statistics → similar gradients → nearby points</strong>.
+            </Paragraph>
+          </WorkedStep>
+        </WorkedExample>
+
+        <details className="collapsible">
+          <summary>Tied embeddings (optional)</summary>
+          <Paragraph>
+            We could use two tables: <Term>E_context</Term> (to look up context characters) and <Term>E_target</Term> (to score candidates). Tying
+            them sets <Term>E_context = E_target = E</Term>, which cuts parameters and tends to work well in practice.
+          </Paragraph>
+          <Paragraph>
+            It also means the same row gets gradients from both roles: as a context ("move toward what follows me") and as a target ("move
+            toward what precedes me").
+          </Paragraph>
+        </details>
+
+        <details className="collapsible">
+          <summary>Derive it line by line (optional)</summary>
+          <Paragraph>
+            Softmax + cross-entropy has a famous gradient:
+          </Paragraph>
+          <MathBlock
+            equation={String.raw`\frac{\partial L}{\partial \text{score}_j} = p_j - \mathbf{1}_{j=\text{actual}}`}
+            explanation="(what you predicted) minus (what was true)."
+          />
+          <Paragraph>
+            And the score is a dot product:
+          </Paragraph>
+          <MathBlock
+            equation={String.raw`\text{score}_j = E[c]\cdot E[j] \quad\Rightarrow\quad \frac{\partial \text{score}_j}{\partial E[c]} = E[j]`}
+            explanation="Derivative of a dot product w.r.t. one vector is the other vector."
+          />
+          <Paragraph>
+            Chain rule gives:
+          </Paragraph>
+          <MathBlock
+            equation={String.raw`\frac{\partial L}{\partial E[c]} = \sum_j \left(p_j - \mathbf{1}_{j=\text{actual}}\right) \cdot E[j] = \left(\sum_j p_j\cdot E[j]\right) - E[\text{actual}]`}
+            explanation="The "predicted centroid minus actual" form is just algebra."
+          />
+        </details>
+
+        <details className="collapsible">
+          <summary>Matrix view (optional)</summary>
+          <Paragraph>
+            In this minimal model, the full score table is a matrix of dot products:
+          </Paragraph>
+          <MathBlock equation={String.raw`S[c, j] = E[c]\cdot E[j]`} />
+          <Paragraph>
+            In one line:
+          </Paragraph>
+          <MathBlock equation={String.raw`S = EE^T`} />
+          <Paragraph>
+            Softmax turns each row of <Term>S</Term> into a next‑character distribution. So the model is really learning a whole table of
+            predictions:
+          </Paragraph>
+          <MathBlock equation={String.raw`P_{\text{model}}(\text{next}=j \mid c) = \text{softmax}(S[c, :])_j`} />
+          <Paragraph>
+            If you wrote down the "what follows what" table from counts, it would be <Term>27×27</Term>. This model can't store an arbitrary
+            <Term>27×27</Term> table — it only gets <Term>27×D</Term> numbers — so it's forced into a low‑rank shape. That's the compression.
+          </Paragraph>
+          <Paragraph>
+            This "learn vectors so a big co‑occurrence table becomes predictable" idea shows up all over classic NLP. Word2Vec is different
+            math, but it's the same family move: squeeze a huge table into a smaller set of vectors and let geometry carry the structure.<Cite n={1} />
+          </Paragraph>
+        </details>
+
+        <CodeChallenge phase="2.10.1" title="Compute the gradient by hand">
+          <CodeChallenge.Setup>
+            <CodeBlock filename="gradient_challenge.py">{`import numpy as np
+
+# Simplified 2D example so you can verify by hand
+context_embedding = np.array([0.5, 0.8])        # E['a']
+actual_embedding = np.array([0.2, 0.3])          # E['t']
+
+# All character embeddings (shape [6, 2])
+all_embeddings = np.array([
+    [0.5, 0.8],  # 'a'
+    [0.6, 0.7],  # 'e'
+    [0.2, 0.3],  # 't'
+    [0.3, 0.4],  # 'n'
+    [0.4, 0.3],  # 's'
+    [0.9, 0.1],  # 'q'
+])
+
+# Softmax probabilities (what the model predicted)
+# These come from: softmax([dot(context_embedding, E[i]) for i in all chars])
+probabilities = np.array([0.25, 0.28, 0.15, 0.18, 0.10, 0.04])`}</CodeBlock>
+          </CodeChallenge.Setup>
+          <CodeChallenge.Prompt>
+            <Paragraph>
+              Implement the gradient formula we just derived. Remember: the gradient is <Term>predicted_centroid − actual_embedding</Term>.
+            </Paragraph>
+            <Paragraph>
+              The predicted centroid is the probability-weighted average of all embeddings:
+            </Paragraph>
+            <MathBlock equation={String.raw`\hat{e} = \sum_j p_j \cdot E[j]`} />
+          </CodeChallenge.Prompt>
+          <CodeChallenge.Solution>
+            <CodeChallenge.Answer>
+              <CodeBlock>{`def compute_gradient(context_embedding, actual_embedding, all_embeddings, probabilities):
+    """
+    Compute the gradient of cross-entropy loss with respect to the context embedding.
+
+    Args:
+        context_embedding: Current embedding for the context character (shape: [D])
+        actual_embedding: Embedding of the actual next character (shape: [D])
+        all_embeddings: All character embeddings (shape: [vocab_size, D])
+        probabilities: Softmax output (shape: [vocab_size])
+
+    Returns:
+        gradient: The gradient ∂L/∂E[context] (shape: [D])
+    """
+    # Step 1: Compute the predicted centroid (weighted average)
+    predicted_centroid = np.sum(probabilities[:, None] * all_embeddings, axis=0)
+    # Alternative: predicted_centroid = all_embeddings.T @ probabilities
+
+    # Step 2: The gradient is predicted_centroid minus actual_embedding
+    gradient = predicted_centroid - actual_embedding
+
+    return gradient
+
+# Test it
+gradient = compute_gradient(context_embedding, actual_embedding, all_embeddings, probabilities)
+print(f"Gradient: {gradient}")
+print(f"Gradient shape: {gradient.shape}")
+print(f"Gradient magnitude: {np.linalg.norm(gradient):.3f}")
+
+# Verify the computation manually for the first dimension:
+# predicted_centroid[0] = 0.25*0.5 + 0.28*0.6 + 0.15*0.2 + 0.18*0.3 + 0.10*0.4 + 0.04*0.9
+#                       = 0.125 + 0.168 + 0.03 + 0.054 + 0.04 + 0.036
+#                       = 0.453
+# gradient[0] = 0.453 - 0.2 = 0.253 ✓`}</CodeBlock>
+            </CodeChallenge.Answer>
+            <Paragraph>
+              <strong>In the visualization:</strong> The yellow arrow is this gradient. The magenta dashed arrow is the negative of it (the update direction: <Term>−η·gradient</Term>).
+            </Paragraph>
+                <Paragraph>
+                  The gradient points from the actual answer toward the predicted centroid (uphill). When you update with{' '}
+                  <Term>E[context] ← E[context] − η·gradient</Term>, you move opposite that arrow — downhill, toward the actual answer.
+                </Paragraph>
+                    <Paragraph>
+                      This matters because the gradient has a simple meaning: "predicted centroid minus actual embedding." Characters that predict
+                      similar next-characters keep getting nudged in similar directions. After thousands of updates, that's where clustering comes
+                      from.
+                </Paragraph>
+          </CodeChallenge.Solution>
+            </CodeChallenge>
+
+            <details className="collapsible">
+              <summary>Optional: watch one gradient step in 2D</summary>
+              <Paragraph>
+                Watch how the gradient arrow points from the actual answer toward the predicted centroid (uphill), and how a single update moves the context embedding in the opposite direction.
+              </Paragraph>
+              <EmbeddingGradientViz />
+            </details>
+
+                <Paragraph>
+                  That "nudge" step is the mechanism. How do we know which direction makes things better?
+                </Paragraph>
+            <Paragraph>
+              Take a second to see what we're actually asking here.
+            </Paragraph>
+        <Paragraph>
+          We have 1,728 numbers scattered across a 64-dimensional space. We need to adjust them — but which way? Up? Down? There's no one looking at the problem saying "oh, this coordinate should be 0.3 instead of 0.5." The model has to feel its way through the dark.
+        </Paragraph>
+        <Paragraph>
+          Imagine you're blindfolded in a hilly landscape, trying to find the lowest point. You can't see, but you <em>can</em> feel the ground under your feet. If the ground slopes down to your left, you step left. That's the basic instinct. Training is just doing it on lots of numbers, over and over.
+        </Paragraph>
+        <Paragraph>
+          Now translate that to numbers. Say the model has just one adjustable number <Term>w</Term>, and <Term>L(w)</Term> tells us how wrong we are. To feel the slope, we wiggle:
+        </Paragraph>
+        <MathBlock
+          equation={String.raw`\text{slope} = \frac{L(w + \epsilon) - L(w)}{\epsilon}`}
+          explanation="Bump w by a tiny ε, see how much the loss changes. That ratio is the slope."
+        />
+        <Callout variant="insight" title="Backprop is the chain rule (industrialized)">
+          <Paragraph>
+            The finite-difference slope is the intuition: poke the loss and see which way it changes.
+          </Paragraph>
+          <Paragraph>
+            But real models aren't one number. They're long chains of computation. The loss depends on <Term>w</Term> through a bunch of intermediate values, and the chain rule tells you how slopes flow through a chain:
+          </Paragraph>
+          <MathBlock
+            equation={String.raw`\frac{dL}{dw} = \frac{dL}{dy} \cdot \frac{dy}{du} \cdot \frac{du}{dw}`}
+            explanation="Local slopes multiply as you move backward through the computation."
+          />
+          <Paragraph>
+            Backpropagation is just this idea repeated at scale: do one forward pass, keep the intermediates, then do one backward pass that walks the graph in reverse and accumulates <em>all</em> the slopes.
+          </Paragraph>
+          <Paragraph>
+            The mental model stays the same: find the slope, step downhill.
+          </Paragraph>
+        </Callout>
+        <Paragraph>
+          Positive slope? Increasing <Term>w</Term> makes things worse — step the other way. Negative slope? <Term>w</Term> is heading somewhere good — keep going. The update rule writes itself:
+        </Paragraph>
+        <MathBlock
+          equation={String.raw`w \leftarrow w - \eta \cdot \text{slope}`}
+          explanation="Step opposite to the slope. η controls how big a step."
+        />
+        <Paragraph>
+          That minus sign is doing all the work: it flips "uphill" into "go downhill."
+        </Paragraph>
+        <Paragraph>
+          Real models have millions of numbers. You compute a slope for every single one — that collection of slopes is called the <em>gradient</em>. Following it downhill is <em>gradient descent</em>.
+        </Paragraph>
+        <Paragraph>
+          Here's the strange part: nobody tells the model where to go. It just... feels its way downhill. Each step, it asks: "which direction makes me slightly less wrong?" And it takes that step. A billion times. And somehow, out of that blind fumbling in a space with 6,912 dimensions — or 175 billion dimensions in GPT-3 — structure emerges. The landscape we're descending has no visualization. The slopes are real. The progress is measurable. But there's no picture that would help you.
+        </Paragraph>
+        <GradientDescentViz />
+        <Paragraph>
+          <strong>The result:</strong> The coordinates start random, but training keeps nudging them until the geometry starts to mirror the statistics. Characters with similar next‑character fingerprints drift toward similar places.
+        </Paragraph>
+
+        <Paragraph>
+          We've computed one gradient by hand. We've seen the visualization. Now: <strong>type the loop and watch it work.</strong>
+        </Paragraph>
+
+        <CodeChallenge phase="2.10.2" title="Train a 1-layer bigram model">
+          <CodeChallenge.Setup>
+            <CodeBlock filename="train_bigram.py">{`import numpy as np
+
+# Tiny corpus: just enough to see loss drop
+corpus = "the cat sat on the mat" * 20
+chars = sorted(set(corpus))
+char_to_idx = {ch: i for i, ch in enumerate(chars)}
+idx_to_char = {i: ch for i, ch in enumerate(chars)}
+
+# Build training pairs: (context_char, next_char)
+pairs = [(corpus[i], corpus[i+1]) for i in range(len(corpus)-1)]
+
+# Initialize random embeddings (vocab_size × d_model)
+vocab_size = len(chars)
+d_model = 8
+np.random.seed(42)
+embeddings = np.random.randn(vocab_size, d_model) * 0.1
+
+learning_rate = 0.1
+num_epochs = 500
+
+print(f"Corpus: '{corpus[:30]}...'")
+print(f"Vocab: {chars}")
+print(f"Training on {len(pairs)} bigram pairs")
+print(f"Embeddings shape: {embeddings.shape}")
+print(f"Learning rate: {learning_rate}\\n")`}</CodeBlock>
+          </CodeChallenge.Setup>
+          <CodeChallenge.Prompt>
+            <Paragraph>
+              Implement the training loop. For each epoch:
+            </Paragraph>
+            <ol>
+              <li>For each (context, target) pair in the corpus</li>
+              <li>Compute scores: dot product of context embedding with all embeddings</li>
+              <li>Apply softmax to get probabilities</li>
+              <li>Compute cross-entropy loss: <Term>−log(p[actual])</Term></li>
+              <li>Compute gradient: <Term>predicted_centroid − actual_embedding</Term></li>
+              <li>Update context embedding: <Term>E[context] ← E[context] − η·gradient</Term></li>
+            </ol>
+            <Paragraph>
+              Print average loss every 100 epochs. Then add one tiny probe at the end: print two cosine similarities (e.g. <Term>cos(t, h)</Term> and <Term>cos(t, a)</Term>) to see whether "similar contexts drift together."
+            </Paragraph>
+          </CodeChallenge.Prompt>
+          <CodeChallenge.Checkpoint>
+            <Paragraph>
+              Your exact numbers will differ, but the shape should feel like this:
+            </Paragraph>
+            <CodeBlock lang="text">{`Epoch 100: loss = 2.1
+Epoch 200: loss = 1.9
+Epoch 300: loss = 1.7
+Epoch 400: loss = 1.6
+Epoch 500: loss = 1.5
+
+cos(t, h) = 0.7
+cos(t, a) = 0.1`}</CodeBlock>
+            <ul>
+              <li><strong>Loss trends down.</strong> Not perfectly monotone, but downhill overall.</li>
+              <li>
+                <strong>Similar contexts look more aligned.</strong> On this tiny corpus, <Term>t</Term> and <Term>h</Term> both often precede <Term>e</Term> (in "the"), so <Term>cos(t, h)</Term> is often larger than <Term>cos(t, a)</Term>.
+              </li>
+            </ul>
+            <Paragraph>
+              If loss doesn't move at all, the usual culprits are: unstable softmax (no max-subtraction), taking <Term>log(0)</Term> (no epsilon), or updating the wrong row.
+            </Paragraph>
+          </CodeChallenge.Checkpoint>
+          <CodeChallenge.Solution>
+            <CodeChallenge.Answer>
+              <CodeBlock>{`def softmax(scores):
+    """Numerically stable softmax."""
+    exp_scores = np.exp(scores - np.max(scores))
+    return exp_scores / exp_scores.sum()
+
+def cross_entropy(probs, target_idx):
+    """Cross-entropy loss: -log(p[target])."""
+    return -np.log(probs[target_idx] + 1e-10)  # Add epsilon for numerical stability
+
+# Training loop
+for epoch in range(num_epochs):
+    total_loss = 0.0
+
+    for context_char, target_char in pairs:
+        # Get indices
+        ctx_idx = char_to_idx[context_char]
+        tgt_idx = char_to_idx[target_char]
+
+        # Forward pass
+        context_emb = embeddings[ctx_idx]
+        scores = embeddings @ context_emb  # Dot product with all embeddings
+        probs = softmax(scores)
+        loss = cross_entropy(probs, tgt_idx)
+        total_loss += loss
+
+        # Backward pass: compute gradient
+        predicted_centroid = embeddings.T @ probs  # Weighted average of all embeddings
+        actual_emb = embeddings[tgt_idx]
+        gradient = predicted_centroid - actual_emb
+
+        # Update: move context embedding downhill
+        embeddings[ctx_idx] -= learning_rate * gradient
+
+    # Print progress
+    if (epoch + 1) % 100 == 0:
+        avg_loss = total_loss / len(pairs)
+        print(f"Epoch {epoch+1:3d}: loss = {avg_loss:.4f}")
+
+print("\\nFinal embeddings (first 3 chars):")
+for i in range(min(3, vocab_size)):
+    print(f"  {idx_to_char[i]}: {embeddings[i][:4]}...")  # Show first 4 dims
+
+# Check clustering: chars with similar P(next|c) should be close
+print("\\nEmbedding distances (cosine similarity):")
+def cosine_sim(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+# 't' and 'h' both often precede 'e' - should be similar
+t_idx = char_to_idx['t']
+h_idx = char_to_idx['h']
+a_idx = char_to_idx['a']
+print(f"  cos(t, h) = {cosine_sim(embeddings[t_idx], embeddings[h_idx]):.3f}  (both often precede 'e')")
+print(f"  cos(t, a) = {cosine_sim(embeddings[t_idx], embeddings[a_idx]):.3f}  (different contexts)")`}</CodeBlock>
+            </CodeChallenge.Answer>
+            <Paragraph>
+              The satisfying part isn't the number going down. It's what the number forces the vectors to do: contexts that "want" similar next characters get pulled toward similar places.
+            </Paragraph>
+            <Paragraph>
+              If you want to poke it:
+            </Paragraph>
+            <ul>
+              <li>Change the corpus to "abcabc" repeated. Do 'a', 'b', 'c' cluster?</li>
+              <li>Increase <Term>d_model</Term> to 16. Does loss drop faster?</li>
+              <li>Add a print statement inside the loop to see individual gradients. Often they point toward similar targets for similar contexts.</li>
+            </ul>
+          </CodeChallenge.Solution>
+        </CodeChallenge>
+
+        <Paragraph>
+          Loss is a scoreboard. The promise we made was about the map.
+        </Paragraph>
+        <details
+          className="collapsible"
+          onToggle={(e) => {
+            const el = e.currentTarget as HTMLDetailsElement
+            if (el.open) {
+              setShowTrainingReplay(true)
+              setTrainingReplayCorpus(corpus)
             }
-          >
-              <Paragraph>What is the lowest possible value for the Loss? What probability does the model need to assign to the correct target to achieve it?</Paragraph>
-          </Exercise>
-          <Exercise 
-            number="2.2" 
-            title="Random Guessing"
-            solution={
-                <>
-                <p>If vocab size is 27, uniform probability is 1/27.</p>
-                <p>Loss = -log(1/27) = -log(0.037) ≈ 3.29</p>
-                <p>This is a great sanity check. If your loss starts around 3.3, your initialization is correct.</p>
-                </>
-            }
-          >
-              <Paragraph>If your model is totally untrained and guessing randomly (uniform distribution) with a vocabulary of 27 characters, what should the Loss be approx?</Paragraph>
-          </Exercise>
+          }}
+        >
+          <summary>Optional: replay the map forming</summary>
+          <Paragraph>
+            Here's a replay of what those nudges do to the 27 character vectors (projected down to 2D so a human eyeball can
+            look at it). This one is an actual training run on the shared corpus from earlier in the chapter.
+          </Paragraph>
+          <Paragraph>
+            To keep it browser‑friendly, the replay uses a fixed random seed and (for long corpora) a capped number of training pairs. The goal is to make the update rule visible, not to match anyone's exact run.
+          </Paragraph>
+          <Paragraph>
+            It also shows <Term>perplexity</Term>, which is the same score with the log undone:
+          </Paragraph>
+          <MathBlock
+            equation={String.raw`\text{perplexity} = 2^{H}`}
+            explanation="Here H is the cross-entropy in bits per character."
+          />
+          <Paragraph>
+            So <Term>H = 1.0</Term> bit/char means perplexity 2. Uniform guessing over 27 characters is <Term>H = log₂(27) ≈ 4.75</Term>, so
+            perplexity 27.
+          </Paragraph>
+          {showTrainingReplay && <TrainingDynamicsViz corpus={trainingReplayCorpus} />}
+          <Paragraph>
+            Slide the epochs. Early on it's a random cloud. Later, you start getting neighborhoods: vowels bunch up, space peels
+            off, and you may see <Term>'q'</Term> drift toward <Term>'u'</Term> if your corpus has lots of <Term>'qu'</Term>.
+          </Paragraph>
+        </details>
+
+        <CodeChallenge phase="2.10.3" title="Bonus: Verify Your Gradient Numerically">
+          <CodeChallenge.Prompt>
+            <Paragraph>
+              You derived the gradient. You typed it. Now <strong>prove it's correct</strong> by comparing to numerical approximation using finite differences.
+            </Paragraph>
+            <Paragraph>
+              For a single training step, compute the gradient two ways:
+            </Paragraph>
+            <ol>
+              <li><strong>Analytical</strong>: Using your formula <Term>predicted_centroid − actual_embedding</Term></li>
+              <li><strong>Numerical</strong>: Perturb each dimension by ±ε, measure how loss changes</li>
+            </ol>
+            <Paragraph>
+              If they match (within ~1e-5), your gradient is correct. If not, you have a bug.
+            </Paragraph>
+          </CodeChallenge.Prompt>
+          <CodeChallenge.Solution>
+            <CodeChallenge.Answer>
+              <CodeBlock>{`# Pick a single training example
+context_char, target_char = pairs[0]
+ctx_idx = char_to_idx[context_char]
+tgt_idx = char_to_idx[target_char]
+
+# 1. Compute analytical gradient (your formula)
+context_emb = embeddings[ctx_idx]
+scores = embeddings @ context_emb
+probs = softmax(scores)
+predicted_centroid = embeddings.T @ probs
+actual_emb = embeddings[tgt_idx]
+analytical_grad = predicted_centroid - actual_emb
+
+# 2. Compute numerical gradient (finite differences)
+epsilon = 1e-5
+numerical_grad = np.zeros_like(analytical_grad)
+
+for i in range(len(numerical_grad)):
+    # Perturb +epsilon
+    embeddings[ctx_idx, i] += epsilon
+    scores_plus = embeddings @ embeddings[ctx_idx]
+    probs_plus = softmax(scores_plus)
+    loss_plus = cross_entropy(probs_plus, tgt_idx)
+
+    # Perturb -epsilon
+    embeddings[ctx_idx, i] -= 2 * epsilon
+    scores_minus = embeddings @ embeddings[ctx_idx]
+    probs_minus = softmax(scores_minus)
+    loss_minus = cross_entropy(probs_minus, tgt_idx)
+
+    # Restore original value
+    embeddings[ctx_idx, i] += epsilon
+
+    # Finite difference: (f(x+ε) - f(x-ε)) / 2ε
+    numerical_grad[i] = (loss_plus - loss_minus) / (2 * epsilon)
+
+# 3. Compare
+print("Analytical gradient:", analytical_grad)
+print("Numerical gradient: ", numerical_grad)
+print("Max difference:     ", np.abs(analytical_grad - numerical_grad).max())
+print("\\nGradient check:", "PASS ✓" if np.abs(analytical_grad - numerical_grad).max() < 1e-5 else "FAIL ✗")`}</CodeBlock>
+            </CodeChallenge.Answer>
+            <Paragraph>
+              <strong>Expected output</strong>: Max difference should be around 1e-7 to 1e-9. If it's larger than 1e-5, check your gradient formula or finite difference implementation.
+            </Paragraph>
+            <Paragraph>
+              <strong>Why this matters</strong>: Karpathy calls this "the most important debugging tool in deep learning." You can derive gradients on paper, but numerical verification catches algebra errors, implementation bugs, and indexing mistakes. If the check fails, <em>don't trust your gradient</em> — even if the loss appears to decrease.
+            </Paragraph>
+          </CodeChallenge.Solution>
+        </CodeChallenge>
+
+        <Paragraph>
+          Training is the loop: initialize random coordinates, compute gradients, nudge embeddings downhill, repeat. Bigger models add more machinery, but the core loop — predict, score, update — stays the same.
+        </Paragraph>
+
+        <Paragraph>
+          And this brings us back to the schoolteacher from Stettin.
+        </Paragraph>
+
+        <Callout variant="info" title="How Grassmann's Work Was Received">
+          <Paragraph>
+            <Highlight>1844</Highlight>: Grassmann publishes the <em>Ausdehnungslehre</em> while teaching high school. Möbius — one
+            of the few people who might have understood it — <em>declines to review it</em>. The book <em>doesn't spread</em>.
+            <Cite n={1} />
+          </Paragraph>
+
+          <Paragraph>
+            <Highlight>1846</Highlight>: He submits a related essay and wins a prize. The evaluation calls it "commendably good
+            material expressed in a <em>deficient form</em>."<Cite n={1} />
+          </Paragraph>
+
+          <Paragraph>
+            <Highlight>1862</Highlight>: Eighteen years later, he tries again. It still doesn't catch on. In the foreword he
+            says he's <em>"completely confident"</em> the work will eventually matter, even if it must first wait{' '}
+            <em>"in the dust of oblivion."</em>
+            <Cite n={4} />
+          </Paragraph>
+
+          <Paragraph>
+            <Highlight>1864</Highlight>: The publisher's records show that roughly <strong>600 copies</strong> were sold as{' '}
+            <em>waste paper</em>.<Cite n={5} />
+          </Paragraph>
+
+          <Paragraph>
+            Over the next century, the ideas become standard tools: vector spaces and related algebra end up as normal math.
+            <Cite n={1} />
+          </Paragraph>
+        </Callout>
+
+        <Callout variant="insight" title="Grassmann's Vision, Finally Built">
+          <Paragraph>
+            Grassmann's bet was simple: if you can measure relationships between abstract things, you can treat them as
+            coordinates.
+          </Paragraph>
+          <Paragraph>
+            In this chapter we made the measurement concrete (next‑character statistics), and we built a training loop that
+            nudges coordinates until the geometry starts matching the data.
+          </Paragraph>
+        </Callout>
+
+        <Callout variant="insight" title="What comes next">
+          <Paragraph>
+            We've built the map and we've watched it move. Next we widen the context window and let the model combine multiple token vectors before it predicts the next one.
+          </Paragraph>
+        </Callout>
+
+        <Paragraph>
+          <strong>Grassmann proved that relationships can be coordinates.</strong> We've shown how to find those coordinates from data.
+        </Paragraph>
+        <Paragraph>
+          The embedding table starts as noise. Training is what gives it structure.
+        </Paragraph>
+        <Paragraph>
+          If you want one sentence for the chapter: we replace "store a table for every context" with "store one reusable vector
+          per token," then learn those vectors by pushing down a single score.
+        </Paragraph>
       </Section>
 
-      <ChapterNav 
-        prev={{ href: '/', label: 'Chapter 1: The Meat Grinder' }}
-        next={{ href: '/chapter-03', label: 'Chapter 3: The MLP' }} 
-      />
-    </Container>
+      <Section number="2.11" title="Exercises">
+        <Exercise
+          number="2.1"
+          title="The 'q' Test"
+          hint={<Paragraph>Think in contexts: what usually comes right after <Term>q</Term>?</Paragraph>}
+          solution={<Paragraph>A trained embedding for <Term>q</Term> becomes unusual because its context statistics are unusual.</Paragraph>}
+        >
+          <Paragraph>
+            In ordinary English, <Term>q</Term> is rare and strongly constrained (it doesn't behave like most consonants).
+            Why would that pressure its embedding to look different from, say, <Term>t</Term>?
+          </Paragraph>
+        </Exercise>
+
+        <Exercise
+          number="2.2"
+          title="Manual Dot Product"
+          solution={
+            <>
+              <Paragraph>a = [0.9, 0.1]</Paragraph>
+              <Paragraph>b = [0.1, 0.8]</Paragraph>
+              <Paragraph>
+                Dot = (0.9×0.1) + (0.1×0.8) = 0.09 + 0.08 = <strong>0.17</strong>
+              </Paragraph>
+              <Paragraph>Low score → not very aligned.</Paragraph>
+            </>
+          }
+        >
+          <Paragraph>
+            Compute the dot product of <code>[0.9, 0.1]</code> and <code>[0.1, 0.8]</code>. Is it high or low?
+          </Paragraph>
+        </Exercise>
+
+        <Exercise
+          number="2.3"
+          title="Tensor Shapes"
+          hint={<Paragraph>After embedding lookup, you add a feature dimension.</Paragraph>}
+          solution={
+            <>
+              <Paragraph>
+                If <Term>batch_size = 32</Term>, <Term>context_length = 8</Term>, <Term>embed_dim = 128</Term>:
+              </Paragraph>
+              <Paragraph>
+                IDs have shape <Term>[32, 8]</Term>. After embedding lookup, you get <Term>[32, 8, 128]</Term>.
+              </Paragraph>
+            </>
+          }
+        >
+          <Paragraph>
+            If your token ID tensor has shape <Term>[32, 8]</Term> (batch size 32, context length 8), and your embedding
+            dimension is <Term>128</Term>, what is the shape after embedding?
+          </Paragraph>
+        </Exercise>
+
+        <Exercise
+          number="2.4"
+          title="The 1/V Baseline"
+          hint={
+            <Paragraph>
+              If <Term>p</Term> is uniform over <Term>V</Term> outcomes, then every entry is <Term>1/V</Term>. Write out{' '}
+              <Term>p · p</Term> as a sum.
+            </Paragraph>
+          }
+          solution={
+            <>
+              <Paragraph>
+                If <Term>p</Term> is uniform, every entry is:
+              </Paragraph>
+              <MathBlock equation={String.raw`p_i = \frac{1}{V}`} />
+              <MathBlock
+                equation={String.raw`\begin{aligned}
+p \cdot p &= \sum_i p_i^2 \\
+&= \sum_i (1/V)^2 \\
+&= V \cdot (1/V^2) \\
+&= 1/V
+\end{aligned}`}
+              />
+              <Paragraph>
+                For <Term>V = 27</Term>, the baseline is <Term>1/27 ≈ 0.037</Term>.
+              </Paragraph>
+            </>
+          }
+        >
+          <Paragraph>
+            In the dot product demo, why does "uniform-ish" behavior land around <Term>1/V</Term>? Derive the baseline for
+            a uniform distribution, then compute it for <Term>V = 27</Term>.
+          </Paragraph>
+        </Exercise>
+
+        <Exercise
+          number="2.5"
+          title="Corpus Surgery (Use the Lab)"
+          hint={
+            <Paragraph>
+              Use the corpus preset pills in the cluster demo. Pick <Term>A</Term> and <Term>B</Term> in the plot, then
+              read the "Top next" chips and the contribution bars.
+            </Paragraph>
+          }
+          solution={
+            <>
+              <Paragraph>
+                You should see two effects:
+              </Paragraph>
+              <ul>
+                <li>
+                  If a character barely appears in the corpus, smoothing makes its <Term>P(next | c)</Term> close to
+                  uniform — so its dot products sit near the <Term>1/V</Term> baseline.
+                </li>
+                <li>
+                  If you make a pattern common (like <Term>qu</Term> in the "qu-heavy" preset), <Term>q</Term> gets a sharp
+                  next-character spike, and both the cluster plot and the dot product reflect that. The contribution list
+                  will usually show <Term>u</Term> doing a lot of the work for <Term>dot(q, u)</Term>.
+                </li>
+              </ul>
+              <Paragraph>
+                The point isn't that one number is "correct" forever. It's that the geometry is trying to summarize the
+                statistics your corpus actually contains.
+              </Paragraph>
+            </>
+          }
+        >
+          <Paragraph>
+            Switch between at least two corpus presets (for example "tiny toy" and "qu-heavy"). For each corpus:
+          </Paragraph>
+          <ol>
+            <li>Pick <Term>A = q</Term> and <Term>B = u</Term>. What happens to the dot product?</li>
+            <li>Pick <Term>A = a</Term> and <Term>B = e</Term>. Does it stay high, drop, or depend?</li>
+            <li>Explain your observations using the "Top next" chips and the contribution list.</li>
+          </ol>
+        </Exercise>
+
+        <Exercise
+          number="2.6"
+          title="Predict, Then Measure"
+          hint={
+            <>
+              <Paragraph>
+                The cluster plot and the similarity panel in <SectionLink to="2.3">Section 2.3</SectionLink> are built from <Term>P(next | c)</Term>.
+              </Paragraph>
+              <Paragraph>
+                Try pasting a tiny synthetic corpus like:
+              </Paragraph>
+              <CodeBlock lang="text">{`ac bc ac bc ac bc ac bc`}</CodeBlock>
+              <Paragraph>
+                Then set <Term>A = a</Term> and <Term>B = b</Term>.
+              </Paragraph>
+            </>
+          }
+          solution={
+            <>
+              <Paragraph>
+                Before you measure anything, your prediction should be: "<Term>a</Term> and <Term>b</Term> will look very
+                similar."
+              </Paragraph>
+              <Paragraph>
+                Why? In that corpus, <Term>a</Term> is almost always followed by <Term>c</Term>, and <Term>b</Term> is also
+                almost always followed by <Term>c</Term>. So their next-character distributions overlap heavily.
+              </Paragraph>
+              <Paragraph>
+                That makes both cosine similarity (in the <SectionLink to="2.2">Section 2.2</SectionLink> panel) and the dot product (in <SectionLink to="2.6">Section 2.6</SectionLink>) jump up.
+                With smoothing on, it won't hit a perfect 1.000, but it should be obviously higher than "random-ish."
+              </Paragraph>
+              <Paragraph>
+                This is the core idea: the geometry is trying to summarize behavior. If you rewrite the behavior in the
+                corpus, the geometry should follow.
+              </Paragraph>
+            </>
+          }
+        >
+          <Paragraph>
+            Use the corpus editor in <SectionLink to="2.2">Section 2.2</SectionLink> to <em>force</em> two different characters to behave the same way. Before
+            you look at any numbers, predict whether <Term>dot(a, b)</Term> will go up or down — then check.
+          </Paragraph>
+        </Exercise>
+
+        <Exercise
+          number="2.7"
+          title="The Context Explosion (Use the Slider)"
+          hint={
+            <>
+              <Paragraph>
+                The lookup table is storing a full <Term>P(next | context)</Term> for every possible context. That's why it
+                has a <Term>V<sup>T+1</sup></Term> term.
+              </Paragraph>
+              <Paragraph>
+                Try the presets in the demo, then change only <Term>T</Term> and watch the <Term>≈ 10<sup>x</sup>×</Term> bigger number.
+              </Paragraph>
+            </>
+          }
+          solution={
+            <>
+              <Paragraph>
+                You should notice two things:
+              </Paragraph>
+              <ul>
+                <li>
+                  Increasing <Term>T</Term> by 1 multiplies the lookup table by about <Term>V</Term>.
+                </li>
+                <li>
+                  The embedding table doesn't care about <Term>T</Term>. Its size is basically <Term>V·D</Term>.
+                </li>
+              </ul>
+              <Paragraph>
+                That difference in growth rate is the motivation for reuse: we can't afford "one distribution per
+                context."
+              </Paragraph>
+            </>
+          }
+        >
+          <Paragraph>
+            In the Context Explosion demo (<SectionLink to="2.2">Section 2.2</SectionLink>), pick one preset and then increase <Term>T</Term> by 2. What
+            happens to the lookup-table size? What happens to the embedding-table size?
+          </Paragraph>
+        </Exercise>
+
+        <Exercise
+          number="2.8"
+          title="The Integer Distance Lie"
+          hint={<Paragraph>Look at the vocabulary: <Term>stoi = {'{'}' ': 0, 'a': 1, 'b': 2, ..., 'q': 17, ..., 'u': 21, ...{'}'}</Term></Paragraph>}
+          solution={
+            <>
+              <Paragraph>
+                <strong>'q' and 'u':</strong> <Term>|17 - 21| = 4</Term>. But they should be <em>extremely</em> close — 'q' is almost always followed by 'u'.
+              </Paragraph>
+              <Paragraph>
+                <strong>'a' and 'b':</strong> <Term>|1 - 2| = 1</Term>. Looks close! But they have completely different roles in English.
+              </Paragraph>
+              <Paragraph>
+                <strong>Conclusion:</strong> Integer distance tells you nothing about linguistic similarity. The ordering is arbitrary (alphabetical), and "close" integers can have completely different predictive roles.
+              </Paragraph>
+            </>
+          }
+        >
+          <Paragraph>
+            Using our toy vocabulary where <Term>stoi['q'] = 17</Term> and <Term>stoi['u'] = 21</Term>:
+          </Paragraph>
+          <ol>
+            <li>What is the integer distance between 'q' and 'u'?</li>
+            <li>What is the integer distance between 'a' (=1) and 'b' (=2)?</li>
+            <li>Which pair should be <em>closer</em> in a useful representation? Does integer distance get this right?</li>
+          </ol>
+        </Exercise>
+
+        <Exercise
+          number="2.9"
+          title="Grassmann's Principle"
+          hint={<Paragraph>Think about what "linear mixing" means: <Term>A + B</Term> should behave like a weighted combination.</Paragraph>}
+          solution={
+            <>
+              <Paragraph>
+                <strong>1.</strong> <Term>0.5·Red + 0.5·Blue = [0.5, 0, 0.5]</Term> — this is purple/magenta.
+              </Paragraph>
+              <Paragraph>
+                <strong>2.</strong> Yes, mixing is commutative: <Term>Red + Blue = Blue + Red</Term>. Order doesn't matter.
+              </Paragraph>
+              <Paragraph>
+                <strong>3.</strong> Yes, mixing is associative: <Term>(R + G) + B = R + (G + B)</Term>.
+              </Paragraph>
+              <Paragraph>
+                <strong>Why it matters:</strong> These properties define a <em>vector space</em>. Once you have a vector space,
+                you can measure distances (similarity), find nearest neighbors, and — crucially — you can <em>learn</em> by
+                gradually nudging coordinates based on prediction error. Grassmann showed that abstract objects (colors,
+                sounds, words) can live in vector spaces if their mixing obeys these rules.
+              </Paragraph>
+            </>
+          }
+        >
+          <Paragraph>
+            RGB colors can be treated as vectors: <Term>Red = [1, 0, 0]</Term>, <Term>Green = [0, 1, 0]</Term>, <Term>Blue = [0, 0, 1]</Term>.
+          </Paragraph>
+          <ol>
+            <li>What color is <Term>0.5·Red + 0.5·Blue</Term>? Write the vector.</li>
+            <li>Is color mixing commutative? (<Term>Red + Blue = Blue + Red</Term>?)</li>
+            <li>Is color mixing associative? (<Term>(R + G) + B = R + (G + B)</Term>?)</li>
+            <li>Why do these properties matter for treating words as vectors?</li>
+          </ol>
+        </Exercise>
+
+        <Exercise
+          number="2.10"
+          title="The Compression Ratio"
+          hint={
+            <>
+              <Paragraph>Lookup table: one row per context. <Term>(vocab_size)<sup>T</sup></Term> contexts, each storing <Term>vocab_size</Term> probabilities.</Paragraph>
+              <Paragraph>Embedding table: one row per token. <Term>vocab_size</Term> tokens, each with <Term>D</Term> dimensions.</Paragraph>
+            </>
+          }
+          solution={
+            <>
+              <Paragraph>
+                <strong>Full lookup table:</strong> <Term>27<sup>4</sup> × 27 = 531,441 × 27 ≈ 14.3 million</Term> numbers.
+              </Paragraph>
+              <Paragraph>
+                <strong>Embedding table:</strong> <Term>27 × 64 = 1,728</Term> numbers.
+              </Paragraph>
+              <Paragraph>
+                <strong>Compression ratio:</strong> <Term>14.3M / 1,728 ≈ 8,300×</Term> smaller.
+              </Paragraph>
+              <Paragraph>
+                <strong>What gets lost:</strong> The embedding table can't represent every possible context-specific distribution. It captures <em>general patterns</em> about how characters behave, but some fine-grained context-specific information is compressed away. Training finds the best approximation given the capacity.
+              </Paragraph>
+            </>
+          }
+        >
+          <Paragraph>
+            For <Term>vocab_size = 27</Term>, <Term>context_length = 4</Term>, <Term>embed_dim = 64</Term>:
+          </Paragraph>
+          <ol>
+            <li>How many numbers would a full <Term>P(next | context)</Term> lookup table need? (Hint: <Term>(vocab_size)<sup>T</sup></Term> contexts, each with <Term>vocab_size</Term> outcomes)</li>
+            <li>How many numbers does the embedding table <Term>E</Term> have?</li>
+            <li>What's the compression ratio?</li>
+            <li>What information gets "lost" in the compression?</li>
+          </ol>
+        </Exercise>
+
+        <Exercise
+          number="2.11"
+          title="Dot Product Properties"
+          hint={<Paragraph>Write out the definition <Term>a · b = Σ_i a_i b_i</Term> and verify each property algebraically.</Paragraph>}
+          solution={
+            <>
+              <Paragraph>
+                <strong>1. Non-negative self-similarity:</strong> <Term>a · a = Σ_i a_i² ≥ 0</Term> because squares are non-negative.
+              </Paragraph>
+              <Paragraph>
+                <strong>2. Symmetry:</strong> <Term>a · b = Σ_i a_i b_i = Σ_i b_i a_i = b · a</Term> because multiplication is commutative.
+              </Paragraph>
+              <Paragraph>
+                <strong>3. Linearity:</strong> <Term>a · (b + c) = Σ_i a_i(b_i + c_i) = Σ_i a_i b_i + Σ_i a_i c_i = a·b + a·c</Term>
+              </Paragraph>
+              <Paragraph>
+                <strong>4. Scaling:</strong> <Term>(k·a) · b = Σ_i (k·a_i) b_i = k Σ_i a_i b_i = k(a · b)</Term>
+              </Paragraph>
+              <Paragraph>
+                These are the axioms that make dot product "the right" similarity metric for vector spaces. They're what make
+                similarity behave predictably when you start nudging coordinates during training.
+              </Paragraph>
+            </>
+          }
+        >
+          <Paragraph>
+            Prove each property of the dot product:
+          </Paragraph>
+          <ol>
+            <li><Term>a · a ≥ 0</Term> for any vector <Term>a</Term></li>
+            <li><Term>a · b = b · a</Term> (symmetry)</li>
+            <li><Term>a · (b + c) = a · b + a · c</Term> (linearity)</li>
+            <li><Term>(k · a) · b = k · (a · b)</Term> (scaling)</li>
+          </ol>
+        </Exercise>
+      </Section>
+
+      <Section number="2.12" title="References">
+        <Citations
+          title="Academic references"
+          items={[
+            {
+              n: 1,
+              href: 'https://arxiv.org/abs/1301.3781',
+              label: 'Mikolov, T., Chen, K., Corrado, G., & Dean, J. (2013). Efficient estimation of word representations in vector space. arXiv preprint arXiv:1301.3781.',
+            },
+          ]}
+        />
+      </Section>
+
+      <ChapterNav prev={{ href: '/', label: 'Chapter 1: The Meat Grinder' }} />
+    </Container >
   )
 }
