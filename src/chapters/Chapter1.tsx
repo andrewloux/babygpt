@@ -60,12 +60,15 @@ export function Chapter1() {
         <Paragraph>
           We're going to derive the entire training objective from scratch. No hand-waving, no "just trust me"—just following the logic until it clicks.
         </Paragraph>
+        <Paragraph>
+          In 1948, Claude Shannon asked a very simple question: <strong>how predictable is English?</strong> His answer was operational: build a predictor, make next‑character bets, and score how much probability it assigned to what actually happened.
+        </Paragraph>
       </Section>
 
       {/* Section 1.1.1 */}
       <Section number="1.1.1" title="What Even Is Probability">
         <Paragraph>
-          Probability is just <Highlight>how surprised you'd be</Highlight> if something happened.
+          One useful intuition: probability controls <Highlight>surprise</Highlight>.
         </Paragraph>
         <Paragraph>
           If I tell you "the next word is 'the'"—you're not surprised. <Term>'the'</Term> shows up constantly. High probability, low surprise.
@@ -77,8 +80,12 @@ export function Chapter1() {
           I'll use <em>words</em> for intuition in a few places because they're easier to read. When we implement this, we'll work with <em>characters</em> so the vocabulary stays tiny and nothing is hidden. Same math, smaller Lego bricks.
         </Paragraph>
         <Paragraph>
-          One more small bridge for later: when we start training in Chapter 2, "surprise" becomes a number. We usually measure it as <Term>-log p</Term> and minimize the average.
+          We'll make this precise in a second. For now, keep the direction straight: <strong>high probability → low surprise</strong>, and <strong>low probability → high surprise</strong>.
         </Paragraph>
+        <MathBlock
+          equation={String.raw`\text{surprise}(p) = -\log_2(p)`}
+          explanation="In bits: p=0.5 → 1 bit. p=0.25 → 2 bits. Smaller p means more surprise."
+        />
         <MathBlock
           equation="P(\text{event}) \in [0, 1]"
           explanation="Probability lives between 0 (impossible, you'd have a heart attack) and 1 (certain, you'd be bored)."
@@ -93,7 +100,7 @@ export function Chapter1() {
           Let's make this concrete. Say you're predicting the next character after "<Term>hel</Term>" and your vocabulary is just 5 characters: <Term>[a, l, o, p, z]</Term>. Your model needs to output 5 numbers:
         </Paragraph>
         <Paragraph>
-          <em>This is the shape of every model output: probabilities over the vocabulary, summing to 1. Notice which character gets the most mass.</em>
+          <em>This is the shape of every model output: probabilities over the vocabulary, summing to 1. The tallest bar is the model’s best bet.</em>
         </Paragraph>
         <ProbabilityExample
           rows={[
@@ -560,6 +567,18 @@ P(x_1, x_2, \\ldots, x_t) &= P(x_1) \\\\
         <Paragraph>
           But even with infinite speed and RAM, n-gram models hit a fundamental wall: <strong>Sparsity</strong>.
         </Paragraph>
+        <Paragraph>
+          What's missing is reuse. If the model learns something about "cat sat", that knowledge doesn't help with "dog sat". Every context is its own lookup. Every pattern requires new entries.
+        </Paragraph>
+        <Paragraph>
+          KenLM solves the <strong>speed</strong> problem, but fails the <strong>generalization</strong> test because it relies on exact matching. It can tell you efficiently that it has never seen "dog sat" before, but it cannot take the next step—using what it knows about "cat sat" to make a guess. It is a brilliant system for retrieving exactly what you have seen, and useless for inferring what you haven't.
+        </Paragraph>
+        <Paragraph>
+          What if we stored something else entirely? What if similar situations could share information?
+        </Paragraph>
+        <Paragraph>
+          Chapter 2 builds that system.
+        </Paragraph>
         <Citations
           items={[
             {
@@ -661,6 +680,9 @@ P(x_1, x_2, \\ldots, x_t) &= P(x_1) \\\\
             That's transfer through <Highlight>overlap</Highlight>. Semantic similarity is the stronger thing: "cat" and
             "dog" should behave similarly in many contexts even when they share almost no spelling. Getting that kind of
             reuse is what Chapter 2 is about.
+          </Paragraph>
+          <Paragraph>
+            Chapter 2 is where we build a model that can share what it learns across many different contexts—even when they don't share the same characters.
           </Paragraph>
         </Callout>
       </Section>
@@ -1086,7 +1108,7 @@ print(f"First Y: {Y[0]}")               # [2, 4, 4, 5] ("ello")`}</CodeBlock>
         />
         <MathBlock
           equation={`80^{100} \\approx 10^{190}`}
-          explanation={`For comparison, the number of atoms in the observable universe is roughly 10^80.`}
+          explanation={`For comparison, the number of atoms in the observable universe is roughly 10⁸⁰.`}
         />
         <Paragraph>
           This isn't just a "buy a bigger hard drive" problem. This is a physics problem.
@@ -1274,7 +1296,7 @@ Verify:
         </Exercise>
       </Section>
 
-      <ChapterNav next={{ href: '/chapter-02', label: 'Chapter 2: The Neural Network' }} />
+      <ChapterNav next={{ href: '/chapter-02', label: 'Chapter 2: The Map' }} />
     </Container>
   )
 }
