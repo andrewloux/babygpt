@@ -964,8 +964,11 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
         <Paragraph>
           If the correct next token happens, and the model assigned it probability <Term>p</Term>, then lower <Term>p</Term> should mean “more surprise.” A handy way to measure that is in <strong>bits</strong>:
         </Paragraph>
+        <MathBlock
+          equation={String.raw`p=\frac{1}{2}\Rightarrow 1\text{ bit}\qquad p=\frac{1}{4}\Rightarrow 2\text{ bits}\qquad p=\frac{1}{8}\Rightarrow 3\text{ bits}`}
+        />
         <Paragraph>
-          <Term>p = 1/2</Term> feels like <Term>1</Term> bit of surprise (a coin flip). <Term>p = 1/4</Term> feels like <Term>2</Term> bits. <Term>p = 1/8</Term> is <Term>3</Term> bits. In general:
+          In general:
         </Paragraph>
         <MathBlock equation={String.raw`\text{surprise}(p) = -\log_2(p)`} />
         <Paragraph>
