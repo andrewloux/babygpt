@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Slider } from './Slider'
+import { VizCard } from './VizCard'
 import styles from './ExplosionDemo.module.css'
 
 export function ExplosionDemo() {
@@ -51,63 +52,70 @@ export function ExplosionDemo() {
 
   const { state, label, desc } = getState(data.ratio)
 
-  // Generate the exponent chain: 27 × 27 × 27 × ...
-  const exponentChain = Array(T).fill('27').join(' × ')
+  const exponentChain = useMemo(() => Array(T).fill('27').join(' × '), [T])
+
+  const footer =
+    T >= 6 ? (
+      <div className={styles.footer}>
+        <strong>The problem:</strong> At T={T}, there are {formatPossibilities(data.possibilities)} possible sequences. Your 1M training
+        examples cover {formatCoverage(data.ratio)} of them.
+        {data.ratio < 0.01 ? ' Most sequences the model encounters will be ones it’s never seen before.' : null}
+      </div>
+    ) : null
 
   return (
-    <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <span className={styles.title}>The Generalization Wall</span>
-        <span className={styles.subtitle}>Why counting doesn&apos;t scale</span>
-      </div>
+    <VizCard title="The Generalization Wall" subtitle="Why counting doesn't scale" footer={footer}>
+      <div className={styles.grid}>
+        <div className={styles.left}>
+          <div className={styles.sliderSection}>
+            <div className={styles.sliderHeader}>
+              <span className={styles.sliderLabel}>Context length (T)</span>
+              <span className={styles.lengthValue}>T = {T}</span>
+            </div>
+            <Slider
+              wrap={false}
+              min={1}
+              max={10}
+              step={1}
+              value={T}
+              onValueChange={(v) => setT(Math.round(v))}
+              ariaLabel="Context length (T)"
+            />
+          </div>
 
-      {/* Slider */}
-      <div className={styles.sliderSection}>
-        <label className={styles.sliderLabel}>Context length (T)</label>
-        <div className={styles.sliderRow}>
-          <Slider
-            wrap={false}
-            min={1}
-            max={10}
-            step={1}
-            value={T}
-            onValueChange={(v) => setT(Math.round(v))}
-            ariaLabel="Context length (T)"
-          />
-          <span className={styles.lengthValue}>T = {T}</span>
-        </div>
-      </div>
+          <div className={styles.numbers}>
+            <div className={styles.numberRow}>
+              <div className={styles.numberLabel}>Possibilities</div>
+              <div className={styles.numberValue}>
+                27<sup>{T}</sup> <span className={styles.dim}>≈</span>{' '}
+                <span className={styles.emph}>{formatPossibilities(data.possibilities)}</span>
+              </div>
+            </div>
 
-      {/* The Equation */}
-      <div className={styles.equation}>
-        <div className={styles.equationLine}>
-          <span className={styles.equationLabel}>Possibilities</span>
-          <span className={styles.equationMath}>
-            27<sup>{T}</sup> = {exponentChain} = <strong>{formatPossibilities(data.possibilities)}</strong>
-          </span>
-        </div>
-        <div className={styles.equationLine}>
-          <span className={styles.equationLabel}>Your Data</span>
-          <span className={styles.equationMath}>
-            <strong>1,000,000</strong> <span className={styles.dim}>(fixed)</span>
-          </span>
-        </div>
-      </div>
+            <div className={styles.numberRow}>
+              <div className={styles.numberLabel}>Your data</div>
+              <div className={styles.numberValue}>
+                <span className={styles.emph}>1,000,000</span> <span className={styles.dim}>(fixed)</span>
+              </div>
+            </div>
+          </div>
 
-      {/* Visual Comparison */}
-      <div className={styles.comparison}>
-        <div className={styles.barContainer}>
+          <details className={styles.details}>
+            <summary className={styles.summary}>Show expansion</summary>
+            <div className={styles.expansion}>
+              27<sup>{T}</sup> = {exponentChain}
+            </div>
+          </details>
+        </div>
+
+        <div className={styles.right}>
           <div className={styles.barLabels}>
             <span>Oversaturated</span>
-            <span className={styles.crossover}>← Crossover →</span>
+            <span className={styles.crossover}>1× crossover</span>
             <span>Sparse</span>
           </div>
-          <div className={styles.barTrack}>
-            <div
-              className={`${styles.barFill} ${styles[state]}`}
-              style={{ width: `${data.barPosition}%` }}
-            />
+          <div className={styles.barTrack} aria-hidden="true">
+            <div className={`${styles.barFill} ${styles[state]}`} style={{ width: `${data.barPosition}%` }} />
             <div className={styles.crossoverLine} />
           </div>
           <div className={styles.barScale}>
@@ -118,29 +126,19 @@ export function ExplosionDemo() {
             <span>0.1%</span>
             <span>0.001%</span>
           </div>
+
+          <div className={`${styles.result} ${styles[state]}`}>
+            <div className={styles.resultMain}>
+              <span className={styles.coverageValue}>{formatCoverage(data.ratio)}</span>
+              <span className={styles.coverageLabel}>coverage</span>
+            </div>
+            <div className={styles.resultState}>
+              <span className={styles.stateLabel}>{label}</span>
+              <span className={styles.stateDesc}>{desc}</span>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Coverage Result */}
-      <div className={`${styles.result} ${styles[state]}`}>
-        <div className={styles.resultMain}>
-          <span className={styles.coverageValue}>{formatCoverage(data.ratio)}</span>
-          <span className={styles.coverageLabel}>coverage</span>
-        </div>
-        <div className={styles.resultState}>
-          <span className={styles.stateLabel}>{label}</span>
-          <span className={styles.stateDesc}>{desc}</span>
-        </div>
-      </div>
-
-      {/* The Insight */}
-      {T >= 6 && (
-        <div className={styles.insight}>
-          <strong>The problem:</strong> At T={T}, there are {formatPossibilities(data.possibilities)} possible sequences.
-          Your 1M training examples cover {formatCoverage(data.ratio)} of them.
-          {data.ratio < 0.01 && " Most sequences the model encounters will be ones it’s never seen before."}
-        </div>
-      )}
-    </div>
+    </VizCard>
   )
 }
