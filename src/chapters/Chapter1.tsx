@@ -716,13 +716,6 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
             </Paragraph>
           </FormalSubSection>
 
-          <details className="collapsible">
-            <summary>Why can neural networks handle unseen contexts?</summary>
-            <Paragraph>
-              Counting models divide counts, so they break on zeros. Neural networks compute a function—they take a context, run it through parameters, and output probabilities. There's no division step, so there's no undefined case. The function always returns <em>something</em>. Whether that something is <em>good</em> depends on whether similar contexts were in training. But it never crashes on "I've never seen this exact string."
-            </Paragraph>
-          </details>
-
           <Citations
             items={[
               {
