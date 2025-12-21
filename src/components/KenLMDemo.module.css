@@ -1,144 +1,346 @@
 .container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 24px 0;
   font-family: var(--font-mono);
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 24px;
-  margin: 24px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
 }
 
 .title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: -12px;
+  text-align: center;
+}
+
+.subtitle {
+  margin-top: -8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 340px) 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .controls {
   display: flex;
+  flex-direction: column;
   gap: 12px;
-  align-items: center;
   background: var(--bg-tertiary);
-  padding: 12px;
-  border-radius: 8px;
   border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 14px;
 }
 
-.queryBox {
-  flex: 1;
+.queryLabel {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.queryInput {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(255, 255, 255, 0.9);
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+
+.queryInput:focus {
+  outline: none;
+  border-color: rgba(96, 217, 255, 0.35);
+  box-shadow: 0 0 0 4px rgba(96, 217, 255, 0.08);
+}
+
+.presetRow {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.label {
-  color: var(--text-secondary);
-  font-size: 13px;
+.presetBtn {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.18);
+  color: rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
 
-.value {
-  color: var(--accent-cyan);
-  font-weight: 700;
-  font-size: 15px;
+.presetBtn:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
 }
 
 .actionBtn {
   background: var(--accent-magenta);
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 10px 16px;
+  border-radius: 10px;
   font-family: var(--font-mono);
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.actionBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
 }
 
 .actionBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background: var(--bg-tertiary);
-  color: var(--text-muted);
-  border: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
 }
 
-.memoryMap {
+.status {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.35;
+}
+
+.statusLine {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+
+.metaLabel {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.metaValue {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+.metaDivider {
+  width: 1px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 2px;
+}
+
+.path {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.note {
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.memoryTitle {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  text-align: left;
+}
+
+.memoryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .slot {
-  display: grid;
-  grid-template-columns: 40px 1fr 1fr;
-  gap: 12px;
-  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
   background: var(--code-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  align-items: center;
-  font-size: 13px;
-  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  min-height: 108px;
 }
 
-.slot.active {
-  border-color: var(--accent-yellow);
-  background: rgba(255, 214, 10, 0.05);
-  box-shadow: 0 0 0 1px var(--accent-yellow);
+.visited {
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
-.slot.match {
-  border-color: var(--accent-green);
+.active {
+  border-color: rgba(255, 214, 10, 0.7);
+  box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.09);
+}
+
+.collision {
+  border-color: rgba(255, 56, 255, 0.55);
+  background: rgba(255, 56, 255, 0.05);
+}
+
+.hit {
+  border-color: rgba(57, 255, 20, 0.6);
   background: rgba(57, 255, 20, 0.05);
-  box-shadow: 0 0 0 1px var(--accent-green);
 }
 
-.slot.collision {
-  border-color: var(--accent-red);
+.miss {
+  border-color: rgba(255, 107, 107, 0.7);
   background: rgba(255, 107, 107, 0.05);
 }
 
-.slotIndex {
-  color: var(--text-muted);
-  font-size: 11px;
-}
-
-.slotContent {
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.slotContent.empty {
-  color: var(--text-muted);
-  font-style: italic;
-  font-weight: 400;
-}
-
-.slotValue {
-  color: var(--accent-cyan);
-  text-align: right;
-}
-
-.log {
-  font-size: 13px;
-  color: var(--text-secondary);
-  min-height: 24px;
+.slotHeader {
   display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.slotIndex {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.slotHome {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.slotHomeMuted {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.14);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.packedRow {
+  display: flex;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.packedCell {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 4px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.16);
+  padding: 8px 6px 7px;
 }
 
-.logStep {
-  display: inline-block;
-  animation: fadeIn 0.3s ease;
+.packedCell:last-child {
+  border-right: none;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(2px); }
-  to { opacity: 1; transform: translateY(0); }
+.cellHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  line-height: 1.05;
+}
+
+.cellLabel {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.34);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cellOffset {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.22);
+  letter-spacing: 0.02em;
+}
+
+.cellValue {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.cellHighlight {
+  color: var(--accent-cyan);
+}
+
+.keyLine {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.emptySlot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.35);
+  font-style: italic;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .memoryGrid {
+    grid-template-columns: 1fr;
+  }
 }
