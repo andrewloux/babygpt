@@ -900,6 +900,32 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
           <Cite n={8} />
           <MathBlock equation='\text{Hash("dog sat")} \neq \text{Hash("sat dog")}' />
         </Paragraph>
+        <WorkedExample title="A tiny hash that cares about order">
+          <WorkedStep n="1">
+            <p>Pick a toy hash rule: start with <code>h = 0</code>. For each character, update</p>
+            <MathBlock equation={String.raw`h \leftarrow (h \cdot 31 + \text{code}(\text{char})) \bmod 97`} />
+            <WorkedNote>
+              This is not what KenLM uses — it’s just an easy example. The important part is the <code>h · 31</code>: earlier characters get
+              multiplied (different “place value”).
+            </WorkedNote>
+          </WorkedStep>
+          <WorkedStep n="2">
+            <p>Now compute <code>Hash(&quot;ab&quot;)</code>. Use <code>code(a)=1</code>, <code>code(b)=2</code>:</p>
+            <WorkedNote>
+              Start <code>h=0</code>. After <code>a</code>: <code>h=(0·31+1)=1</code>. After <code>b</code>: <code>h=(1·31+2)=33</code>.
+            </WorkedNote>
+          </WorkedStep>
+          <WorkedStep n="3" final>
+            <p>Compute <code>Hash(&quot;ba&quot;)</code> with the same codes:</p>
+            <WorkedNote>
+              Start <code>h=0</code>. After <code>b</code>: <code>h=(0·31+2)=2</code>. After <code>a</code>: <code>h=(2·31+1)=63</code>.
+              So <code>Hash(&quot;ab&quot;)=33</code> but <code>Hash(&quot;ba&quot;)=63</code>.
+            </WorkedNote>
+          </WorkedStep>
+        </WorkedExample>
+        <Paragraph>
+          That’s what “mixing based on position” means: the same characters contribute differently depending on where they appear. Real hash functions do much more aggressive bit‑mixing than this, but they’re built on the same idea: <em>each step depends on the previous state</em>, so swapping order changes the whole trajectory.
+        </Paragraph>
         <Paragraph>
           The "structure" isn't lost; it's <Highlight>baked into the address</Highlight>. The model knows "sat" follows "dog" because the probability value is stored at the unique memory address reserved for that specific sequence.
         </Paragraph>
