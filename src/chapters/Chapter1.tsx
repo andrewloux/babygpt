@@ -869,14 +869,12 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
           <Cite n={4} />
           <Cite n={6} />
         </Paragraph>
-        <Callout variant="info" title="Does KenLM use words or characters?">
-          <Paragraph>
-            KenLM is an <em>n-gram</em> language model toolkit. In practice, it's usually trained on <strong>word tokens</strong> (that’s what classic speech recognition decoders wanted). But the tool itself doesn’t care what a “token” is—if you feed it characters as tokens, it becomes a character n-gram model.
-          </Paragraph>
-          <Paragraph>
-            In this chapter we use words when it helps readability, and characters when we want a tiny vocabulary. Same probability math, different Lego size.
-          </Paragraph>
-        </Callout>
+        <Paragraph>
+          Quick clarification: KenLM is token‑agnostic. In practice it’s usually trained on <strong>words</strong> (that’s what classic speech recognition decoders wanted), but if you feed it <strong>characters</strong> as tokens, it becomes a character n‑gram model.
+        </Paragraph>
+        <Paragraph>
+          In this chapter we’ll use words when it helps readability, and characters when we want a tiny vocabulary. Same probability math, different Lego size.
+        </Paragraph>
         <Paragraph>
           Instead of following pointers from node to node, it does something much more raw:
         </Paragraph>
