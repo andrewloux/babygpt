@@ -109,10 +109,7 @@ export function Chapter1() {
           In 1948, Claude Shannon asked a very simple question: <strong>how predictable is English?</strong> His answer was operational: build a predictor, make next‑character bets, and score how much probability it assigned to what actually happened.
         </Paragraph>
         <Paragraph>
-          Shannon estimated that English has an entropy around <strong>1.3 bits per character</strong> — meaning a perfect model would average about 1.3 bits of surprise per character. Our counting model will be much worse, especially at the start. But that number gives us a target: the closer we get to 1.3, the more structure we've captured.
-        </Paragraph>
-        <Paragraph>
-          Entropy is a number: the fundamental limit to how compressible a language is. And the way you measure it is by building a predictor, making next-character bets, and scoring how much probability it gave to what actually happened.
+          That's the same game we'll play. At each position, the model outputs a probability distribution over the next character. Then reality reveals what the next character actually was, and we check: did the model put high probability on the truth, or did it miss?
         </Paragraph>
         <Citations
           title="Shannon's Information Theory"
@@ -152,6 +149,9 @@ export function Chapter1() {
           equation={String.raw`\text{surprise}(p) = -\log_2(p)`}
           explanation="In bits: p=0.5 → 1 bit. p=0.25 → 2 bits. Smaller p means more surprise."
         />
+        <Paragraph>
+          Shannon’s famous estimate is that English averages around <strong>1.3 bits per character</strong>. Read that as a target: on average, a good predictor narrows the next character down to only a small handful of plausible options. Our counting model will be much worse at first, but the direction is what matters.
+        </Paragraph>
         <Callout variant="insight" title="From Surprise to Loss">
           <Paragraph>
             Picture the setup: you're predicting English one character at a time. Before the next character arrives, your model has to place a bet—one probability for each possible character.
