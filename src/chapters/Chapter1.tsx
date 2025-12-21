@@ -944,10 +944,10 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
         <Paragraph>
           A Decoder (like in a translation app) doesn't just pick the best word once. It explores thousands of possible sentence variations in parallel, trying to find the one sequence that maximizes total probability. It hammers the Language Model with millions of queries per second.
         </Paragraph>
-        <DecoderDemo />
         <Paragraph>
-          The demo above shows a <Term>Beam Search</Term>. Watch the "LM lookups" counter. Even for a tiny 3-word sentence with a narrow beam, we are asking the model for probabilities constantly. KenLM made this loop viable for real-world products.
+          The demo below shows a <Term>Beam Search</Term>. Watch the "LM lookups" counter. Even for a tiny 3-word sentence with a narrow beam, we are asking the model for probabilities constantly. KenLM made this loop viable for real-world products.
         </Paragraph>
+        <DecoderDemo />
         <Paragraph>
           But even with infinite speed and RAM, n-gram models hit a fundamental wall: <strong>Sparsity</strong>.
         </Paragraph>
