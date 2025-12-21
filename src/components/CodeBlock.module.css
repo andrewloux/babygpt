@@ -43,6 +43,12 @@
   line-height: inherit;
   font-feature-settings: inherit;
   letter-spacing: inherit;
+  background: transparent !important;
+  padding: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  color: inherit;
 }
 
 /* Override shiki background */
