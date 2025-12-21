@@ -29,6 +29,7 @@ export { Exercise } from './Exercise'
 // Visualization components
 export { VizCard } from './VizCard'
 export { Slider } from './Slider'
+export { StepDots } from './StepDots'
 export { SparsityViz, defaultSparsityData } from './SparsityViz'
 export { SparsityDemo } from './SparsityDemo'
 export { MarkovChainViz } from './MarkovChainViz'

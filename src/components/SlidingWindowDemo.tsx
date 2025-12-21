@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Slider } from './Slider'
+import { StepDots } from './StepDots'
 import styles from './SlidingWindowDemo.module.css';
 
 const text = 'hello world';
@@ -96,15 +97,12 @@ export const SlidingWindowDemo = () => {
         >
           ← Prev
         </button>
-        <div className={styles.stepIndicator}>
-          {examples.map((_, i) => (
-            <div
-              key={i}
-              className={`${styles.dot} ${i === safeStep ? styles.activeDot : ''}`}
-              onClick={() => setStep(i)}
-            />
-          ))}
-        </div>
+        <StepDots
+          count={examples.length}
+          current={safeStep}
+          onSelect={setStep}
+          ariaLabel="Training example navigation"
+        />
         <button
           onClick={handleNext}
           disabled={safeStep === maxStep}

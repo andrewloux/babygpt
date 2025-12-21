@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { VizCard } from './VizCard'
+import { StepDots } from './StepDots'
 import styles from './GradientTraceDemo.module.css'
 
 // Tiny vocab for demonstration: q, u, a
@@ -257,19 +258,14 @@ export function GradientTraceDemo() {
       subtitle="Trace one training step through the computation"
       figNum="Fig. 2.10"
     >
-      <div className={styles.stepIndicator} role="navigation" aria-label="Step navigation">
-          {steps.map((_, i) => (
-            <button
-              key={i}
-              className={`${styles.stepDot} ${i === currentStep ? styles.active : ''} ${i < currentStep ? styles.completed : ''}`}
-              onClick={() => setCurrentStep(i)}
-              aria-label={`Go to step ${i + 1}`}
-              aria-current={i === currentStep ? 'step' : undefined}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
+      <StepDots
+        className={styles.stepIndicator}
+        count={steps.length}
+        current={currentStep}
+        onSelect={setCurrentStep}
+        variant="numbered"
+        ariaLabel="Step navigation"
+      />
 
         <div className={styles.stepTitle}>{step.title}</div>
 

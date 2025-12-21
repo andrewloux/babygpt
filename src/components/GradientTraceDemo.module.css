@@ -9,48 +9,6 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.stepDot {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.22);
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 0.75rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
-  font-family: var(--font-mono);
-}
-
-.stepDot:hover:not(.active) {
-  border-color: rgba(0, 217, 255, 0.35);
-  color: var(--accent-cyan);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 217, 255, 0.15);
-}
-
-.stepDot:focus-visible {
-  outline: 2px solid var(--accent-cyan);
-  outline-offset: 2px;
-}
-
-.stepDot.active {
-  background:
-    radial-gradient(ellipse 120% 90% at 30% 0%, rgba(0, 217, 255, 0.24), transparent 55%),
-    rgba(0, 217, 255, 0.12);
-  border-color: rgba(0, 217, 255, 0.4);
-  color: rgba(0, 0, 0, 0.95);
-  font-weight: 800;
-  box-shadow: 0 0 24px rgba(0, 217, 255, 0.25);
-}
-
-.stepDot.completed {
-  border-color: rgba(0, 255, 160, 0.3);
-  color: var(--accent-green);
-  background: rgba(0, 255, 160, 0.08);
-}
-
 .stepTitle {
   padding: 1.25rem 1.5rem;
   font-family: var(--font-serif);
@@ -95,12 +53,6 @@
   .stepIndicator {
     gap: 0.4rem;
     padding: 0.85rem 1rem;
-  }
-
-  .stepDot {
-    width: 28px;
-    height: 28px;
-    font-size: 0.7rem;
   }
 
   .controls {

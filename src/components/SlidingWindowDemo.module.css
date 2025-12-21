@@ -175,28 +175,6 @@
   cursor: not-allowed;
 }
 
-.stepIndicator {
-  display: flex;
-  gap: 0.4rem;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--bg-tertiary);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.dot:hover {
-  background: var(--text-muted);
-}
-
-.activeDot {
-  background: var(--accent-cyan);
-}
-
 /* Examples table */
 .examplesTable {
   background: var(--code-bg);
