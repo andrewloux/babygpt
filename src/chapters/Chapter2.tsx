@@ -1126,40 +1126,41 @@ score = float(np.dot(a, b))`}</CodeBlock>
 
       <Section number="2.9" title="Synthesis: From Counts to Coordinates">
         <Paragraph>
-          Let's trace the path we've taken:
+          Let's trace the path we've taken — and why each step was needed:
         </Paragraph>
-        <details className="collapsible">
-          <summary>Optional: the Chapter 2 arc (one list)</summary>
-          <ol>
-            <li>
-              <strong>Foundation (2.1):</strong> Grassmann showed abstract things can be coordinates. If colors can be vectors,
-              why not characters? This is the basic move embeddings use.
-            </li>
-            <li>
-              <strong>Problem (2.2):</strong> The <Term>(vocab_size)<sup>T</sup></Term> scaling limit. We can't store a distribution per
-              context — so what if similar tokens could share information?
-            </li>
-            <li>
-              <strong>Target (2.3):</strong> What ideal coordinates look like: characters with similar <Term>P(next | c)</Term> should be close.
-            </li>
-            <li>
-              <strong>Data structure (2.4):</strong> The embedding table: one row per token, each row a <Term>D</Term>-dimensional vector. Vectors
-              are just storage for attributes.
-            </li>
-            <li>
-              <strong>Mechanics (2.5):</strong> Embedding lookup is row selection: <Term>E[ix]</Term>.
-            </li>
-            <li>
-              <strong>Similarity (2.6):</strong> The dot product measures "fingerprint overlap" — it's how the model compares tokens.
-            </li>
-            <li>
-              <strong>Softmax (2.7):</strong> Scores become probabilities.
-            </li>
-            <li>
-              <strong>Batching (2.8):</strong> Shape bookkeeping: <Term>[B, T] → [B, T, D]</Term>.
-            </li>
-          </ol>
-        </details>
+        <ol>
+          <li>
+            <strong>Foundation (2.1):</strong> Grassmann showed that abstract things can be coordinates. We need that “permission slip”
+            before treating characters like points in space.
+          </li>
+          <li>
+            <strong>Problem (2.2):</strong> The <Term>(vocab_size)<sup>T</sup></Term> scaling limit. This pressure is why we need sharing: one
+            reusable representation per token, instead of one table per context.
+          </li>
+          <li>
+            <strong>Target (2.3):</strong> Sharing only helps if we know what “similar” should mean. Our ground truth is computable: tokens with
+            similar <Term>P(next | token)</Term> should be close.
+          </li>
+          <li>
+            <strong>Data structure (2.4):</strong> Once we know what we want to learn, we need somewhere to store it: an embedding table with one
+            <Term>D</Term>-dimensional row per token.
+          </li>
+          <li>
+            <strong>Mechanics (2.5):</strong> To use that table, we need row selection from IDs: <Term>E[ix]</Term>. One-hot vectors are a way to
+            write “pick this row” as ordinary matrix multiplication.
+          </li>
+          <li>
+            <strong>Similarity (2.6):</strong> After lookup, we need a score that compares vectors and plays nicely with gradients. Dot product is
+            the simplest workhorse.
+          </li>
+          <li>
+            <strong>Softmax (2.7):</strong> Scores aren’t probabilities. Softmax turns them into a valid distribution so we can train on log‑probability.
+          </li>
+          <li>
+            <strong>Batching (2.8):</strong> Real training runs many examples and many positions at once. Tensors are just the shape bookkeeping for
+            <Term>[B, T] → [B, T, D]</Term>.
+          </li>
+        </ol>
 
         <Invariants title="Chapter 2 Invariants">
           <InvariantItem>We replace giant context tables with shared, reusable number tables (matrices).</InvariantItem>
@@ -1902,6 +1903,26 @@ print("\\nGradient check:", "PASS ✓" if np.abs(analytical_grad - numerical_gra
       </Section>
 
       <Section number="2.11" title="Exercises">
+        <Paragraph>
+          These exercises are where you make the chapter concrete. The goal isn’t to be clever — it’s to get comfortable with the exact
+          objects the model manipulates.
+        </Paragraph>
+        <Paragraph>
+          Chapter 2’s pipeline is: IDs → vectors → scores → probabilities → loss. The exercises ask you to do each step once, slowly, so the
+          code later feels inevitable instead of mysterious.
+        </Paragraph>
+        <ul>
+          <li><strong>Embedding lookup:</strong> row selection (<Term>E[ix]</Term>) from token IDs</li>
+          <li><strong>Dot product:</strong> turn two vectors into a similarity score</li>
+          <li><strong>Softmax:</strong> turn scores into a probability distribution</li>
+          <li><strong>Cross‑entropy:</strong> measure “how surprised were we by the truth?”</li>
+          <li><strong>Training step:</strong> nudge the numbers so the truth gets higher probability next time</li>
+        </ul>
+        <Paragraph>
+          We’ll lean on this in Chapter 3 when we widen the context window and let the model combine multiple token vectors before it predicts
+          the next one.
+        </Paragraph>
+
         <Exercise
           number="2.1"
           title="The 'q' Test"

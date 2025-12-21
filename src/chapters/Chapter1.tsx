@@ -457,11 +457,12 @@ export function Chapter1() {
         </Paragraph>
         <CorridorDemo />
         <Paragraph>
-          It can look like a formula at first. It's just the bookkeeping for "of those, of those, of those." Once you see
-          the corridor narrowing, multiplication is what keeps track.
+          In symbols, this becomes the chain rule product. Each factor is one “survival fraction”: <em>given</em> the first
+          <Term>k</Term> characters, what fraction of the remaining corpus survives one more character? Multiply those survival
+          fractions and you get the final fraction that survives all the way to the full sequence.
         </Paragraph>
         <Paragraph>
-          Why does "AND" mean multiply? Think of it as filtering. Imagine starting with 1,000 equally likely worlds.
+          Here's the same thing from first principles. Imagine starting with 1,000 equally likely worlds.
         </Paragraph>
         <Paragraph>
           First, filter for event <Term>A</Term>. Say it happens in 200 of them. That's <Term>200/1000 = 0.2</Term>.
@@ -1354,8 +1355,10 @@ itos = {i: ch for ch, i in stoi.items()}
           Now we can actually <em>use</em> the vocabulary.
         </Paragraph>
         <Paragraph>
-          The word <strong>code</strong> just means “an agreed mapping.” In this chapter, our codebook is two tiny
-          dictionaries: <Term>stoi</Term> and <Term>itos</Term>.
+          The model is going to store everything in arrays: tables of numbers. Arrays don’t have a slot called <Term>'h'</Term>. They have a slot called <Term>3</Term>. So we pick an integer ID for every token and stay consistent.
+        </Paragraph>
+        <Paragraph>
+          That assignment is the whole “code” in this chapter: a reversible mapping between symbols and integer IDs. Our two tiny maps are <Term>stoi</Term> (string → int) and <Term>itos</Term> (int → string).
         </Paragraph>
         <Paragraph>
           <strong>Encoding</strong> means: walk through the text and replace each character with its ID using <Term>stoi</Term>.
@@ -1364,7 +1367,7 @@ itos = {i: ch for ch, i in stoi.items()}
           <strong>Decoding</strong> means: take IDs, map them back to characters with <Term>itos</Term>, and join them into a string.
         </Paragraph>
         <Paragraph>
-          With the mapping above, <Term>hello</Term> becomes <Term>[3, 2, 4, 4, 5]</Term>.
+          With the mapping above, <Term>hello</Term> becomes <Term>[3, 2, 4, 4, 5]</Term>, and <Term>[3, 2, 4, 4, 5]</Term> becomes <Term>hello</Term>.
         </Paragraph>
         <Paragraph>
           One subtle but important detail: these integers aren't "numbers" the way <Term>3</Term> and <Term>5</Term> are in
