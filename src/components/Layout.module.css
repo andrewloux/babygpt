@@ -10,7 +10,7 @@
 }
 
 .chapterNumber {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 14px;
   color: var(--accent-cyan);
   letter-spacing: 3px;
@@ -29,7 +29,7 @@
 }
 
 .chapterTitle {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-sans);
   font-size: clamp(48px, 8vw, 72px);
   font-weight: 700;
   line-height: 1.1;
@@ -60,7 +60,7 @@
 }
 
 .sectionNumber {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   color: var(--accent-magenta);
   background: rgba(255, 0, 110, 0.1);
@@ -84,7 +84,7 @@
 }
 
 .sectionLink {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.9em;
   color: var(--accent-cyan);
   text-decoration: none;
@@ -96,7 +96,7 @@
 }
 
 .sectionTitle {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-sans);
   font-size: 28px;
   font-weight: 700;
   color: var(--text-primary);

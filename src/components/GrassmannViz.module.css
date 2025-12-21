@@ -22,7 +22,7 @@
 
 .card {
     position: relative;
-    background-color: #0b0c15;
+    background-color: var(--bg-primary);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 1rem;
     padding: 2rem;
@@ -285,7 +285,7 @@
 }
 
 .tooltipContent {
-    background: #1a1b26;
+    background: var(--bg-secondary);
     border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 0.5rem 0.75rem;
     border-radius: 0.5rem;
@@ -309,7 +309,7 @@
 .tooltipArrow {
     width: 0.5rem;
     height: 0.5rem;
-    background: #1a1b26;
+    background: var(--bg-secondary);
     border-left: 1px solid rgba(255, 255, 255, 0.1);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     transform: rotate(45deg) translateX(-50%);
@@ -469,7 +469,7 @@
     height: 8px;
     -webkit-appearance: none;
     appearance: none;
-    background: linear-gradient(90deg, #4ecdc4, #ff6b6b);
+    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-red));
     border-radius: 4px;
     cursor: pointer;
 }

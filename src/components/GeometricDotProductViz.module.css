@@ -1,0 +1,351 @@
+.content {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 1.25rem;
+}
+
+@media (max-width: 700px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .vizPanel {
+    min-height: 300px;
+  }
+
+  .svg {
+    touch-action: none;
+  }
+
+  .handle,
+  .handleB {
+    r: 18;
+  }
+
+  .explanation {
+    font-size: 0.9rem;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .infoPanel {
+    gap: 1.25rem;
+  }
+
+  .resultValue {
+    font-size: 2.5rem;
+  }
+
+  .breakdown {
+    gap: 0.75rem;
+  }
+
+  .breakdownRow {
+    font-size: 0.95rem;
+  }
+}
+
+.vizPanel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse 120% 75% at 50% 0%, rgba(255, 255, 255, 0.04), transparent 65%),
+    rgba(0, 0, 0, 0.22);
+  border-radius: 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0.75rem;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 25px 40px -30px rgba(0, 0, 0, 0.7);
+}
+
+.svg {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  cursor: crosshair;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.gridLine {
+  stroke: rgba(255, 255, 255, 0.05);
+  stroke-width: 1;
+}
+
+.axis {
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1;
+}
+
+.vectorA {
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.95;
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.vectorB {
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.95;
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.handle {
+  fill: var(--accent-cyan);
+  fill-opacity: 0.3;
+  stroke: var(--accent-cyan);
+  stroke-width: 2;
+  cursor: grab;
+  transition:
+    fill-opacity 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    cx 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    cy 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  filter: drop-shadow(0 0 12px rgba(0, 217, 255, 0.25));
+  outline: none;
+}
+
+.handle:hover {
+  fill-opacity: 0.5;
+  filter: drop-shadow(0 0 18px rgba(0, 217, 255, 0.35));
+}
+
+.handle.dragging {
+  cursor: grabbing;
+  fill-opacity: 0.6;
+  filter: drop-shadow(0 0 24px rgba(0, 217, 255, 0.45));
+}
+
+.handle.focused {
+  stroke-width: 3;
+  filter: drop-shadow(0 0 24px rgba(0, 217, 255, 0.55));
+}
+
+.handleB {
+  fill: var(--accent-magenta);
+  fill-opacity: 0.3;
+  stroke: var(--accent-magenta);
+  filter: drop-shadow(0 0 12px rgba(255, 0, 110, 0.25));
+  outline: none;
+}
+
+.handleB:hover {
+  filter: drop-shadow(0 0 18px rgba(255, 0, 110, 0.35));
+}
+
+.handleB.dragging {
+  filter: drop-shadow(0 0 24px rgba(255, 0, 110, 0.45));
+}
+
+.handleB.focused {
+  stroke-width: 3;
+  filter: drop-shadow(0 0 24px rgba(255, 0, 110, 0.55));
+}
+
+.projectionLine {
+  stroke-width: 4;
+  stroke-linecap: round;
+  opacity: 0.95;
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.perpLine {
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 1.5;
+  stroke-dasharray: 4, 4;
+  opacity: 0.6;
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.projPointGlow {
+  fill: rgba(255, 214, 10, 0.25);
+  filter: blur(3px);
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.projPoint {
+  fill: var(--accent-yellow);
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 1.25;
+  filter: drop-shadow(0 0 18px rgba(255, 214, 10, 0.35));
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.arcPositive {
+  fill: none;
+  stroke: var(--accent-green);
+  stroke-width: 2;
+  opacity: 0.7;
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.arcNegative {
+  fill: none;
+  stroke: var(--accent-red);
+  stroke-width: 2;
+  opacity: 0.7;
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.labelA {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 800;
+  fill: var(--accent-cyan);
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.labelB {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 800;
+  fill: var(--accent-magenta);
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.infoPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.resultBox {
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(255, 255, 255, 0.03), transparent 60%),
+    rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.95rem;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+}
+
+.resultLabel {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-mono);
+}
+
+.resultValue {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.resultValue.positive {
+  color: var(--accent-green);
+}
+
+.resultValue.negative {
+  color: var(--accent-red);
+}
+
+.breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.breakdownRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.breakdownLabel {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.breakdownValue {
+  font-family: var(--font-mono);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.formula {
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(255, 255, 255, 0.03), transparent 60%),
+    rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.95rem;
+  padding: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+  text-align: center;
+  line-height: 1.6;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+}
+
+.formulaValues {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.75rem;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.18);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.toggle:hover {
+  background: rgba(0, 0, 0, 0.28);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-cyan);
+  cursor: pointer;
+}
+
+.toggle input:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+.insight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(255, 255, 255, 0.03), transparent 60%),
+    rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.95rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+}
+
+.insightIcon {
+  font-size: 1rem;
+}
+
+.explanation {
+  padding: 1rem 1.25rem;
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(0, 0, 0, 0.18);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.explanation strong {
+  color: rgba(255, 255, 255, 0.85);
+}

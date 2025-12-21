@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Slider } from './Slider'
 import styles from './EmbeddingInspector.module.css'
 import { VOCAB, prettyChar } from '../data/characterData'
 
@@ -376,15 +377,15 @@ export function EmbeddingInspector({ corpus }: EmbeddingInspectorProps) {
               <label className={styles.dimLabel} htmlFor="embedding-dim">
                 Axis <span className={styles.dimValue}>#{axisDim}</span>
               </label>
-              <input
+              <Slider
                 id="embedding-dim"
-                className={styles.slider}
-                type="range"
+                wrap={false}
                 min={1}
                 max={trained.dim}
                 step={1}
                 value={axisDim}
-                onChange={(e) => setAxisDim(parseInt(e.target.value, 10))}
+                onValueChange={(v) => setAxisDim(Math.round(v))}
+                ariaLabel="Embedding axis"
               />
               <div className={styles.toggleGroup}>
                 <button

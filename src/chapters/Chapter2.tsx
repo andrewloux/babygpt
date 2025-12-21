@@ -35,9 +35,14 @@ import {
   DiscreteContinuousViz,
   EmbeddingInspector,
   SoftmaxWidget,
+  SoftmaxSimplexViz,
+  GradientTraceDemo,
+  GeometricDotProductViz,
   CrossEntropyViz,
   EmbeddingGradientViz,
   TrainingDynamicsViz,
+  OneHotViz,
+  NeuralTrainingDemo,
 } from '../components'
 
 const DEFAULT_SHARED_CORPUS = `It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.
@@ -88,13 +93,33 @@ export function Chapter2() {
             ),
           },
           {
+            to: '2.5',
+            title: 'The Embedding Lookup',
+            description: 'Row selection via one-hot vectors: E[ix].',
+          },
+          {
             to: '2.6',
             title: 'Dot Product',
             description: 'A similarity score you can compute (and differentiate).',
           },
           {
+            to: '2.7',
+            title: 'Softmax',
+            description: 'Converts raw scores to a probability distribution.',
+          },
+          {
+            to: '2.8',
+            title: 'Tensors',
+            description: 'Shape bookkeeping: [B, T] → [B, T, D].',
+          },
+          {
+            to: '2.9',
+            title: 'Synthesis',
+            description: 'Traces the full path from counts to coordinates.',
+          },
+          {
             to: '2.10',
-            title: 'The Handoff',
+            title: 'The Nudge',
             description: "How do we update the numbers when we're wrong?",
           },
         ]}
@@ -102,15 +127,25 @@ export function Chapter2() {
 
       <Section number="2.1" title="Grassmann's Insight">
         <Paragraph>
-          In Chapter 1, we ran into a scaling limit: the number of possible contexts explodes exponentially. We can't store them all. We need a way to <strong>compress</strong> infinite variations of language into something finite.
+          In Chapter 1, we built a system that memorizes. Feed it <Term>"cat sat on the"</Term>, and it retrieves what it knows about <Term>"cat sat on the"</Term>. But ask about <Term>"dog sat on the"</Term> — a context it hasn't stored — and it has nothing. Not because it's
+          stupid, but because it has no notion of similarity. In its world, <Term>'cat'</Term> and <Term>'dog'</Term> are just different hash keys. There's no structure connecting them, no way for knowledge to flow from one to the other.
+        </Paragraph>
+        <Paragraph>
+          The mechanism: a hash table maps strings to addresses. Hash(<Term>"cat sat"</Term>) might produce 47,923. Hash(<Term>"dog sat"</Term>) might produce 8,301,457. Those integers are just memory slots — there's no "nearby" slot 47,924 that represents something similar. Addresses are storage locations, not coordinates in a space. Change one letter in the input and the hash jumps to a completely unrelated integer. The data structure has no concept of distance.
+        </Paragraph>
+        <Paragraph>
+          What we need is a representation where tokens aren't just labels — they're <strong>locations</strong>. Where <Term>'cat'</Term> and <Term>'dog'</Term> being nearby isn't a metaphor but a geometric fact. Where learning about one automatically teaches you something about
+          its neighbors. That's the shift from memorization to generalization: from a lookup table to a map.
+        </Paragraph>
+        <Paragraph>
+          Under the hood, this is also a scaling limit: the number of possible contexts explodes exponentially. We can't store them all. We need a way to <strong>compress</strong> infinite variations of language into something finite.
         </Paragraph>
         <Paragraph>
           In 1844, a schoolteacher in Stettin had an insight that wouldn't be fully understood for 120 years: <strong>abstract relationships can be coordinates.</strong>
         </Paragraph>
-            <Paragraph>
-              His point was broader than physics: if you can measure relationships, you can build coordinates. Colors, sounds, and linguistic
-              patterns can all live in a space where "near" and "far" mean something.
-            </Paragraph>
+        <Paragraph>
+          His point was broader than physics: if you can measure relationships, you can build coordinates. Colors, sounds, and linguistic patterns can all live in a space where "near" and "far" mean something.
+        </Paragraph>
         <Paragraph>
           His name was Hermann Grassmann. He wasn't a university professor with a lab and research funding. He taught high school, studied theology, and did mathematics on the side because he couldn't help himself.<Cite n={1} />
         </Paragraph>
@@ -119,7 +154,25 @@ export function Chapter2() {
         </Paragraph>
 
         <Paragraph>
-          Grassmann proved this with color. He didn't just use it as a metaphor — he did actual experimental color science and showed something remarkable: if you pick a few "primaries," you can describe <em>any</em> color by its coordinates in that basis.
+          In 1853, Grassmann published a paper correcting Helmholtz — the most famous physicist of the age. Helmholtz had assumed that mixing yellow and blue light would make green, the way paints do.
+        </Paragraph>
+        <Paragraph>
+          Grassmann identified the category error.
+        </Paragraph>
+        <Paragraph>
+          Mixing paint is <strong>destruction</strong>. A pigment's color is the light it <em>doesn't</em> absorb — everything else gets swallowed. Yellow pigment reflects yellow and absorbs blue. Blue pigment reflects blue and absorbs red. Mix them, and their absorptions combine:
+          blue is gone, red is gone, and green — the one wavelength both happen to reflect — is all that's left.
+        </Paragraph>
+        <Paragraph>
+          Mixing light is <strong>construction</strong>. Light is waves, and waves are additive — they superpose. Yellow and blue wavelengths coexist in the same space. Both hit the retina simultaneously: yellow triggers one set of receptors, blue triggers another. The brain receives
+          both signals at once and reads the combination as white.
+        </Paragraph>
+        <Paragraph>
+          He wasn't guessing. He derived the laws of colorimetry we still use today — proving that the messy, subjective experience of "seeing color" maps cleanly onto a 3‑dimensional vector space.
+        </Paragraph>
+        <Paragraph>
+          This was the radical move: take something that seems irreducibly qualitative — the experience of redness — and give it coordinates. Once you have coordinates, you unlock geometry. You can measure distances. You can interpolate. You can average. Coordinates turn intuition
+          into computation.
         </Paragraph>
         <MathBlock
           equation={String.raw`\text{Purple} = 0.5 \cdot \text{Red} + 0.5 \cdot \text{Blue}`}
@@ -137,14 +190,17 @@ export function Chapter2() {
           </Paragraph>
         </Callout>
         <Paragraph>
-          He called it the <em>Ausdehnungslehre</em> — literally "theory of extension." Looks scary, says the same thing: once something has coordinates, you can do coordinate math on it.
+          He called it the <em>Ausdehnungslehre</em> — literally "theory of extension." Looks scary, says the same thing: once something has coordinates, you can do coordinate math on it. Coordinates are just numbers you can scale, add, and mix.
+        </Paragraph>
+        <Paragraph>
+          Grassmann got his numbers from a matching experiment — adjust knobs until patches look the same, read the settings. We get ours from counting — what follows each character, how often.
         </Paragraph>
         <Paragraph>
           That gives you a new move: take a weighted average. Slide <Term>t</Term> below and watch the blend. In "Colors" mode it's just purple showing up. In "Characters" mode, you're blending two next‑character distributions from Chapter 1 and watching the model's bets morph smoothly.
         </Paragraph>
         <GrassmannViz />
         <Paragraph>
-          Colors aren't numbers. They're sensory experiences. Characters aren't numbers either — they're symbols. But both can be treated as coordinates in a space where <em>blending makes sense</em>. Purple is "half red, half blue." And a blend of 'q' and 'u' predicts a mix of what follows each.
+          Colors aren't numbers. They're sensory experiences. Characters aren't numbers either — they're symbols. But both can be treated as coordinates in a space where <em>blending makes sense</em>. Purple is "half red, half blue." And a blend of <Term>'q'</Term> and <Term>'u'</Term> predicts a mix of what tends to follow each.
         </Paragraph>
 
         <Paragraph>
@@ -160,7 +216,7 @@ export function Chapter2() {
           experiment. For characters, we use something just as measurable: the distribution of what tends to come next. That fingerprint is already a vector (one coordinate per possible next character). We can compute it directly from counts.
         </Paragraph>
         <Paragraph>
-          One important clarification before we sprint off a cliff: the character <Term>'q'</Term> isn't "a vector." It's still just a
+          One important clarification before we get carried away: the character <Term>'q'</Term> isn't "a vector." It's still just a
           symbol. The vector is the little bundle of numbers we decide to represent it with.
         </Paragraph>
         <Callout variant="info" title="What actually lives in the space?">
@@ -169,7 +225,7 @@ export function Chapter2() {
               <strong>Symbol:</strong> <Term>'q'</Term> (discrete)
             </li>
             <li>
-              <strong>ID:</strong> <Term>stoi['q'] = 17</Term> (a name tag)
+              <strong>ID:</strong> <Term>stoi['q'] = 17</Term> (example name tag)
             </li>
             <li>
               <strong>Embedding:</strong> <Term>e_q = [0.2, -1.3, ...]</Term> (coordinates we can move)
@@ -186,7 +242,7 @@ export function Chapter2() {
         </Paragraph>
         <Paragraph>
           And this is where the "continuous" part starts to matter. Integer IDs can only jump: 17 → 18. There's no "a tiny bit more
-          like <Term>u</Term>." In a vector space, you can move one millimeter — add a tiny <Term>ε</Term> to one coordinate — and get a
+          like <Term>'u'</Term>." In a vector space, you can move one millimeter — add a tiny <Term>ε</Term> to one coordinate — and get a
           nearby point.
         </Paragraph>
         <Paragraph>
@@ -210,7 +266,7 @@ export function Chapter2() {
           Grassmann did this at a deeper, historical level. "Grassmann's law" is an actual rule in historical linguistics:<Cite n={2} /> when two aspirated consonants show up in neighboring syllables, the first one loses its puff. It's a <em>transformation</em>: input → rule → output. The same kind of systematic structure you'd write as a function.
         </Paragraph>
         <Paragraph>
-          The same person who showed that colors can be coordinates <em>also</em> proved that language has this kind of structure. That's the bridge: if linguistic patterns are systematic enough to write as rules, they're systematic enough to capture as coordinates. The patterns aren't in the sounds themselves — they're in the <em>relationships</em>. And relationships can be geometry.
+          The same person who showed that colors can be coordinates <em>also</em> proved that language has this kind of structure. But there's a problem: a character has no wavelength. The symbol is arbitrary — a shape we all agreed would mean something, defined entirely by how it differs from other shapes and how we use it. So we can't measure what the character <em>is</em>. But we can measure what it <em>does</em>: what tends to follow <Term>'q'</Term>? What expectations does <Term>'e'</Term> set up? Go through enough text and count: for each character, you get 27 numbers — a probability for each possible successor. That distribution captures the character's predictive role. 27 numbers is a vector. The vector is the coordinate — not extracted from the symbol (there's nothing inside to extract), but emerging from how the symbol behaves in the language that gives it meaning.
         </Paragraph>
 
         <Paragraph>
@@ -267,28 +323,51 @@ export function Chapter2() {
 
       <Section number="2.2" title="The Reuse Question">
         <Paragraph>
-          Chapter 1 gave us a working model (N-grams), but it had a fatal flaw: <strong>every context was an island.</strong>
+          Chapter 1 gave us a working model (n‑grams), but it had a sharp limit: <strong>every context was an island.</strong>
         </Paragraph>
         <Paragraph>
-          Picture this: you've seen "the cat" ten thousand times in your training data. You know <em>exactly</em> what tends to follow "the cat" — maybe "sat", "ran", "meowed". The model has learned this pattern cold.
+          Picture this: you've seen <Term>"the cat"</Term> ten thousand times in your training data. You know <em>exactly</em>{' '}
+          what tends to follow <Term>"the cat"</Term> — maybe <Term>"sat"</Term>, <Term>"ran"</Term>, <Term>"meowed"</Term>.
         </Paragraph>
         <Paragraph>
-          Now the text shows you "a cat" for the first time.
+          Now the text shows you <Term>"a cat"</Term> for the first time.
         </Paragraph>
         <Paragraph>
-          In a lookup-table N-gram, <Term>"the "</Term> and <Term>"a "</Term> are totally separate contexts. The model looks up "a cat", finds nothing, and shrugs. All that knowledge about cats? Useless. It can't transfer. The contexts are different strings, so they're different rows in the table, so they're <em>unrelated</em>. The model falls back to "never seen this exact thing before."
+          In a lookup-table n‑gram, <Term>"the "</Term> and <Term>"a "</Term> are separate contexts. The model looks up <Term>"a cat"</Term>,
+          finds nothing, and (in a pure lookup table) has to guess from something shorter. Everything it learned about{' '}
+          <Term>"the cat"</Term> stays trapped there, because the model has no notion of distance between contexts.
         </Paragraph>
         <Paragraph>
-          Same pain with rare strings: <Term>supercalifragilisticexpialidocious</Term> is made of ordinary letters, but most longer contexts inside it are ones you'll never have seen in your tiny corpus. In a pure lookup table, "new context" just means "empty row."
+          You see the same thing with rare strings: <Term>supercalifragilisticexpialidocious</Term> is made of ordinary letters, but most longer contexts inside it are ones you'll never have seen in your tiny corpus. In a pure lookup table, "new context" just means "empty row."
         </Paragraph>
         <Paragraph>
-          This is the problem of <strong>independent learning</strong>. In an N-gram model, if you haven't seen a specific context before, you know <em>nothing</em>. And as contexts get longer, "never seen this before" becomes the default state.
+          This is what <strong>independent learning</strong> looks like: if you haven't seen a specific context before, you have no direct evidence for it. And as contexts get longer, "never seen this before" becomes the default state.
         </Paragraph>
         <Paragraph>
           We need a way to <strong>share information</strong>. We need reusable parts.
         </Paragraph>
         <Paragraph>
-          The solution is to stop memorizing <em>contexts</em> and start modeling <em>tokens</em>. Instead of a giant table of answers for every possible situation, we give each token a <strong>portable identity</strong> — a set of numbers that travels with it wherever it goes. (Or rather: a set of numbers that the <em>model</em> can consult whenever that token appears, which amounts to the same thing mechanically but matters conceptually — we're not encoding intrinsic properties of 'a', we're learning what <em>role</em> 'a' tends to play when predicting what comes next.)
+          The solution is to stop memorizing <em>contexts</em> and start modeling <em>tokens</em>. Instead of a giant table of answers for every possible situation, we store one shared vector per token.
+        </Paragraph>
+        <Paragraph>
+          Here's why this works. If <Term>'cat'</Term> and <Term>'dog'</Term> have similar embeddings, then <em>any context containing them produces similar predictions</em>. One learned embedding for <Term>'cat'</Term> serves <strong>all</strong> contexts containing <Term>'cat'</Term>: <Term>"the cat"</Term>, <Term>"a cat"</Term>, <Term>"fat cat"</Term>, etc. The same embedding gets reused everywhere.
+        </Paragraph>
+        <Paragraph>
+          The compression is direct:
+        </Paragraph>
+        <ul>
+          <li>
+            <strong>Lookup table:</strong> <Term>V<sup>T</sup></Term> entries (one per context).
+          </li>
+          <li>
+            <strong>Embedding table:</strong> <Term>V</Term> entries (one per token).
+          </li>
+        </ul>
+        <Paragraph>
+          With a vocabulary of 27 characters and context length 3, that's 19,683 entries versus 27. One embedding does the work of thousands of lookup-table rows — because tokens appear in many contexts.
+        </Paragraph>
+        <Paragraph>
+          You can call that a "portable identity," but mechanically it's just shared memory: whenever the text contains <Term>'a'</Term>, the model consults the same row of numbers. It's not an intrinsic property of the symbol — it's a learned summary of how the symbol behaves in this prediction game.
         </Paragraph>
         <Paragraph>
           Here's the shift:
@@ -307,10 +386,11 @@ export function Chapter2() {
         </Paragraph>
         <ContextExplosionViz />
         <Paragraph>
-          In this chapter, that reusable part is an <em>embedding table</em>: one learnable vector per token. It gives the model a place to store information about 'a' or 'b' that applies <em>everywhere</em>, not just in one specific context.
+          In this chapter, that reusable part is an <em>embedding table</em>: one learnable vector per token. It gives the model a place to store information about <Term>'a'</Term> or <Term>'b'</Term> that applies <em>everywhere</em>, not just in one specific context.
         </Paragraph>
         <Paragraph>
-          But this raises a deeper question. Token IDs are just integers — arbitrary labels. <Term>stoi['q'] = 17</Term> and <Term>stoi['u'] = 21</Term> tells us nothing about whether 'q' and 'u' are similar — yet they're extremely similar statistically, since 'q' is almost always followed by 'u'.
+          But this raises a deeper question. Token IDs are just integers — arbitrary labels. For example, <Term>stoi['q'] = 17</Term> and{' '}
+          <Term>stoi['u'] = 21</Term> tell us nothing about whether <Term>'q'</Term> and <Term>'u'</Term> are similar — yet in English, <Term>'q'</Term> is almost always followed by <Term>'u'</Term>.
         </Paragraph>
         <Paragraph>
           We need a representation where distance actually means something: <em>coordinates</em> in a space where nearby things behave similarly.
@@ -322,7 +402,7 @@ export function Chapter2() {
         <details className="collapsible">
           <summary>Optional: what do we mean by "model"?</summary>
           <Paragraph>
-            In this book, a model is a function: input → output.
+            In this series, a model is a function: input → output.
           </Paragraph>
           <ul>
             <li><strong>Input:</strong> context characters</li>
@@ -346,11 +426,14 @@ export function Chapter2() {
           <strong>Two characters should be close if they predict similar next characters.</strong>
         </Paragraph>
         <Paragraph>
+          Why this definition? Because we're building a <strong>language model</strong>, not a thesaurus. The model's job is to predict the next token. Two characters are "the same" for prediction purposes if they make the same predictions. Semantic similarity doesn't matter — predictive role is everything.
+        </Paragraph>
+        <Paragraph>
           If you had to bet money on what comes next after seeing <Term>'a'</Term> versus <Term>'e'</Term>, you'd offer similar odds. That's measurable. That's the geometry we're after.
         </Paragraph>
         <Callout variant="info" title="The target is computable">
           <Paragraph>
-            <strong>Step 1: Compute the fingerprint.</strong> For each character <Term>c</Term>, count what follows it:
+            <strong>Step 1: Compute the fingerprint.</strong> For each character <Term>c</Term>, count what follows it — this is the same conditional probability we built in Chapter 1 (Section 1.1.5):
           </Paragraph>
           <MathBlock
             equation={String.raw`P(\text{next}=x \mid c) = \frac{\text{count}(c \to x)}{\text{count}(c)}`}
@@ -390,7 +473,7 @@ export function Chapter2() {
         />
         <Paragraph>
           That similarity score isn't random. It's computed from the full{' '}
-          <Term>P(next | c)</Term> fingerprints (all 27 probabilities) using the corpus above. The plot is just a 2‑D slice so your eyeballs have something to look at.
+          <Term>P(next | c)</Term> fingerprints (all 27 probabilities) using the corpus above. The plot is just a 2‑D slice so a human can look at it.
         </Paragraph>
         <Callout variant="insight" title="Why this definition?">
           <Paragraph>
@@ -413,29 +496,40 @@ export function Chapter2() {
           <strong>Integers are like Proper Nouns (Identities).</strong> <Term>stoi['cat'] = 17</Term> is just a unique name tag. It tells you <em>which</em> one it is, but nothing about <em>what</em> it is. You can't compare 'John' and 'Alice' just by looking at their names. John is Person #457. Alice is Person #203. The number 254 separating them? Meaningless.
         </Paragraph>
         <Paragraph>
+          The naive first step is <Term>one-hot encoding</Term>: turn each integer into a vector of 0s with a single 1 at the token's index. But this is just the identity problem in disguise—the vectors are orthogonal (zero overlap), so "similar" tokens have identical dot products (zero) as "different" ones.
+        </Paragraph>
+        <OneHotViz />
+        <Paragraph>
           <strong>Vectors are like Adjectives (Attributes).</strong> A vector is a list of measurable qualities: <Term>[Furry, Small, Living]</Term>. Now you can ask: how similar is John to Alice? Compare their <em>attributes</em>. John = [tall, quiet, left-handed]. Alice = [tall, quiet, right-handed]. They're similar on two dimensions, different on one. You can measure that.
         </Paragraph>
         <Paragraph>
-          This shift—from "Who are you?" (<strong>Name</strong>) to "What are you like?" (<strong>Adjectives</strong>)—is what unlocks learning. You can't mathematically adjust a name. But you <em>can</em> adjust a description. You can make a vector slightly more "adjective-like" or slightly less "plural".
+          This shift—from "Who are you?" (<strong>Name</strong>) to "What are you like?" (<strong>Adjectives</strong>)—is what makes learning possible. Integers can't learn because there's no operation that moves 17 toward 42. There's no "slightly more" in discrete label space. But vectors live in continuous space: you can write <Term>v += 0.01 * gradient</Term>. That nudge—moving coordinates by tiny amounts in directions that reduce error—is gradient descent. Continuous space enables it. Discrete labels don't.
         </Paragraph>
         <DiscreteContinuousViz />
         <Paragraph>
-          But why are we allowed to do this? Why should words have coordinates?
+          But why are we allowed to do this? Why should tokens have coordinates?
         </Paragraph>
         <Paragraph>
-          Words have properties you can measure: <strong>statistical ones</strong>. 'Apple' has a high probability of appearing near 'eat'. 'King' appears near 'throne'. Those relationships are numbers you can count. The geometry is a map built from those counts.
+          Tokens have properties you can measure: <strong>statistical ones</strong>. <Term>apple</Term> has a high probability of appearing near <Term>eat</Term>. <Term>king</Term> appears near <Term>throne</Term>. Those relationships are numbers you can count.
         </Paragraph>
 
         <Paragraph>
-          And then the math has to live somewhere. That means <em>data structures</em>.
+          But why should these counts become coordinates? Try this: take the distribution for <Term>'a'</Term> and the distribution for <Term>'e'</Term>. Both often precede <Term>'n'</Term> — "an", "en". Average their vectors. The result has a high value in the "followed-by-n" slot. It predicts like something between <Term>'a'</Term> and <Term>'e'</Term>. That's not an accident — averaging vectors averaged the predictions.
         </Paragraph>
-            <Paragraph>
-              We need one simple guarantee: every time the text contains an <Term>a</Term>, we fetch the <em>same</em> coordinates for
-              <Term>a</Term>. It's the same row of numbers every time.
-            </Paragraph>
+
         <Paragraph>
-          If we have that, something important happens: evidence about <Term>a</Term> can accumulate. Whatever the model learns
-          about <Term>a</Term> in one sentence comes along the next time <Term>a</Term> shows up somewhere else. No more
+          The dot product works too: high overlap between two vectors means both tokens predict similar next-characters. The geometry comes from the counts. Move in a direction, and predictions change in a corresponding way.
+        </Paragraph>
+
+        <Paragraph>
+          But coordinates need to live somewhere persistent.
+        </Paragraph>
+        <Paragraph>
+          Picture a table with one row per token. The row for <Term>'a'</Term> holds its coordinates — 64 numbers. When <Term>'a'</Term> appears in <Term>"cat"</Term>, we read that row. When <Term>'a'</Term> appears in <Term>"apple"</Term>, we read the same row. When training adjusts those numbers, it writes back to that row.
+        </Paragraph>
+        <Paragraph>
+          If we have that, something important happens: evidence about <Term>'a'</Term> can accumulate. Whatever the model learns
+          about <Term>'a'</Term> in one sentence comes along the next time <Term>'a'</Term> shows up somewhere else. No more
           one‑context islands.
         </Paragraph>
         <ul>
@@ -511,7 +605,7 @@ E = np.random.randn(vocab_size, embed_dim).astype(np.float32)`}</CodeBlock>
           Don't overtrust any one axis. A model can rotate the space and keep the same information as a <em>direction</em>, not a named column. The point is simpler: training turns those 6,912 bytes into a structured table you can probe.
         </Paragraph>
 
-            <Callout variant="insight" title="Why random? (Symmetry breaking is necessary)">
+        <Callout variant="insight" title="Why random? (Symmetry breaking is necessary)">
           <Paragraph>
             You might ask: why not initialize all embeddings to zero? Or all to the same value?
           </Paragraph>
@@ -521,25 +615,21 @@ E = np.random.randn(vocab_size, embed_dim).astype(np.float32)`}</CodeBlock>
           <Paragraph>
             If <Term>E['a'] = E['b'] = E['c'] = [0, 0, ..., 0]</Term>, then every character produces identical predictions. The loss is the same for each character. So the gradients are identical. Identical gradients → identical updates → they remain identical after the update.
           </Paragraph>
-              <Paragraph>
-                Random initialization <em>breaks this symmetry</em>. Each character starts at a different point in the 64-dimensional space.
-                Even though the positions are arbitrary, they're different. That's enough to give them different gradients, and it compounds
-                over training.
-              </Paragraph>
           <Paragraph>
-            We introduce noise to break the symmetry. If every character started at zero, they would all receive identical updates and remain clones forever.
+            Random initialization <em>breaks the tie</em>. Then the data can do its job: <Term>'q'</Term> is usually followed by <Term>'u'</Term>, <Term>'t'</Term> is often followed by <Term>'h'</Term> or <Term>'e'</Term>, and those different training pairs pull different rows in different directions. Tiny differences accumulate into structure.
           </Paragraph>
         </Callout>
-            <Paragraph>
-              That smallness is the point. Instead of trying to store <Term>27<sup>8</sup></Term> contexts (~282 billion), we store one reusable row per character.
-            </Paragraph>
+
         <Paragraph>
-          Right now it's random, which means it has no structure yet. But it's <em>consistent</em> randomness: every time the text contains an <Term>a</Term>, you fetch the same row, so all the evidence about <Term>a</Term> keeps piling into the same 64 slots.
+          That smallness is the point. A lookup table for 8-character contexts needs <Term>27<sup>8</sup> × 27</Term> entries — one probability for each next-character, for each context. That's 282 trillion parameters. The embedding table has 27 rows × 64 columns = 1,728 numbers. Even adding an output layer (64 × 27 = 1,728 more), the total is 3,456 parameters. That's 80 billion times smaller.
         </Paragraph>
         <Paragraph>
-          So the "no more islands" win is built into the data structure: the same row gets reused in every context. If the model learns something useful about <Term>q</Term> in one place, that information comes along the next time <Term>q</Term> shows up somewhere else.
+          Right now it's random, which means it has no structure yet. But it's <em>consistent</em> randomness: every time the text contains <Term>'a'</Term>, you fetch the same row, so all the evidence about <Term>'a'</Term> keeps piling into the same 64 slots.
         </Paragraph>
-            <Callout variant="insight" title="So what fills the matrix?">
+        <Paragraph>
+          So the "no more islands" win is built into the data structure: the same row gets reused in every context. If the model learns something useful about <Term>'q'</Term> in one place, that information comes along the next time <Term>'q'</Term> shows up somewhere else.
+        </Paragraph>
+        <Callout variant="insight" title="So what fills the matrix?">
           <Paragraph>
             The data structure is the easy part. The hard part is this: <strong>what values should go in this matrix?</strong>
           </Paragraph>
@@ -595,7 +685,10 @@ x = E[ix]`}</CodeBlock>
         <MatrixRowSelectViz />
         <Paragraph>
           We call it a "lookup," but you can write it as <Term>xᵀW</Term>. That's just a linear layer. The one‑hot vector
-          decides which row gets credit (and which row gets gradients) when we start training.
+          decides which row gets credit — and which row gets gradients — when we start training.
+        </Paragraph>
+        <Paragraph>
+          Why does this matter for training? If the input is <Term>'c'</Term> (index 3), the output is <Term>E[3]</Term>. Rows 0, 1, 2, 4... don't appear in the computation. If the prediction is wrong, the only numbers you can adjust to fix it are the 64 values in row 3. Changing row 0 wouldn't change the output — row 0 wasn't used. The one-hot isolates which row is responsible.
         </Paragraph>
       </Section>
 
@@ -648,7 +741,7 @@ print(X_emb.shape)  # (2, 4, 64)`}</CodeBlock>
           <WorkedExample title="A tiny overlap calculation">
             <WorkedStep n="1">
               <Paragraph>
-                Shrink the universe. Pretend there are only three possible next characters: <Term>a</Term>, <Term>b</Term>, and space <Term>␣</Term>.
+                Shrink the universe. Pretend there are only three possible next characters: <Term>'a'</Term>, <Term>'b'</Term>, and space <Term>␣</Term>.
               </Paragraph>
               <Paragraph>
                 Two contexts give two next‑character distributions:
@@ -688,13 +781,30 @@ print(X_emb.shape)  # (2, 4, 64)`}</CodeBlock>
             </Callout>
 
         <Paragraph>
+          Before we go further, let's see what the dot product actually <em>looks like</em>. Drag the arrows below:
+        </Paragraph>
+
+        <GeometricDotProductViz />
+
+        <Paragraph>
+          That's the geometric view: the dot product measures how much one vector <em>projects onto</em> (casts a shadow onto) another. Parallel vectors have high dot products; perpendicular vectors have zero; opposite vectors have negative.
+        </Paragraph>
+
+        <Paragraph>
+          Now here's the connection to probability: when A and B are probability distributions (like our character fingerprints), the "shadow" interpretation becomes "overlap" — how much probability mass lands in the same places.
+        </Paragraph>
+
+        <Paragraph>
           So why does this particular sum show up everywhere? Because it plays perfectly with the only move we've allowed
           ourselves so far: <em>linear mixing</em>. If you blend vectors, dot products blend too:
         </Paragraph>
         <MathBlock
           equation={String.raw`(\alpha a + \beta b)\cdot c = \alpha(a\cdot c) + \beta(b\cdot c)`}
-          explanation="'Similarity' distributes over addition and scaling. That's the whole reason it composes nicely."
+          explanation="Similarity of a blend = blend of similarities."
         />
+        <Paragraph>
+          Concrete example: suppose <Term>'a'</Term> has similarity 0.7 to <Term>'n'</Term>, and <Term>'e'</Term> has similarity 0.5 to <Term>'n'</Term>. What's the similarity of their average to <Term>'n'</Term>? You already know: it's 0.6. The formula says so. You don't have to build the averaged vector and recompute — the answer falls out from what you already measured.
+        </Paragraph>
 
         <Paragraph>
           One dot product is one similarity score. Stack vectors into matrices and you can compute a whole grid of scores at
@@ -736,16 +846,24 @@ score = float(np.dot(a, b))`}</CodeBlock>
         <details className="collapsible">
           <summary>Optional: why dot products keep showing up</summary>
           <Paragraph>
-            You might wonder: why this specific similarity score? Why not Euclidean distance (<Term>||a - b||</Term>) or cosine similarity?
+            You might wonder: why this specific similarity score? Why not Euclidean distance (<Term>||a - b||</Term>) or KL divergence?
           </Paragraph>
           <Paragraph>
-            If you're curious, flip the widget above from <Term>dot</Term> to <Term>euclidean</Term>. It's the same two fingerprints, just a different question.
+            Three constraints make dot product the engineering sweet spot:
           </Paragraph>
+          <ol>
+            <li>
+              <strong>Differentiable.</strong> <Term>∂(a·b)/∂a = b</Term>. Clean gradients for backprop.
+            </li>
+            <li>
+              <strong>Distributes over addition.</strong> <Term>(a+b)·c = a·c + b·c</Term>. Crucial for gradient flow and attention (Chapter 4). Euclidean distance breaks this: <Term>||a+b|| ≠ ||a|| + ||b||</Term>.
+            </li>
+            <li>
+              <strong>Fast on GPUs.</strong> Multiply-accumulate is the primitive. KL divergence needs logs. L2 needs squares and square roots.
+            </li>
+          </ol>
           <Paragraph>
-            <strong>The constraint:</strong> we need a score that behaves predictably when we add vectors.
-          </Paragraph>
-          <Paragraph>
-            L2 distance doesn't distribute: <Term>||a+b|| ≠ ||a|| + ||b||</Term>. But dot product does: <Term>(a+b)·c = a·c + b·c</Term>.
+            If you're curious, flip the widget above from <Term>dot</Term> to <Term>euclidean</Term>. Same fingerprints, different question. You'll see L2 works, but the gradients are messier and it doesn't compose as cleanly.
           </Paragraph>
           <details className="collapsible">
             <summary>One quick counterexample</summary>
@@ -802,7 +920,16 @@ score = float(np.dot(a, b))`}</CodeBlock>
             <Term>e<sup>5</sup> ≈ 148</Term> (Huge).
           </Paragraph>
           <Paragraph>
-            This doesn't just make things positive. It <strong>amplifies differences</strong>. If Score A is slightly bigger than Score B, <Term>e<sup>A</sup></Term> will be <em>much</em> bigger than <Term>e<sup>B</sup></Term>.
+            This doesn't just make things positive. It <strong>amplifies differences</strong>. Scores <Term>[2.0, 1.5]</Term> become <Term>[e<sup>2.0</sup>, e<sup>1.5</sup>] ≈ [7.4, 4.5]</Term>. A gap of 0.5 became a gap of 2.9. After normalizing: <Term>[0.62, 0.38]</Term>. The slightly-higher score gets most of the probability.
+          </Paragraph>
+          <Paragraph>
+            Why do we want this? Think of it as a betting game. You have $1 to spread across 27 characters. After you place your bets, we reveal the answer. Your score is how much you put on the correct character. Everything else is lost.
+          </Paragraph>
+          <Paragraph>
+            If you know 'e' is likely correct, every cent on 'a' is a cent not on 'e'. It's not just wasted — it actively hurts you, because the total is fixed at $1. The optimal strategy when you're confident: go all in.
+          </Paragraph>
+          <Paragraph>
+            Linear normalization doesn't do this. Scores <Term>[2.0, 1.5]</Term> become <Term>[0.57, 0.43]</Term> — almost a coin flip. You're betting 43 cents on something you think is less likely. Exponentiation fixes this: same scores become <Term>[0.62, 0.38]</Term>. Still not all-in, but the gap between "I think this" and "I think that" is now reflected in the bet sizes.
           </Paragraph>
 
           <Paragraph><strong>Attempt 3: Normalize</strong></Paragraph>
@@ -829,7 +956,7 @@ score = float(np.dot(a, b))`}</CodeBlock>
               </Paragraph>
               <MathBlock
                 equation={String.raw`\text{Softmax}(x_i) = \frac{e^{x_i - m}}{\sum_{j} e^{x_j - m}} \quad \text{where } m = \max_j x_j`}
-                explanation="Same probabilities, but now the largest exponent is e^0 = 1, and everything else is ≤ 1."
+                explanation="Same probabilities, but now the largest exponent is e⁰ = 1, and everything else is ≤ 1."
               />
             </Callout>
 
@@ -851,11 +978,130 @@ score = float(np.dot(a, b))`}</CodeBlock>
         <Paragraph>
           In the widget, try sliding <Term>T</Term> down toward <Term>0.1</Term> and up toward <Term>5</Term>. You're not changing which logit is biggest — you're changing how aggressively softmax concentrates probability mass on the winner.
         </Paragraph>
+
+        <Callout variant="insight" title="Why exp? (The surprising answer)">
+          <Paragraph>
+            Here's something wild: softmax isn't just <em>a</em> way to turn scores into probabilities. It's the <strong>only</strong> way that makes mathematical sense.
+          </Paragraph>
+          <Paragraph>
+            Imagine you're betting on characters, but you want to be <em>as unbiased as possible</em> given what you know. You don't want to accidentally favor one character over another unless your scores tell you to.
+          </Paragraph>
+          <Paragraph>
+            There's a theorem (maximum entropy principle) that says: if you want the <strong>least-biased probability distribution</strong> that respects your score constraints, you must use <Term>exp(score)</Term>. Not <Term>score²</Term>. Not <Term>abs(score)</Term>. Only <Term>exp</Term>.
+          </Paragraph>
+          <Paragraph>
+            This explains why softmax appears <em>everywhere</em>: language model outputs, attention mechanisms, reinforcement learning, statistical physics. It's not a design choice — it's mathematical inevitability.
+          </Paragraph>
+        </Callout>
+
+        <SoftmaxSimplexViz />
+
+        <Paragraph>
+          The triangle above is called the <Term>probability simplex</Term>. Every point inside represents a valid probability distribution over three options. The corners are certainty (100% on one choice). The center is complete uncertainty (uniform distribution).
+        </Paragraph>
+        <Paragraph>
+          Watch how temperature pulls the point around: low temperature drives toward corners, high temperature drifts toward center. Same logits, different confidence levels.
+        </Paragraph>
+
+        <Callout variant="info" title="Why the gradient is so clean">
+          <Paragraph>
+            Here's a gift from mathematics: when you pair softmax with cross-entropy loss, the gradient becomes beautifully simple.
+          </Paragraph>
+          <Paragraph>
+            The gradient for each output is just: <Term>what you predicted - what was correct</Term>.
+          </Paragraph>
+          <Paragraph>
+            If you predicted 80% for 'e' but the answer was 'a', the gradient says: "push probability <em>away</em> from 'e' and <em>toward</em> 'a'." No complicated derivatives — just redistribution.
+          </Paragraph>
+          <Paragraph>
+            This isn't luck. Softmax and cross-entropy are <em>designed partners</em>. They both emerge from information theory, and their pairing cancels out ugly math, leaving just the intuitive "move probability toward truth."
+          </Paragraph>
+        </Callout>
+
+        <Paragraph>
+          Picture a marble rolling around in a bumpy bowl. Leave it alone, and it settles at the bottom — the lowest-energy spot. Heat the bowl, and the marble starts bouncing. The hotter you make it, the more the marble explores high-energy ridges it would never visit otherwise.
+          </Paragraph>
+          <Paragraph>
+            Now imagine a trillion marbles in a trillion-dimensional bowl. Some configurations of the gas are low-energy (stable). Some are high-energy (chaotic). How do the marbles distribute themselves across all possible configurations?
+          </Paragraph>
+          <Paragraph>
+            In 1877, Ludwig Boltzmann wrote down an answer. He was trying to explain something simple: why does gas pressure exist? His answer required inventing a new mathematics — counting the number of ways atoms could arrange themselves — and the equation he derived looked like this:
+          </Paragraph>
+          <MathBlock
+            equation={String.raw`P(\text{state}) = \frac{1}{Z} e^{-E/kT}`}
+            explanation="P(state) = probability of finding the system in that state. E = energy of the state. T = temperature. Z = normalization constant (the 'partition function'). k = Boltzmann's constant (just unit conversion)."
+          />
+          <Paragraph>
+            The Austrian physics establishment was skeptical. Ernst Mach, the most influential physicist of the era, was a positivist who didn't believe atoms existed — you couldn't see them, so why assume they're real? Boltzmann spent decades defending his work. He died in 1906, still uncertain whether his ideas would survive him.
+          </Paragraph>
+          <Paragraph>
+            Within five years, Einstein proved atoms were real (Brownian motion). Within twenty, Boltzmann's equation was carved into his tombstone. Today it's considered one of the most fundamental equations in physics.
+          </Paragraph>
+
+          <WorkedExample title="Reading the isomorphism">
+            <WorkedStep n="1">
+              <Paragraph>
+                <strong>Energy ↔ Negative logit.</strong> In physics, low-energy states are "preferred" — particles naturally settle into them. In softmax, high-logit states are preferred — they get more probability. The sign flip: <Term>E</Term> in physics corresponds to <Term>-score</Term> in ML. Both measure "how much does nature (or the model) want to be here?"
+              </Paragraph>
+            </WorkedStep>
+            <WorkedStep n="2">
+              <Paragraph>
+                <strong>Temperature ↔ Temperature.</strong> Not a metaphor. The <Term>T</Term> in the API slider is mathematically identical to Kelvin. Divide all logits by <Term>T</Term>, then exponentiate. Higher T spreads probability mass across states. Lower T concentrates it on the winner.
+              </Paragraph>
+            </WorkedStep>
+            <WorkedStep n="3">
+              <Paragraph>
+                <strong>Partition function ↔ Softmax denominator.</strong> <Term>Z</Term> in physics normalizes over all microstates. <Term>Σ exp(score_j / T)</Term> in softmax normalizes over all tokens. Same job: ensure probabilities sum to 1.
+              </Paragraph>
+            </WorkedStep>
+            <WorkedStep n="4" final>
+              <Paragraph>
+                <strong>The equation is the same.</strong> Write them side by side:
+              </Paragraph>
+              <MathBlock
+                equation={String.raw`P_{\text{physics}}(\text{state}) = \frac{e^{-E/kT}}{Z} \qquad P_{\text{softmax}}(\text{token}) = \frac{e^{s/T}}{\sum_j e^{s_j/T}}`}
+                explanation="Set s = -E (flip the sign convention), drop k (units), and they're identical."
+              />
+            </WorkedStep>
+          </WorkedExample>
+
+          <Callout variant="insight" title="Why the same equation? (Maximum entropy)">
+            <Paragraph>
+              Here's where it gets strange. The Boltzmann distribution isn't just <em>one</em> way to distribute particles. It's the <strong>only</strong> distribution that makes no assumptions beyond what you're forced to assume.
+            </Paragraph>
+            <Paragraph>
+              Imagine you know the average energy of a gas, but nothing else. You want to assign probabilities to each microstate. What's the most honest thing you can do? You want the distribution that's maximally uncertain — that makes as few additional claims as possible.
+            </Paragraph>
+            <Paragraph>
+              E.T. Jaynes proved in 1957 that the answer is unique: <Term>P(state) ∝ exp(-E/T)</Term>. Any other functional form smuggles in hidden assumptions. The exponential is the <em>neutral</em> choice.
+            </Paragraph>
+            <Paragraph>
+              Softmax inherits this property. When you convert logits to probabilities, you're not choosing exp because it's convenient. You're choosing it because any other function would secretly favor some tokens in ways your scores don't justify.
+            </Paragraph>
+          </Callout>
+
+          <Paragraph>
+            So when you slide the temperature dial in ChatGPT or Claude:
+          </Paragraph>
+          <ul>
+            <li><strong>T → 0:</strong> The model becomes a greedy argmax. Only the highest-logit token has any probability mass. Deterministic, repetitive, but "confident."</li>
+            <li><strong>T = 1:</strong> The model samples according to its raw logit scores. This is what the model "actually believes."</li>
+            <li><strong>T → ∞:</strong> All tokens become equally likely. The model forgets what it learned. Pure noise.</li>
+          </ul>
+          <Paragraph>
+            The metaphor isn't strained: you're heating up or cooling down the probability distribution. A hot model explores. A cold model exploits. The same tradeoff that governs which atoms end up where in a gas governs which words end up where in your sentence.
+          </Paragraph>
+          <Paragraph>
+            Boltzmann didn't know about language models. He was trying to explain why gases have pressure. But the equation he found — the one that describes how particles distribute across energy levels — turns out to be the <em>unique</em> solution to a deeper problem: how to assign probabilities without making hidden assumptions. That's why the same formula shows up in thermodynamics, neural networks, reinforcement learning, and Bayesian inference.
+          </Paragraph>
       </Section>
 
       <Section number="2.8" title="Tensors: Batching Patterns">
         <Paragraph>
           Up to now, we've been drawing everything as "one sequence." But real data comes as a pile of sequences, and we want one notation that covers all of them.
+        </Paragraph>
+        <Paragraph>
+          The mental picture is a spreadsheet: rows are examples, columns are token positions.
         </Paragraph>
         <Paragraph>
           So we stack <Term>B</Term> sequences (a batch), each of length <Term>T</Term>, into a table of token IDs: <Term>[B, T]</Term>.
@@ -866,12 +1112,16 @@ score = float(np.dot(a, b))`}</CodeBlock>
           Click any cell in the grid. The <em>same</em> token ID always points to the <em>same</em> row in <Term>E</Term> — even when it appears in different places in the batch.
         </Paragraph>
         <TensorShapeBuilder />
-        <Paragraph>
-          Mechanically, it's the exact same lookup you already understand — just applied to every cell at once: <Term>X_emb = E[X]</Term>.
-        </Paragraph>
-        <Paragraph>
-          From here on, we'll keep seeing these three letters: <Term>B</Term> (how many examples), <Term>T</Term> (context length), and <Term>D</Term> (features per token).
-        </Paragraph>
+        <details className="collapsible">
+          <summary>Optional: build a batch and watch the lookup</summary>
+          <Paragraph>
+            Mechanically, it's the exact same lookup you already understand — just applied to every cell at once:{' '}
+            <Term>X_emb = E[X]</Term>.
+          </Paragraph>
+          <Paragraph>
+            From here on, we'll keep seeing these three letters: <Term>B</Term> (how many examples), <Term>T</Term> (context length), and <Term>D</Term> (features per token).
+          </Paragraph>
+        </details>
       </Section>
 
       <Section number="2.9" title="Synthesis: From Counts to Coordinates">
@@ -941,8 +1191,35 @@ score = float(np.dot(a, b))`}</CodeBlock>
           <li><strong>Repeat:</strong> Thousands of times. Millions of times.</li>
         </ol>
         <Paragraph>
+          <em>Watch a tiny weight matrix learn. Click "Train Step" to see how the weights change:</em>
+        </Paragraph>
+        <NeuralTrainingDemo />
+        <Paragraph>
           Concretely: the model outputs a probability distribution for the next character. The training data then reveals what actually came next. The loss is the negative log‑probability the model assigned to the truth. If the model gave the truth a tiny probability, the loss is large.
         </Paragraph>
+
+        <Callout variant="info" title="How Do We Measure Quality?">
+          <Paragraph>
+            Now that we can assign probabilities, we get something rare in ML: a clean score.
+          </Paragraph>
+          <Paragraph>
+            Take a piece of text. Walk through it left-to-right. At each position, ask the model for a distribution over the next character, then look at just one number: the probability it assigned to the character that actually happened.
+          </Paragraph>
+          <Paragraph>
+            <strong>Step 1: Measure surprise for one prediction.</strong> Surprise is <Term>-log₂(probability)</Term>. If the model assigned P=0.5 to the correct character:
+          </Paragraph>
+          <MathBlock equation={String.raw`\text{surprise} = -\log_2(0.5) = 1 \text{ bit}`} />
+          <Paragraph>
+            If it was more confident (P=0.9), surprise is lower. If it was caught off guard (P=0.1), surprise is higher.
+          </Paragraph>
+          <Paragraph>
+            <strong>Step 2: Average over all predictions.</strong> We have N characters to predict. Sum up all the surprises and divide by N:
+          </Paragraph>
+          <MathBlock equation={String.raw`H = \frac{1}{N}\bigl(\text{surprise}_1 + \text{surprise}_2 + \cdots + \text{surprise}_N\bigr)`} />
+          <Paragraph>
+            That's the cross-entropy. Lower is better. A perfect predictor has H=0 (no surprise at all).
+          </Paragraph>
+        </Callout>
 
         <details className="collapsible">
           <summary>Why cross-entropy? (From first principles)</summary>
@@ -951,6 +1228,9 @@ score = float(np.dot(a, b))`}</CodeBlock>
           </Paragraph>
           <Paragraph>
             Accuracy is too blunt here: a model predicting <Term>p['a']=0.34</Term> and one predicting <Term>p['a']=0.99</Term> both "got it right" if <Term>'a'</Term> was correct, but one is much more confident.
+          </Paragraph>
+          <Paragraph>
+            There's also a training reason: accuracy is a step function (right/wrong), so its gradient is zero almost everywhere. Cross-entropy is smooth — it still gives a learning signal when you're barely right or confidently wrong.
           </Paragraph>
           <Paragraph>
             Shannon's move was to treat <Term>-log(p)</Term> as "how surprised you should be" when something happens. He wanted three properties:
@@ -970,8 +1250,10 @@ score = float(np.dot(a, b))`}</CodeBlock>
         </details>
 
         <Paragraph>
-          <strong>Cross-entropy is average surprise.</strong> Walk left‑to‑right. At each step, look at the probability the model gave to what
-          actually happened next, take <Term>-log₂</Term>, and average. Lower means fewer shocks.
+          Shannon's insight was operational: information is surprise. We'll measure that surprise as <Term>surprise(p) = -log₂(p)</Term>. If you have a good model of English, it assigns high probability to what actually comes next, so it isn't surprised very often. If you have a terrible model, every prediction is a shock.
+        </Paragraph>
+        <Paragraph>
+          <strong>Cross-entropy is average surprise.</strong> Walk left‑to‑right. At each step, look at the probability the model gave to what actually happened next, take <Term>-log₂</Term>, and average. Lower means fewer shocks.
         </Paragraph>
 
         <Callout variant="info" title="Concrete numbers">
@@ -993,7 +1275,8 @@ score = float(np.dot(a, b))`}</CodeBlock>
         <CrossEntropyViz />
 
         <Paragraph>
-          Now we need the thing that does the nudging. We'll use the smallest forward pass that can still learn:
+          Cross-entropy consumes a probability and spits out a score. But where does the probability come from? It's manufactured by a <strong>forward pass</strong>: the chain of operations that turns "I just saw <Term>q</Term>" into "here are my 27 bets on what's next."
+          The simplest version:
         </Paragraph>
         <ol>
           <li>
@@ -1018,8 +1301,18 @@ score = float(np.dot(a, b))`}</CodeBlock>
         </Paragraph>
         <MathBlock
           equation={String.raw`\frac{\partial L}{\partial E[c]} = \underbrace{\sum_j p_j \cdot E[j]}_{\text{predicted centroid}} \;-\; \underbrace{E[\text{actual}]}_{\text{actual embedding}}`}
-          explanation="Gradient = (where your probabilities say the answer "is") minus (where the answer actually was)."
+          explanation="Gradient = (where your probabilities say the answer 'is') minus (where the answer actually was)."
         />
+
+        <Paragraph>
+          That formula might look abstract. Let's watch it work on real numbers — step through one complete training update:
+        </Paragraph>
+
+        <GradientTraceDemo />
+
+        <Paragraph>
+          That's it. One training example, one nudge. Do this millions of times and the embeddings organize themselves into meaningful neighborhoods.
+        </Paragraph>
 
         <WorkedExample title="Reading the gradient (in plain terms)">
           <WorkedStep n="1">
@@ -1033,17 +1326,31 @@ score = float(np.dot(a, b))`}</CodeBlock>
           </WorkedStep>
           <WorkedStep n="2">
             <Paragraph>
-              <strong>Direction.</strong> The gradient points from <Term>E[actual]</Term> toward that centroid (uphill). It's the direction that
-              would increase loss the fastest.
+              <strong>The gap.</strong> The centroid is where your probability mass pointed — a weighted average of all candidate embeddings, weighted by how much probability you gave each one. <Term>E[actual]</Term> is where the answer actually was. If these two points differ, you were wrong. The gradient is the vector between them: (where you pointed) − (where you should have pointed).
             </Paragraph>
           </WorkedStep>
-          <WorkedStep n="3" final>
+          <WorkedStep n="3">
             <Paragraph>
-              <strong>Update.</strong> Gradient descent goes the other way:
+              <strong>Why does closing this gap help?</strong> Go back to how scoring works. The score for candidate <Term>j</Term> is <Term>E[context] · E[j]</Term>. A dot product. What makes a dot product big? When two vectors point in similar directions. What makes it small? When they point in different directions.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="4">
+            <Paragraph>
+              <strong>So the fix is geometric.</strong> Right now, <Term>E[context]</Term> is closer to the wrong answers than to the right one — that's why they got higher scores. To fix this, move <Term>E[context]</Term> toward <Term>E[actual]</Term>. As it gets closer, the dot product <Term>E[context] · E[actual]</Term> grows. Higher dot product → higher score → higher probability on the right answer.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="5">
+            <Paragraph>
+              <strong>And away from the mistakes.</strong> Moving toward <Term>E[actual]</Term> simultaneously moves away from the wrong candidates you over-weighted. Their dot products shrink. Their probabilities drop. One motion fixes both problems: boost the right answer, suppress the wrong ones.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="6" final>
+            <Paragraph>
+              <strong>The update rule.</strong> The gradient points from truth toward your prediction (uphill — the direction of increasing loss). We go the opposite way:
             </Paragraph>
             <MathBlock
               equation={String.raw`E[c] \leftarrow E[c] - \eta \cdot \frac{\partial L}{\partial E[c]}`}
-              explanation="Move opposite the gradient — nudging the context embedding toward the actual answer's embedding."
+              explanation="Subtract the gradient: move away from your prediction, toward the truth."
             />
           </WorkedStep>
         </WorkedExample>
@@ -1051,20 +1358,27 @@ score = float(np.dot(a, b))`}</CodeBlock>
         <WorkedExample title="Why neighborhoods form">
           <WorkedStep n="1">
             <Paragraph>
-              Take one tiny scene: the corpus contains <Term>"qu"</Term>. When the context is <Term>'q'</Term>, the correct next character is
-              usually <Term>'u'</Term>. If the model gives <Term>'u'</Term> low probability, the update nudges <Term>E['q']</Term> toward{' '}
-              <Term>E['u']</Term>.
+              <strong>One training example is one tug.</strong> The corpus contains <Term>"qu"</Term>. Context is <Term>'q'</Term>, answer is <Term>'u'</Term>. If the model gave <Term>'u'</Term> low probability, the gradient tugs <Term>E['q']</Term> toward <Term>E['u']</Term>. That's it. One pair, one tug.
             </Paragraph>
           </WorkedStep>
           <WorkedStep n="2">
             <Paragraph>
-              Now zoom out. If two context characters tend to be followed by similar next characters, they keep getting similar gradient
-              directions. Similar nudges, repeated thousands of times.
+              <strong>Each character accumulates tugs.</strong> Over the whole corpus, <Term>'q'</Term> gets tugged toward <Term>'u'</Term> thousands of times (because "qu" is everywhere). It also gets tugged toward <Term>'a'</Term> when "qa" appears, toward <Term>'i'</Term> when "qi" appears — but mostly toward <Term>'u'</Term>. The embedding for <Term>'q'</Term> ends up near the weighted average of its targets, weighted by how often each pairing occurred.
             </Paragraph>
           </WorkedStep>
-          <WorkedStep n="3" final>
+          <WorkedStep n="3">
             <Paragraph>
-              That's the whole mechanism: <strong>similar statistics → similar gradients → nearby points</strong>.
+              <strong>Similar tugs → similar endpoints.</strong> Now consider <Term>'a'</Term> and <Term>'e'</Term>. They're not identical, but they share patterns. Both precede <Term>'n'</Term> often ("an", "en"). Both precede <Term>'r'</Term> ("ar", "er"). Both precede <Term>'t'</Term> ("at", "et"). The set of targets pulling on <Term>'a'</Term> overlaps heavily with the set pulling on <Term>'e'</Term>.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="4">
+            <Paragraph>
+              <strong>The destination is determined by the tugs.</strong> Imagine two people start at random spots in a city. Person A is told: go toward the library, the coffee shop, the park. Person B is told: go toward the library, the bookstore, the park. They never meet. Nobody says "you two are similar." But they end up in the same neighborhood — because they were pulled toward overlapping destinations.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="5" final>
+            <Paragraph>
+              <strong>Structure emerges from prediction.</strong> We never labeled "'a' is like 'e'." We only asked the model to predict. But prediction requires positioning: to predict similar things, you need to be in a similar place. The geometry isn't imposed — it's discovered. The model finds it because it's the only way to do the job.
             </Paragraph>
           </WorkedStep>
         </WorkedExample>
@@ -1102,7 +1416,7 @@ score = float(np.dot(a, b))`}</CodeBlock>
           </Paragraph>
           <MathBlock
             equation={String.raw`\frac{\partial L}{\partial E[c]} = \sum_j \left(p_j - \mathbf{1}_{j=\text{actual}}\right) \cdot E[j] = \left(\sum_j p_j\cdot E[j]\right) - E[\text{actual}]`}
-            explanation="The "predicted centroid minus actual" form is just algebra."
+            explanation="The “predicted centroid minus actual” form is just algebra."
           />
         </details>
 
@@ -1127,7 +1441,7 @@ score = float(np.dot(a, b))`}</CodeBlock>
           </Paragraph>
           <Paragraph>
             This "learn vectors so a big co‑occurrence table becomes predictable" idea shows up all over classic NLP. Word2Vec is different
-            math, but it's the same family move: squeeze a huge table into a smaller set of vectors and let geometry carry the structure.<Cite n={1} />
+            math, but it's the same family move: squeeze a huge table into a smaller set of vectors and let geometry carry the structure.<Cite n={6} />
           </Paragraph>
         </details>
 
@@ -1272,7 +1586,7 @@ print(f"Gradient magnitude: {np.linalg.norm(gradient):.3f}")
           Real models have millions of numbers. You compute a slope for every single one — that collection of slopes is called the <em>gradient</em>. Following it downhill is <em>gradient descent</em>.
         </Paragraph>
         <Paragraph>
-          Here's the strange part: nobody tells the model where to go. It just... feels its way downhill. Each step, it asks: "which direction makes me slightly less wrong?" And it takes that step. A billion times. And somehow, out of that blind fumbling in a space with 6,912 dimensions — or 175 billion dimensions in GPT-3 — structure emerges. The landscape we're descending has no visualization. The slopes are real. The progress is measurable. But there's no picture that would help you.
+          The weird part is that nobody tells the model where to go. It only gets a loss and a gradient — local slope information. Each step asks: "which direction makes me slightly less wrong?" and takes that step. Repeat enough times, and structure emerges, even in a space you can't picture.
         </Paragraph>
         <GradientDescentViz />
         <Paragraph>
@@ -1434,8 +1748,8 @@ print(f"  cos(t, a) = {cosine_sim(embeddings[t_idx], embeddings[a_idx]):.3f}  (d
         >
           <summary>Optional: replay the map forming</summary>
           <Paragraph>
-            Here's a replay of what those nudges do to the 27 character vectors (projected down to 2D so a human eyeball can
-            look at it). This one is an actual training run on the shared corpus from earlier in the chapter.
+            Here's a replay of what those nudges do to the 27 character vectors (projected down to 2D so a human can look at
+            it). This one is an actual training run on the shared corpus from earlier in the chapter.
           </Paragraph>
           <Paragraph>
             To keep it browser‑friendly, the replay uses a fixed random seed and (for long corpora) a capped number of training pairs. The goal is to make the update rule visible, not to match anyone's exact run.
@@ -1538,7 +1852,7 @@ print("\\nGradient check:", "PASS ✓" if np.abs(analytical_grad - numerical_gra
         <Callout variant="info" title="How Grassmann's Work Was Received">
           <Paragraph>
             <Highlight>1844</Highlight>: Grassmann publishes the <em>Ausdehnungslehre</em> while teaching high school. Möbius — one
-            of the few people who might have understood it — <em>declines to review it</em>. The book <em>doesn't spread</em>.
+            of the few people who might have understood it — <em>declines to review it</em>. The work <em>doesn't spread</em>.
             <Cite n={1} />
           </Paragraph>
 
@@ -1565,22 +1879,15 @@ print("\\nGradient check:", "PASS ✓" if np.abs(analytical_grad - numerical_gra
           </Paragraph>
         </Callout>
 
-        <Callout variant="insight" title="Grassmann's Vision, Finally Built">
-          <Paragraph>
-            Grassmann's bet was simple: if you can measure relationships between abstract things, you can treat them as
-            coordinates.
-          </Paragraph>
-          <Paragraph>
-            In this chapter we made the measurement concrete (next‑character statistics), and we built a training loop that
-            nudges coordinates until the geometry starts matching the data.
-          </Paragraph>
-        </Callout>
-
-        <Callout variant="insight" title="What comes next">
-          <Paragraph>
-            We've built the map and we've watched it move. Next we widen the context window and let the model combine multiple token vectors before it predicts the next one.
-          </Paragraph>
-        </Callout>
+        <Paragraph>
+          Grassmann's bet was simple: if you can measure relationships between abstract things, you can treat them as coordinates.
+        </Paragraph>
+        <Paragraph>
+          In this chapter we made the measurement concrete (next‑character statistics), and we built a training loop that nudges coordinates until the geometry starts matching the data.
+        </Paragraph>
+        <Paragraph>
+          We've built the map and we've watched it move. Next we widen the context window and let the model combine multiple token vectors before it predicts the next one.
+        </Paragraph>
 
         <Paragraph>
           <strong>Grassmann proved that relationships can be coordinates.</strong> We've shown how to find those coordinates from data.
@@ -1589,7 +1896,7 @@ print("\\nGradient check:", "PASS ✓" if np.abs(analytical_grad - numerical_gra
           The embedding table starts as noise. Training is what gives it structure.
         </Paragraph>
         <Paragraph>
-          If you want one sentence for the chapter: we replace "store a table for every context" with "store one reusable vector
+          If you want one sentence to hold onto: we replace "store a table for every context" with "store one reusable vector
           per token," then learn those vectors by pushing down a single score.
         </Paragraph>
       </Section>
@@ -1598,12 +1905,12 @@ print("\\nGradient check:", "PASS ✓" if np.abs(analytical_grad - numerical_gra
         <Exercise
           number="2.1"
           title="The 'q' Test"
-          hint={<Paragraph>Think in contexts: what usually comes right after <Term>q</Term>?</Paragraph>}
-          solution={<Paragraph>A trained embedding for <Term>q</Term> becomes unusual because its context statistics are unusual.</Paragraph>}
+          hint={<Paragraph>Think in contexts: what usually comes right after <Term>'q'</Term>?</Paragraph>}
+          solution={<Paragraph>A trained embedding for <Term>'q'</Term> becomes unusual because its context statistics are unusual.</Paragraph>}
         >
           <Paragraph>
-            In ordinary English, <Term>q</Term> is rare and strongly constrained (it doesn't behave like most consonants).
-            Why would that pressure its embedding to look different from, say, <Term>t</Term>?
+            In ordinary English, <Term>'q'</Term> is rare and strongly constrained (it doesn't behave like most consonants).
+            Why would that pressure its embedding to look different from, say, <Term>'t'</Term>?
           </Paragraph>
         </Exercise>
 
@@ -1702,9 +2009,9 @@ p \cdot p &= \sum_i p_i^2 \\
                   uniform — so its dot products sit near the <Term>1/V</Term> baseline.
                 </li>
                 <li>
-                  If you make a pattern common (like <Term>qu</Term> in the "qu-heavy" preset), <Term>q</Term> gets a sharp
+                  If you make a pattern common (like <Term>'qu'</Term> in the "qu-heavy" preset), <Term>'q'</Term> gets a sharp
                   next-character spike, and both the cluster plot and the dot product reflect that. The contribution list
-                  will usually show <Term>u</Term> doing a lot of the work for <Term>dot(q, u)</Term>.
+                  will usually show <Term>'u'</Term> doing a lot of the work for <Term>dot('q', 'u')</Term>.
                 </li>
               </ul>
               <Paragraph>
@@ -1718,8 +2025,8 @@ p \cdot p &= \sum_i p_i^2 \\
             Switch between at least two corpus presets (for example "tiny toy" and "qu-heavy"). For each corpus:
           </Paragraph>
           <ol>
-            <li>Pick <Term>A = q</Term> and <Term>B = u</Term>. What happens to the dot product?</li>
-            <li>Pick <Term>A = a</Term> and <Term>B = e</Term>. Does it stay high, drop, or depend?</li>
+            <li>Pick <Term>A = 'q'</Term> and <Term>B = 'u'</Term>. What happens to the dot product?</li>
+            <li>Pick <Term>A = 'a'</Term> and <Term>B = 'e'</Term>. Does it stay high, drop, or depend?</li>
             <li>Explain your observations using the "Top next" chips and the contribution list.</li>
           </ol>
         </Exercise>
@@ -1737,22 +2044,21 @@ p \cdot p &= \sum_i p_i^2 \\
               </Paragraph>
               <CodeBlock lang="text">{`ac bc ac bc ac bc ac bc`}</CodeBlock>
               <Paragraph>
-                Then set <Term>A = a</Term> and <Term>B = b</Term>.
+                Then set <Term>A = 'a'</Term> and <Term>B = 'b'</Term>.
               </Paragraph>
             </>
           }
           solution={
             <>
               <Paragraph>
-                Before you measure anything, your prediction should be: "<Term>a</Term> and <Term>b</Term> will look very
+                Before you measure anything, your prediction should be: "<Term>'a'</Term> and <Term>'b'</Term> will look very
                 similar."
               </Paragraph>
               <Paragraph>
-                Why? In that corpus, <Term>a</Term> is almost always followed by <Term>c</Term>, and <Term>b</Term> is also
-                almost always followed by <Term>c</Term>. So their next-character distributions overlap heavily.
+                Why? In that corpus, <Term>'a'</Term> is almost always followed by <Term>'c'</Term>, and <Term>'b'</Term> is also almost always followed by <Term>'c'</Term>. So their next-character distributions overlap heavily.
               </Paragraph>
               <Paragraph>
-                That makes both cosine similarity (in the <SectionLink to="2.2">Section 2.2</SectionLink> panel) and the dot product (in <SectionLink to="2.6">Section 2.6</SectionLink>) jump up.
+                That makes both cosine similarity (in the <SectionLink to="2.3">Section 2.3</SectionLink> panel) and the dot product (in <SectionLink to="2.6">Section 2.6</SectionLink>) jump up.
                 With smoothing on, it won't hit a perfect 1.000, but it should be obviously higher than "random-ish."
               </Paragraph>
               <Paragraph>
@@ -1763,7 +2069,7 @@ p \cdot p &= \sum_i p_i^2 \\
           }
         >
           <Paragraph>
-            Use the corpus editor in <SectionLink to="2.2">Section 2.2</SectionLink> to <em>force</em> two different characters to behave the same way. Before
+            Use the corpus editor in <SectionLink to="2.3">Section 2.3</SectionLink> to <em>force</em> two different characters to behave the same way. Before
             you look at any numbers, predict whether <Term>dot(a, b)</Term> will go up or down — then check.
           </Paragraph>
         </Exercise>
@@ -1815,10 +2121,10 @@ p \cdot p &= \sum_i p_i^2 \\
           solution={
             <>
               <Paragraph>
-                <strong>'q' and 'u':</strong> <Term>|17 - 21| = 4</Term>. But they should be <em>extremely</em> close — 'q' is almost always followed by 'u'.
+                <strong><Term>'q'</Term> and <Term>'u'</Term>:</strong> <Term>|17 - 21| = 4</Term>. But they should be <em>extremely</em> close — <Term>'q'</Term> is almost always followed by <Term>'u'</Term>.
               </Paragraph>
               <Paragraph>
-                <strong>'a' and 'b':</strong> <Term>|1 - 2| = 1</Term>. Looks close! But they have completely different roles in English.
+                <strong><Term>'a'</Term> and <Term>'b'</Term>:</strong> <Term>|1 - 2| = 1</Term>. Looks close! But they have completely different roles in English.
               </Paragraph>
               <Paragraph>
                 <strong>Conclusion:</strong> Integer distance tells you nothing about linguistic similarity. The ordering is arbitrary (alphabetical), and "close" integers can have completely different predictive roles.
@@ -1827,11 +2133,11 @@ p \cdot p &= \sum_i p_i^2 \\
           }
         >
           <Paragraph>
-            Using our toy vocabulary where <Term>stoi['q'] = 17</Term> and <Term>stoi['u'] = 21</Term>:
+            Suppose we assign IDs alphabetically (<Term>␣=0</Term>, <Term>a=1</Term>, ..., <Term>z=26</Term>), so <Term>stoi['q'] = 17</Term> and <Term>stoi['u'] = 21</Term>:
           </Paragraph>
           <ol>
-            <li>What is the integer distance between 'q' and 'u'?</li>
-            <li>What is the integer distance between 'a' (=1) and 'b' (=2)?</li>
+            <li>What is the integer distance between <Term>'q'</Term> and <Term>'u'</Term>?</li>
+            <li>What is the integer distance between <Term>'a'</Term> (=1) and <Term>'b'</Term> (=2)?</li>
             <li>Which pair should be <em>closer</em> in a useful representation? Does integer distance get this right?</li>
           </ol>
         </Exercise>
@@ -1950,7 +2256,7 @@ p \cdot p &= \sum_i p_i^2 \\
           title="Academic references"
           items={[
             {
-              n: 1,
+              n: 6,
               href: 'https://arxiv.org/abs/1301.3781',
               label: 'Mikolov, T., Chen, K., Corrado, G., & Dean, J. (2013). Efficient estimation of word representations in vector space. arXiv preprint arXiv:1301.3781.',
             },

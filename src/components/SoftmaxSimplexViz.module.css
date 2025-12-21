@@ -1,0 +1,223 @@
+.content {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sliderPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.scenario {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.65);
+  padding: 0.85rem 1rem;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(0, 217, 255, 0.06), transparent 60%),
+    rgba(0, 0, 0, 0.25);
+  border-radius: 0.7rem;
+  border: 1px solid rgba(0, 217, 255, 0.2);
+  border-left: 3px solid var(--accent-cyan);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+}
+
+.scenario strong {
+  color: var(--accent-cyan);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.sliderGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sliderLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.logitName {
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: -0.01em;
+}
+
+.logitValue {
+  font-family: var(--font-mono);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.probDisplay {
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(255, 255, 255, 0.03), transparent 60%),
+    rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.7rem;
+  padding: 0.85rem 1rem;
+  margin-top: 0.5rem;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+}
+
+.probRow {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 0.35rem 0;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.probRow span:first-child {
+  font-weight: 700;
+}
+
+.probRow span:last-child {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.clearBtn {
+  padding: 0.65rem 1rem;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.82);
+  border-radius: 0.7rem;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.clearBtn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 217, 255, 0.28);
+  box-shadow: 0 10px 24px rgba(0, 217, 255, 0.1);
+}
+
+.clearBtn:active {
+  transform: translateY(0);
+}
+
+.clearBtn:focus {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(0, 217, 255, 0.2),
+    0 10px 24px rgba(0, 217, 255, 0.1);
+}
+
+.vizPanel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse 120% 75% at 50% 0%, rgba(255, 255, 255, 0.04), transparent 65%),
+    rgba(0, 0, 0, 0.22);
+  border-radius: 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 25px 40px -30px rgba(0, 0, 0, 0.7);
+  padding: 1.5rem;
+  min-height: 400px;
+}
+
+.svg {
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+}
+
+.triangleFill {
+  fill: rgba(0, 0, 0, 0.15);
+  opacity: 0.85;
+}
+
+.triangleOutline {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 2.5;
+  opacity: 0.95;
+}
+
+.gridLine {
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 1;
+  opacity: 0.75;
+}
+
+.vertexLabel {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-anchor: middle;
+  letter-spacing: 0.02em;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+}
+
+.centerLabel {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  fill: rgba(255, 255, 255, 0.35);
+  text-anchor: middle;
+  opacity: 0.85;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.trail {
+  fill: none;
+  stroke: var(--accent-magenta);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.45;
+  filter: drop-shadow(0 0 6px rgba(255, 0, 110, 0.3));
+}
+
+.pointGlow {
+  fill: rgba(0, 217, 255, 0.3);
+  opacity: 0.85;
+  filter: blur(12px);
+}
+
+.point {
+  fill: var(--accent-cyan);
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 18px rgba(0, 217, 255, 0.45));
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.explanation {
+  padding: 1rem 2rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 100%, rgba(255, 255, 255, 0.02), transparent 60%),
+    rgba(0, 0, 0, 0.18);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  min-height: 3.5em;
+  line-height: 1.6;
+  font-family: var(--font-mono);
+  text-align: center;
+}
+
+.explanation strong {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 700;
+}

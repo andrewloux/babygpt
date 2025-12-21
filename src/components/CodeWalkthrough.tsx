@@ -16,10 +16,20 @@ Step.displayName = 'Step';
 type CodeWalkthroughProps = {
   filename?: string;
   lang?: string;
+  title?: string;
+  subtitle?: string;
+  figureNumber?: string;
   children: ReactNode;
 };
 
-export function CodeWalkthrough({ filename, lang = 'python', children }: CodeWalkthroughProps) {
+export function CodeWalkthrough({
+  filename,
+  lang = 'python',
+  title,
+  subtitle,
+  figureNumber,
+  children
+}: CodeWalkthroughProps) {
   const [highlightedHtml, setHighlightedHtml] = useState<string[]>([]);
 
   // Extract steps from children - check for 'code' prop which is unique to Step
@@ -77,35 +87,52 @@ export function CodeWalkthrough({ filename, lang = 'python', children }: CodeWal
   }, [steps.map(s => s.code).join('|||'), lang]);
 
   return (
-    <div className={styles.walkthrough}>
-      {filename && <div className={styles.filename}>{filename}</div>}
-
-      <div className={styles.steps}>
-        {steps.map((step, idx) => (
-          <div key={idx} className={styles.step}>
-            {/* Step number - left column */}
-            <span className={styles.stepNum}>{idx + 1}</span>
-
-            {/* Explanation - right column, top */}
-            <div className={styles.explanation}>
-              {step.explanation}
+    <div className={styles.container}>
+      <div className={styles.ambientGlow} />
+      <div className={styles.walkthrough}>
+        {(title || subtitle || figureNumber) && (
+          <div className={styles.header}>
+            <div className={styles.headerText}>
+              {title && <h3 className={styles.title}>{title}</h3>}
+              {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
             </div>
-
-            {/* Code block - right column, bottom */}
-            <div className={styles.codeBlock}>
-              {highlightedHtml[idx] ? (
-                <div
-                  className={styles.codeContent}
-                  dangerouslySetInnerHTML={{ __html: highlightedHtml[idx] }}
-                />
-              ) : (
-                <div className={styles.codeContent}>
-                  <pre><code>{getAccumulatedCode(idx)}</code></pre>
-                </div>
-              )}
-            </div>
+            {figureNumber && <span className={styles.figNum}>{figureNumber}</span>}
           </div>
-        ))}
+        )}
+
+        {filename && <div className={styles.filename}>{filename}</div>}
+
+        <div className={styles.steps}>
+          {steps.map((step, idx) => (
+            <div key={idx} className={styles.step}>
+              {/* Step number - left column */}
+              <span className={styles.stepNum} aria-label={`Step ${idx + 1}`}>{idx + 1}</span>
+
+              {/* Explanation - right column, top */}
+              <div className={styles.explanation}>
+                {step.explanation}
+              </div>
+
+              {/* Code block - right column, bottom */}
+              <div
+                className={styles.codeBlock}
+                role="img"
+                aria-label={`Code for step ${idx + 1}`}
+              >
+                {highlightedHtml[idx] ? (
+                  <div
+                    className={styles.codeContent}
+                    dangerouslySetInnerHTML={{ __html: highlightedHtml[idx] }}
+                  />
+                ) : (
+                  <div className={styles.codeContent}>
+                    <pre><code>{getAccumulatedCode(idx)}</code></pre>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

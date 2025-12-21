@@ -36,9 +36,8 @@
   color: var(--text-secondary);
 }
 
-.slider {
+.contextControl input[type='range'] {
   width: 100px;
-  accent-color: var(--accent-cyan);
 }
 
 .contextValue {

@@ -5,7 +5,7 @@
 
 .term {
   color: var(--accent-cyan);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.9em;
 }
 

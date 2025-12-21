@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Slider } from './Slider'
 import styles from './ExplosionDemo.module.css'
 
 export function ExplosionDemo() {
@@ -65,14 +66,14 @@ export function ExplosionDemo() {
       <div className={styles.sliderSection}>
         <label className={styles.sliderLabel}>Context length (T)</label>
         <div className={styles.sliderRow}>
-          <input
-            type="range"
-            min="1"
-            max="10"
-            step="1"
+          <Slider
+            wrap={false}
+            min={1}
+            max={10}
+            step={1}
             value={T}
-            onChange={(e) => setT(parseInt(e.target.value))}
-            className={styles.slider}
+            onValueChange={(v) => setT(Math.round(v))}
+            ariaLabel="Context length (T)"
           />
           <span className={styles.lengthValue}>T = {T}</span>
         </div>

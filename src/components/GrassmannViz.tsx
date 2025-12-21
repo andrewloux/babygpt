@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { Slider } from './Slider'
 import styles from './GrassmannViz.module.css'
 
 // Vocabulary for character mode
@@ -169,14 +170,16 @@ export function GrassmannViz({ corpus = DEFAULT_CORPUS }: Props) {
 
               {/* Slider */}
               <div className={styles.sliderContainer}>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
+                <Slider
+                  wrap={false}
+                  unstyled
+                  inputClassName={styles.rangeInput}
+                  min={0}
+                  max={1}
+                  step={0.01}
                   value={mix}
-                  onChange={(e) => setMix(parseFloat(e.target.value))}
-                  className={styles.rangeInput}
+                  onValueChange={setMix}
+                  ariaLabel="Blend amount"
                 />
 
                 <div className={styles.puck} style={{ left: `${mix * 100}%` }}>
@@ -258,14 +261,16 @@ export function GrassmannViz({ corpus = DEFAULT_CORPUS }: Props) {
               </div>
 
               <div className={styles.blendSliderWrap}>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
+                <Slider
+                  wrap={false}
+                  unstyled
+                  inputClassName={styles.blendSlider}
+                  min={0}
+                  max={1}
+                  step={0.01}
                   value={mix}
-                  onChange={(e) => setMix(parseFloat(e.target.value))}
-                  className={styles.blendSlider}
+                  onValueChange={setMix}
+                  ariaLabel="Blend amount"
                 />
                 <div className={styles.blendValue}>
                   t = {mix.toFixed(2)}

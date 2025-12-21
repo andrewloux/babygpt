@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Slider } from './Slider'
 import styles from './DotProductViz.module.css'
 
 const VOCAB = [
@@ -485,14 +486,14 @@ export function DotProductViz({
               <div className={styles.metricToyTitle}>Counterexample (embeddings): same direction, different length</div>
               <div className={styles.metricToySliderRow}>
                 <span className={styles.metricToyLabel}>scale</span>
-                <input
-                  className={styles.metricToySlider}
-                  type="range"
+                <Slider
+                  wrap={false}
                   min={0.5}
                   max={6}
                   step={0.1}
                   value={toyScale}
-                  onChange={(e) => setToyScale(parseFloat(e.target.value))}
+                  onValueChange={setToyScale}
+                  ariaLabel="Scale factor"
                 />
                 <span className={styles.metricToyValue}>{toyScale.toFixed(1)}×</span>
               </div>

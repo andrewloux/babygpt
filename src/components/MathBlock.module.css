@@ -7,7 +7,7 @@
 }
 
 .equation {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 20px;
   color: var(--accent-cyan);
   margin-bottom: 12px;

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Slider } from './Slider'
 import styles from './TrainingDynamicsViz.module.css'
 import { VOCAB, prettyChar } from '../data/characterData'
 
@@ -346,15 +347,15 @@ export function TrainingDynamicsViz({ corpus }: TrainingDynamicsVizProps) {
             (dim {run.dim}, {run.pairsUsed}/{run.pairsTotal} pairs)
           </span>
         </label>
-        <input
+        <Slider
           id="training-epochs"
-          className={styles.slider}
-          type="range"
+          wrap={false}
           min={0}
           max={run.epochs}
           step={1}
           value={clampedEpoch}
-          onChange={(e) => setEpoch(parseInt(e.target.value, 10))}
+          onValueChange={(v) => setEpoch(Math.round(v))}
+          ariaLabel="Epoch"
         />
         <div className={styles.readoutRow}>
           <div className={styles.readout}>

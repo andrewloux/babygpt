@@ -63,9 +63,8 @@
   font-weight: 700;
 }
 
-.slider {
+.controls input[type='range'] {
   width: 100%;
-  accent-color: var(--accent-magenta);
 }
 
 .vizContainer {

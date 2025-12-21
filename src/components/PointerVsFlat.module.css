@@ -107,12 +107,12 @@
 }
 
 .overhead {
-  background: #ff6b6b; /* Red-ish for overhead */
+  background: var(--accent-red);
   color: white;
 }
 
 .payload {
-  background: #39ff14; /* Green for actual data */
+  background: var(--accent-green);
   color: black;
 }
 

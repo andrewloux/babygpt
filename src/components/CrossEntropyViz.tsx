@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import styles from './CrossEntropyViz.module.css'
+import { Slider } from './Slider'
 import { Paragraph, Term } from './Typography'
 
 function clamp(value: number, min: number, max: number) {
@@ -106,15 +107,15 @@ export function CrossEntropyViz() {
           </div>
           <div className={styles.sliderContainer}>
             <label htmlFor="prob-slider">Adjust probability</label>
-            <input
+            <Slider
               id="prob-slider"
-              type="range"
-              min="0.001"
-              max="0.999"
-              step="0.001"
+              wrap={false}
+              min={0.001}
+              max={0.999}
+              step={0.001}
               value={prob}
-              onChange={(e) => setProb(parseFloat(e.target.value))}
-              className={styles.slider}
+              onValueChange={setProb}
+              ariaLabel="Adjust probability"
             />
           </div>
           <LogCurve p={prob} loss={loss} />

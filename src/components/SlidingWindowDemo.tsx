@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Slider } from './Slider'
 import styles from './SlidingWindowDemo.module.css';
 
 const text = 'hello world';
@@ -27,8 +28,8 @@ export const SlidingWindowDemo = () => {
   const safeStep = Math.min(step, maxStep);
   const currentExample = examples[safeStep];
 
-  const handleContextSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setContextSize(parseInt(e.target.value, 10));
+  const handleContextSizeChange = (v: number) => {
+    setContextSize(Math.round(v));
     setStep(0);
   };
 
@@ -41,13 +42,14 @@ export const SlidingWindowDemo = () => {
         <span className={styles.title}>Sliding Window</span>
         <div className={styles.contextControl}>
           <span className={styles.controlLabel}>Context length:</span>
-          <input
-            type="range"
-            min="1"
-            max="6"
+          <Slider
+            wrap={false}
+            min={1}
+            max={6}
+            step={1}
             value={contextSize}
-            onChange={handleContextSizeChange}
-            className={styles.slider}
+            onValueChange={handleContextSizeChange}
+            ariaLabel="Context length"
           />
           <span className={styles.contextValue}>{contextSize}</span>
         </div>

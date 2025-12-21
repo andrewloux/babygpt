@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Slider } from './Slider'
 import styles from './TensorShapeBuilder.module.css'
 
 const VOCAB = [
@@ -156,50 +157,50 @@ export function TensorShapeBuilder() {
         </div>
         <label className={styles.control}>
           <span className={styles.controlLabel}>B (batch)</span>
-          <input
-            className={styles.slider}
-            type="range"
+          <Slider
+            wrap={false}
             min={1}
             max={5}
             step={1}
             value={batchSize}
-            onChange={(e) => {
-              const next = parseInt(e.target.value, 10)
+            onValueChange={(v) => {
+              const next = Math.round(v)
               setBatchSize(next)
               setFocus((f) => ({ ...f, b: clamp(f.b, 0, next - 1) }))
             }}
+            ariaLabel="Batch size"
           />
           <span className={styles.controlValue}>{batchSize}</span>
         </label>
 
         <label className={styles.control}>
           <span className={styles.controlLabel}>T (positions)</span>
-          <input
-            className={styles.slider}
-            type="range"
+          <Slider
+            wrap={false}
             min={2}
             max={8}
             step={1}
             value={timeSteps}
-            onChange={(e) => {
-              const next = parseInt(e.target.value, 10)
+            onValueChange={(v) => {
+              const next = Math.round(v)
               setTimeSteps(next)
               setFocus((f) => ({ ...f, t: clamp(f.t, 0, next - 1) }))
             }}
+            ariaLabel="Time steps"
           />
           <span className={styles.controlValue}>{timeSteps}</span>
         </label>
 
         <label className={styles.control}>
           <span className={styles.controlLabel}>D (features)</span>
-          <input
-            className={styles.slider}
-            type="range"
+          <Slider
+            wrap={false}
             min={4}
             max={16}
             step={1}
             value={embedDim}
-            onChange={(e) => setEmbedDim(parseInt(e.target.value, 10))}
+            onValueChange={(v) => setEmbedDim(Math.round(v))}
+            ariaLabel="Embedding dimension"
           />
           <span className={styles.controlValue}>{embedDim}</span>
         </label>

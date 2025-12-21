@@ -1,6 +1,8 @@
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import { useMemo, useState } from 'react'
+import { VizCard } from './VizCard'
+import { Slider } from './Slider'
 import styles from './EmbeddingGradientViz.module.css'
 
 type Vec2 = [number, number]
@@ -237,18 +239,12 @@ export function EmbeddingGradientViz() {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.ambientGlow} />
-      <div className={styles.card}>
-        <div className={styles.header}>
-          <div className={styles.headerText}>
-            <h3 className={styles.title}>Embedding Gradient Derivation</h3>
-            <p className={styles.subtitle}>Understanding gradient descent: gradient points uphill, we move downhill</p>
-          </div>
-          <span className={styles.figNum}>Fig. 2.5</span>
-        </div>
-
-        <div className={styles.graphContainer}>
+    <VizCard
+      title="Embedding Gradient Derivation"
+      subtitle="Understanding gradient descent: gradient points uphill, we move downhill"
+      figNum="Fig. 2.5"
+    >
+      <div className={styles.graphContainer}>
           <svg className={styles.svg} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label="2D embedding space">
             <defs>
               <radialGradient id="contextGlow">
@@ -559,16 +555,16 @@ export function EmbeddingGradientViz() {
             <label className={styles.etaLabel} htmlFor="eta">
               η
             </label>
-            <input
+            <Slider
               id="eta"
-              type="range"
-              min="0.1"
-              max="1.0"
-              step="0.1"
+              wrap={false}
+              min={0.1}
+              max={1.0}
+              step={0.1}
               value={eta}
-              onChange={(e) => setEta(parseFloat(e.target.value))}
-              className={styles.etaSlider}
+              onValueChange={setEta}
               disabled={isAutoTraining}
+              ariaLabel="Step size eta"
             />
             <span className={styles.etaValue}>{eta.toFixed(1)}</span>
           </div>
@@ -653,16 +649,16 @@ export function EmbeddingGradientViz() {
                   <label className={styles.trailLengthLabel} htmlFor="trailLength">
                     Trail length
                   </label>
-                  <input
+                  <Slider
                     id="trailLength"
-                    type="range"
-                    min="5"
-                    max="50"
-                    step="5"
+                    wrap={false}
+                    min={5}
+                    max={50}
+                    step={5}
                     value={trailLength}
-                    onChange={(e) => setTrailLength(Number(e.target.value))}
-                    className={styles.trailLengthSlider}
+                    onValueChange={(v) => setTrailLength(Math.round(v))}
                     disabled={isAutoTraining}
+                    ariaLabel="Trail length"
                   />
                   <span className={styles.trailLengthValue}>{trailLength}</span>
                 </div>
@@ -700,16 +696,16 @@ export function EmbeddingGradientViz() {
                   const MAX_DELAY = 200
                   const invert = (v: number) => MIN_DELAY + MAX_DELAY - v
                   return (
-                    <input
+                    <Slider
                       id="trainSpeed"
-                      type="range"
+                      wrap={false}
                       min={MIN_DELAY}
                       max={MAX_DELAY}
-                      step="10"
+                      step={10}
                       value={invert(trainSpeed)}
-                      onChange={(e) => setTrainSpeed(invert(Number(e.target.value)))}
-                      className={styles.speedSlider}
+                      onValueChange={(v) => setTrainSpeed(invert(v))}
                       disabled={isAutoTraining}
+                      ariaLabel="Auto-train speed"
                     />
                   )
                 })()}
@@ -729,7 +725,6 @@ export function EmbeddingGradientViz() {
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </VizCard>
   )
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Slider } from './Slider'
 import styles from './DiscreteContinuousViz.module.css'
 
 export function DiscreteContinuousViz() {
@@ -77,14 +78,14 @@ export function DiscreteContinuousViz() {
                 </div>
 
                 <div className={styles.sliderWrap}>
-                    <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        className={styles.slider}
+                    <Slider
+                        wrap={false}
+                        min={0}
+                        max={1}
+                        step={0.01}
                         value={continuousValue}
-                        onChange={(e) => setContinuousValue(parseFloat(e.target.value))}
+                        onValueChange={setContinuousValue}
+                        ariaLabel="Blend amount"
                     />
                 </div>
 

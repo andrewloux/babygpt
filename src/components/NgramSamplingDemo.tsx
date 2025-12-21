@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import { Slider } from './Slider'
 import styles from './NgramSamplingDemo.module.css'
 import { VOCAB, prettyChar } from '../data/characterData'
 
@@ -186,14 +187,14 @@ export function NgramSamplingDemo() {
             <label className={styles.label}>
               n = <span className={styles.value}>{order}</span>
             </label>
-            <input
-              className={styles.slider}
-              type="range"
+            <Slider
+              wrap={false}
               min={1}
               max={5}
               step={1}
               value={order}
-              onChange={(e) => setOrder(parseInt(e.target.value, 10))}
+              onValueChange={(v) => setOrder(Math.round(v))}
+              ariaLabel="N-gram order"
             />
           </div>
           <div className={styles.controlGroup}>
@@ -236,14 +237,14 @@ export function NgramSamplingDemo() {
                 <label className={styles.label}>
                   temperature: <span className={styles.value}>{temperature.toFixed(2)}</span>
                 </label>
-                <input
-                  className={styles.slider}
-                  type="range"
+                <Slider
+                  wrap={false}
                   min={0.2}
                   max={1.5}
                   step={0.05}
                   value={temperature}
-                  onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                  onValueChange={setTemperature}
+                  ariaLabel="Temperature"
                 />
               </div>
               <label className={styles.toggle}>

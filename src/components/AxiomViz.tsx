@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Slider } from './Slider'
 import styles from './AxiomViz.module.css'
 
 const MAX_SCALAR = 3
@@ -76,13 +77,15 @@ export function AxiomViz() {
             </div>
           </div>
 
-          <div className={styles.controls}>
-            <input
-              type="range"
-              min="1" max="3" step="0.1"
+        <div className={styles.controls}>
+            <Slider
+              wrap={false}
+              min={1}
+              max={3}
+              step={0.1}
               value={scalar}
-              onChange={(e) => setScalar(parseFloat(e.target.value))}
-              className={styles.slider}
+              onValueChange={setScalar}
+              ariaLabel="Amplification"
             />
             <div className={styles.controlReadout}>
               Amplification: <span className={styles.readoutValue}>{scalar.toFixed(1)}×</span>

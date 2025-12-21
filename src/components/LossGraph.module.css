@@ -66,7 +66,7 @@
   width: 20%;
   height: 100%;
   background: rgba(76, 175, 80, 0.1);
-  border-left: 1px dashed #4caf50;
+  border-left: 1px dashed var(--accent-green);
 }
 
 .badZone {
@@ -76,5 +76,5 @@
   width: 20%;
   height: 100%;
   background: rgba(244, 67, 54, 0.1);
-  border-right: 1px dashed #f44336;
+  border-right: 1px dashed var(--accent-red);
 }

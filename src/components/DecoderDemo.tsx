@@ -1,4 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from 'react'
+import { Slider } from './Slider'
 import styles from './DecoderDemo.module.css'
 
 // --- Data & Logic ---
@@ -195,13 +196,14 @@ export function DecoderDemo() {
             <span>Beam Width (K)</span>
             <span className={styles.value}>{beamWidth}</span>
           </div>
-          <input
-            type="range"
-            className={styles.slider}
+          <Slider
+            wrap={false}
             min={1}
             max={5}
+            step={1}
             value={beamWidth}
-            onChange={e => setBeamWidth(Number(e.target.value))}
+            onValueChange={(v) => setBeamWidth(Math.round(v))}
+            ariaLabel="Beam width"
           />
         </div>
         <div className={styles.controlGroup}>
@@ -209,14 +211,14 @@ export function DecoderDemo() {
             <span>LM Weight</span>
             <span className={styles.value}>{lmWeight.toFixed(1)}</span>
           </div>
-          <input
-            type="range"
-            className={styles.slider}
+          <Slider
+            wrap={false}
             min={0}
             max={3}
             step={0.5}
             value={lmWeight}
-            onChange={e => setLmWeight(Number(e.target.value))}
+            onValueChange={setLmWeight}
+            ariaLabel="LM weight"
           />
         </div>
       </div>

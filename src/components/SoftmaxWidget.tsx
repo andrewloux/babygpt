@@ -1,6 +1,7 @@
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import { useMemo, useState } from 'react'
+import { Slider } from './Slider'
 import styles from './SoftmaxWidget.module.css'
 
 export function SoftmaxWidget() {
@@ -27,9 +28,9 @@ export function SoftmaxWidget() {
     return katex.renderToString(equation, { throwOnError: false, displayMode: true })
   }, [])
 
-  const updateLogit = (idx: number, val: string) => {
+  const updateLogit = (idx: number, val: number) => {
     const newLogits = [...logits]
-    newLogits[idx] = parseFloat(val)
+    newLogits[idx] = val
     setLogits(newLogits)
   }
 
@@ -38,14 +39,14 @@ export function SoftmaxWidget() {
       <div className={styles.tempRow}>
         <div className={styles.tempLabel}>Temperature</div>
         <div className={styles.tempSliderWrap}>
-          <input
-            type="range"
-            min="0.1"
-            max="5.0"
-            step="0.1"
+          <Slider
+            wrap={false}
+            min={0.1}
+            max={5.0}
+            step={0.1}
             value={temperature}
-            className={styles.slider}
-            onChange={(e) => setTemperature(parseFloat(e.target.value))}
+            onValueChange={setTemperature}
+            ariaLabel="Temperature"
           />
           <span className={styles.tempValue}>{safeT.toFixed(1)}</span>
         </div>
@@ -60,14 +61,14 @@ export function SoftmaxWidget() {
           
           <div className={styles.sliderContainer}>
             <div className={styles.sliderWrapper}>
-              <input 
-                type="range" 
-                min="-5" 
-                max="5" 
-                step="0.1"
+              <Slider
+                wrap={false}
+                min={-5}
+                max={5}
+                step={0.1}
                 value={logits[i]}
-                className={styles.slider}
-                onChange={(e) => updateLogit(i, e.target.value)}
+                onValueChange={(v) => updateLogit(i, v)}
+                ariaLabel={`Logit for ${label}`}
               />
               <span className={styles.logitValue}>{logits[i].toFixed(1)}</span>
             </div>

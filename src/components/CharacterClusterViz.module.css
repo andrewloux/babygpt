@@ -681,13 +681,13 @@
 }
 
 .charCardA {
-  --bar-solid: #00d9ff;
+  --bar-solid: var(--accent-cyan);
   --bar-soft: rgba(0, 217, 255, 0.22);
   --bar-glow: rgba(0, 217, 255, 0.28);
 }
 
 .charCardB {
-  --bar-solid: #ff006e;
+  --bar-solid: var(--accent-magenta);
   --bar-soft: rgba(255, 0, 110, 0.20);
   --bar-glow: rgba(255, 0, 110, 0.24);
 }

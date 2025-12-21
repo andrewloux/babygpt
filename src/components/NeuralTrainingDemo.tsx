@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Slider } from './Slider'
 import styles from './NeuralTrainingDemo.module.css';
 
 // Simple vocab: h, e, l, o
@@ -97,15 +98,15 @@ export function NeuralTrainingDemo() {
         <label htmlFor="learning-rate" className={styles.sliderLabel}>
           Learning Rate: <strong>{learningRate.toFixed(1)}</strong>
         </label>
-        <input
+        <Slider
           id="learning-rate"
-          type="range"
-          min="0.1"
-          max="2.0"
-          step="0.1"
+          wrap={false}
+          min={0.1}
+          max={2.0}
+          step={0.1}
           value={learningRate}
-          onChange={(e) => setLearningRate(parseFloat(e.target.value))}
-          className={styles.slider}
+          onValueChange={setLearningRate}
+          ariaLabel="Learning rate"
         />
         <div className={styles.sliderHints}>
           <span className={styles.hint}>Too low: slow convergence</span>

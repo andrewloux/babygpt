@@ -33,3 +33,10 @@
   stroke-width: 6px;
   stroke-linejoin: round;
 }
+
+.labelBg {
+  fill: var(--bg-secondary);
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1px;
+  opacity: 0.95;
+}

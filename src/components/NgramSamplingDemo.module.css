@@ -26,9 +26,9 @@
   border-radius: 50%;
 }
 
-.red { background: #ff5f57; }
-.yellow { background: #febc2e; }
-.green { background: #28c840; }
+.red { background: var(--accent-red); }
+.yellow { background: var(--accent-yellow); }
+.green { background: var(--accent-green); }
 
 .title {
   font-family: var(--font-mono);
@@ -304,12 +304,12 @@
 }
 
 .badgeFound {
-  color: #4caf50;
+  color: var(--accent-green);
   background: rgba(76, 175, 80, 0.15);
 }
 
 .badgeNotFound {
-  color: #f44336;
+  color: var(--accent-red);
   background: rgba(244, 67, 54, 0.12);
 }
 

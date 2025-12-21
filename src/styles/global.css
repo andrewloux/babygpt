@@ -7,6 +7,14 @@
   --font-sans: 'Space Grotesk', system-ui, sans-serif;
   --font-serif: 'Crimson Pro', Georgia, serif;
 
+  /* Spacing Scale */
+  --space-xs: 0.25rem;   /* 4px */
+  --space-sm: 0.5rem;    /* 8px */
+  --space-md: 1rem;      /* 16px */
+  --space-lg: 1.5rem;    /* 24px */
+  --space-xl: 2rem;      /* 32px */
+  --space-2xl: 3rem;     /* 48px */
+
   /* Colors */
   --bg-primary: #0a0a0f;
   --bg-secondary: #12121a;
@@ -25,6 +33,25 @@
   --primary-dark: #00a6c2;
   --border-color: #2a2a3a;
   --code-bg: #0d0d14;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-smooth: 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Border Radius */
+  --radius-sm: 0.35rem;  /* ~6px - for inline code, small elements */
+  --radius-md: 0.75rem;  /* ~12px - for buttons, inputs */
+  --radius-lg: 1rem;     /* 16px - for cards, panels */
+  --radius-xl: 1.25rem;  /* 20px - for large containers */
+
+  /*
+   * Breakpoints (for reference - CSS vars can't be used in @media)
+   * --bp-sm: 600px   (mobile landscape)
+   * --bp-md: 768px   (tablet)
+   * --bp-lg: 1024px  (desktop)
+   */
 }
 
 * {
@@ -67,10 +94,17 @@ a:hover {
 
 code {
   font-family: 'JetBrains Mono', monospace;
-  background: var(--code-bg);
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(255, 255, 255, 0.03), transparent 60%),
+    rgba(0, 0, 0, 0.25);
   padding: 2px 6px;
-  border-radius: 3px;
+  border-radius: 0.35rem;
   font-size: 0.9em;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 2px 4px rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 ul, ol {
@@ -123,4 +157,102 @@ details.collapsible > summary:focus-visible {
   border-radius: 12px;
   padding: 0.25rem 0.35rem;
   margin: -0.25rem -0.35rem 0.35rem -0.35rem;
+}
+
+/* Ambient glow utility class
+ * Creates a soft, blurred multi-color gradient background effect
+ * Used by visualization components for atmospheric lighting
+ */
+.ambient-glow {
+  position: absolute;
+  inset: -10%;
+  background:
+    radial-gradient(circle at 20% 35%, rgba(255, 0, 110, 0.18), transparent 55%),
+    radial-gradient(circle at 80% 65%, rgba(0, 217, 255, 0.14), transparent 55%),
+    radial-gradient(circle at 55% 55%, rgba(255, 214, 10, 0.1), transparent 55%);
+  filter: blur(85px);
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Premium glass card background
+ * Multi-layer radial gradients with subtle color accents on dark base
+ * Creates depth with border, inset highlight, and dramatic shadow
+ */
+.card-glass {
+  background:
+    radial-gradient(ellipse 70% 45% at 18% 0%, rgba(255, 0, 110, 0.08), transparent 60%),
+    radial-gradient(ellipse 70% 45% at 82% 100%, rgba(0, 217, 255, 0.06), transparent 60%),
+    linear-gradient(180deg, rgba(11, 12, 21, 1), rgba(15, 17, 28, 1));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 25px 50px -12px rgba(0, 0, 0, 0.55);
+}
+
+/* Dark panel background
+ * Simpler background for nested panels and visualization containers
+ * Subtle top highlight with dark base and minimal borders
+ */
+.panel-dark {
+  background:
+    radial-gradient(ellipse 120% 75% at 50% 0%, rgba(255, 255, 255, 0.04), transparent 65%),
+    rgba(0, 0, 0, 0.22);
+  border-radius: 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 25px 40px -30px rgba(0, 0, 0, 0.7);
+}
+
+/* Inset box background
+ * For info boxes, formulas, and result displays
+ * Very subtle gradient with understated depth
+ */
+.inset-box {
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(255, 255, 255, 0.03), transparent 60%),
+    rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.95rem;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+}
+
+/* Interactive States */
+.hover-lift {
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.focus-glow:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.25);
+}
+
+.interactive {
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.interactive:hover {
+  opacity: 0.85;
+}
+
+/* Responsive Utilities */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .hide-desktop {
+    display: none !important;
+  }
 }

@@ -1,4 +1,6 @@
 import { useState, type ReactNode } from 'react'
+import { VizCard } from './VizCard'
+import { Slider } from './Slider'
 import styles from './ContextExplosionViz.module.css'
 
 const vocabSize = 27 // Fixed vocab size for clarity (a–z + space)
@@ -22,33 +24,21 @@ export function ContextExplosionViz() {
   const multiplier = vocabSize
 
   return (
-    <div className={styles.container}>
-      <div className={styles.ambientGlow} />
-      <div className={styles.card}>
-        {/* Header */}
-        <div className={styles.header}>
-          <div className={styles.headerText}>
-            <h3 className={styles.title}>The Context Explosion</h3>
-            <p className={styles.subtitle}>
-              Same wall, different count
-            </p>
+    <div className={styles.noSelect}>
+      <VizCard title="The Context Explosion" subtitle="Same wall, different count" figNum="Fig. 2.2">
+        <div className={styles.sliderSection}>
+          <div className={styles.sliderHeader}>
+            <span className={styles.sliderLabel}>Context length (T)</span>
+            <span className={styles.sliderValue}>T = {T}</span>
           </div>
-          <span className={styles.figNum}>Fig. 2.2</span>
-        </div>
-
-        {/* The slider - this is the ONLY control */}
-          <div className={styles.sliderSection}>
-            <div className={styles.sliderHeader}>
-              <span className={styles.sliderLabel}>Context length (T)</span>
-              <span className={styles.sliderValue}>T = {T}</span>
-            </div>
-          <input
-            type="range"
+          <Slider
+            wrap={false}
             min={1}
             max={8}
+            step={1}
             value={T}
-            onChange={(e) => setT(Number(e.target.value))}
-            className={styles.slider}
+            onValueChange={(v) => setT(Math.round(v))}
+            ariaLabel="Context length (T)"
           />
           <div className={styles.sliderHint}>T = how many tokens the model gets to see. Slide to add more.</div>
         </div>
@@ -117,7 +107,7 @@ export function ContextExplosionViz() {
             <span className={styles.scaleValue}>{formatNumber(embeddingNums)} nums</span>
           </div>
         </div>
-      </div>
+      </VizCard>
     </div>
   )
 }

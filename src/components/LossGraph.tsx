@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Slider } from './Slider'
 import styles from './LossGraph.module.css';
 
 export function LossGraph() {
@@ -51,14 +52,14 @@ export function LossGraph() {
       </div>
 
       <div className={styles.sliderContainer}>
-        <input
-            type="range"
-            min="0.01"
-            max="1.0"
-            step="0.01"
-            value={prob}
-            onChange={(e) => setProb(parseFloat(e.target.value))}
-            className={styles.slider}
+        <Slider
+          wrap={false}
+          min={0.01}
+          max={1.0}
+          step={0.01}
+          value={prob}
+          onValueChange={setProb}
+          ariaLabel="Probability assigned to correct answer"
         />
       </div>
       

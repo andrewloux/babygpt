@@ -8,6 +8,7 @@ export { Highlight, Term, Paragraph } from './Typography'
 
 // Content components
 export { Callout } from './Callout'
+export { FormalRigor, FormalSubSection } from './FormalRigor'
 export { CausalMaskViz } from './CausalMaskViz'
 export { ChapterMap } from './ChapterMap'
 export { Cite, Citations } from './Citations'
@@ -26,6 +27,8 @@ export { Invariants, InvariantItem } from './Invariants'
 export { Exercise } from './Exercise'
 
 // Visualization components
+export { VizCard } from './VizCard'
+export { Slider } from './Slider'
 export { SparsityViz, defaultSparsityData } from './SparsityViz'
 export { SparsityDemo } from './SparsityDemo'
 export { MarkovChainViz } from './MarkovChainViz'
@@ -63,3 +66,6 @@ export { EmbeddingGradientViz } from './EmbeddingGradientViz'
 export { CrossEntropyViz } from './CrossEntropyViz'
 export { TrainingDynamicsViz } from './TrainingDynamicsViz'
 export { EmbeddingInspector } from './EmbeddingInspector'
+export { SoftmaxSimplexViz } from './SoftmaxSimplexViz'
+export { GradientTraceDemo } from './GradientTraceDemo'
+export { GeometricDotProductViz } from './GeometricDotProductViz'

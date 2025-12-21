@@ -39,11 +39,11 @@
 
 .vectorDisplay {
   font-family: var(--font-mono);
-  background: #111;
+  background: var(--code-bg);
   padding: 1rem;
   border-radius: 4px;
   overflow-x: auto;
-  color: #888;
+  color: var(--text-muted);
 }
 
 .vectorValue {

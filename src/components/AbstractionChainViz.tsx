@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { VizCard } from './VizCard'
 import styles from './AbstractionChainViz.module.css'
 
 interface Station {
@@ -60,18 +61,8 @@ export const AbstractionChainViz: React.FC = () => {
   const displayStation = activeStation || hoveredStation
 
   return (
-    <div className={styles.container}>
-      <div className={styles.ambientGlow} />
-
-      <div className={styles.card}>
-        <div className={styles.header}>
-          <div>
-            <h3 className={styles.title}>The Abstraction Chain</h3>
-            <p className={styles.subtitle}>From Physics to Embeddings</p>
-          </div>
-          <span className={styles.figNum}>Fig 2.1</span>
-        </div>
-
+    <div className={styles.noSelect}>
+      <VizCard title="The Abstraction Chain" subtitle="From Physics to Embeddings" figNum="Fig. 2.1">
         <div className={styles.subway}>
           <svg className={styles.rail} viewBox="0 0 1000 100" preserveAspectRatio="none">
             {/* Main rail line */}
@@ -169,7 +160,7 @@ export const AbstractionChainViz: React.FC = () => {
             <span className={styles.highlightPattern}>pattern</span>, embeddings apply it to language.
           </p>
         </div>
-      </div>
+      </VizCard>
     </div>
   )
 }

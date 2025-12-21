@@ -27,19 +27,19 @@
 }
 
 .dot.red {
-  background: #ff5f57;
+  background: var(--accent-red);
 }
 
 .dot.yellow {
-  background: #ffbd2e;
+  background: var(--accent-yellow);
 }
 
 .dot.green {
-  background: #28ca42;
+  background: var(--accent-green);
 }
 
 .title {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--text-muted);
 }
@@ -50,7 +50,7 @@
 
 .label {
   display: block;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--text-secondary);
   margin-bottom: 10px;
@@ -59,7 +59,7 @@
 .input {
   width: 100%;
   padding: 12px 16px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 18px;
   background: var(--code-bg);
   border: 1px solid var(--border-color);
@@ -113,13 +113,13 @@
 }
 
 .text {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-secondary);
 }
 
 .prob {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--accent-yellow);
   font-weight: 700;
@@ -129,7 +129,7 @@
   background: var(--code-bg);
   border-radius: 6px;
   padding: 15px 20px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 14px;
   border-left: 3px solid var(--accent-yellow);
 }
@@ -161,7 +161,7 @@
 }
 
 .corpusLabel {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -174,7 +174,7 @@
   align-items: baseline;
   gap: 10px;
   padding: 3px 0;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   line-height: 1.5;
 }
@@ -212,7 +212,7 @@
 }
 
 .stat {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--text-secondary);
 }
@@ -259,7 +259,7 @@
 }
 
 .nextTitle {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--text-primary);
 }
@@ -271,7 +271,7 @@
 }
 
 .nextEmpty {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--text-muted);
   background: rgba(255, 255, 255, 0.04);
@@ -314,7 +314,7 @@
 .nextChar {
   width: 2.2ch;
   text-align: center;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 14px;
   color: var(--accent-cyan);
   font-weight: 700;
@@ -335,7 +335,7 @@
 }
 
 .nextProb {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-secondary);
   min-width: 110px;
@@ -350,13 +350,13 @@
 }
 
 .suggestLabel {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-muted);
 }
 
 .suggestBtn {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   padding: 6px 8px;
   background: rgba(255, 255, 255, 0.04);

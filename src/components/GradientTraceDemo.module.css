@@ -1,0 +1,270 @@
+.stepIndicator {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(255, 255, 255, 0.03), transparent 60%),
+    rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.stepDot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.22);
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  font-family: var(--font-mono);
+}
+
+.stepDot:hover:not(.active) {
+  border-color: rgba(0, 217, 255, 0.35);
+  color: var(--accent-cyan);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 217, 255, 0.15);
+}
+
+.stepDot:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+.stepDot.active {
+  background:
+    radial-gradient(ellipse 120% 90% at 30% 0%, rgba(0, 217, 255, 0.24), transparent 55%),
+    rgba(0, 217, 255, 0.12);
+  border-color: rgba(0, 217, 255, 0.4);
+  color: rgba(0, 0, 0, 0.95);
+  font-weight: 800;
+  box-shadow: 0 0 24px rgba(0, 217, 255, 0.25);
+}
+
+.stepDot.completed {
+  border-color: rgba(0, 255, 160, 0.3);
+  color: var(--accent-green);
+  background: rgba(0, 255, 160, 0.08);
+}
+
+.stepTitle {
+  padding: 1.25rem 1.5rem;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 0.015em;
+  color: rgba(255, 255, 255, 0.88);
+  background:
+    radial-gradient(ellipse 120% 75% at 50% 0%, rgba(255, 255, 255, 0.04), transparent 65%),
+    rgba(0, 0, 0, 0.22);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 280px;
+}
+
+@media (max-width: 700px) {
+  .panels {
+    grid-template-columns: 1fr;
+  }
+
+  .codePanel {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .header {
+    padding: 1.5rem 1.25rem 0.85rem 1.25rem;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .subtitle {
+    font-size: 0.7rem;
+  }
+
+  .stepIndicator {
+    gap: 0.4rem;
+    padding: 0.85rem 1rem;
+  }
+
+  .stepDot {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
+
+  .controls {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .navBtn {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+}
+
+.codePanel {
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+}
+
+.outputPanel {
+  display: flex;
+  flex-direction: column;
+}
+
+.panelHeader {
+  padding: 0.7rem 1.1rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.35);
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(255, 255, 255, 0.02), transparent 60%),
+    rgba(0, 0, 0, 0.18);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-family: var(--font-mono);
+}
+
+.code,
+.output {
+  margin: 0;
+  padding: 1.25rem 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.65;
+  flex: 1;
+  overflow-x: auto;
+}
+
+.code {
+  background:
+    radial-gradient(ellipse 100% 60% at 50% 0%, rgba(255, 0, 110, 0.04), transparent 60%),
+    rgba(8, 8, 16, 1);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.codeLine {
+  min-height: 1.65em;
+  transition: color 0.2s ease;
+}
+
+.output {
+  background:
+    radial-gradient(ellipse 100% 60% at 50% 0%, rgba(0, 217, 255, 0.03), transparent 60%),
+    rgba(11, 12, 21, 1);
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.outputLine {
+  min-height: 1.65em;
+  transition: color 0.2s ease;
+}
+
+.outputLine.highlight {
+  color: var(--accent-cyan);
+  font-weight: 700;
+  text-shadow: 0 0 12px rgba(0, 217, 255, 0.2);
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(255, 255, 255, 0.03), transparent 60%),
+    rgba(0, 0, 0, 0.25);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.navBtn {
+  padding: 0.7rem 1.25rem;
+  background:
+    radial-gradient(ellipse 120% 90% at 30% 0%, rgba(0, 217, 255, 0.16), transparent 55%),
+    rgba(0, 217, 255, 0.08);
+  border: 1px solid rgba(0, 217, 255, 0.25);
+  border-radius: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.navBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(0, 217, 255, 0.4);
+  box-shadow: 0 12px 28px rgba(0, 217, 255, 0.18);
+  background:
+    radial-gradient(ellipse 120% 90% at 30% 0%, rgba(0, 217, 255, 0.24), transparent 55%),
+    rgba(0, 217, 255, 0.12);
+}
+
+.navBtn:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+.navBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.stepCount {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+.resetRow {
+  display: flex;
+  justify-content: center;
+  padding: 0 1.5rem 1.25rem;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(255, 255, 255, 0.03), transparent 60%),
+    rgba(0, 0, 0, 0.25);
+}
+
+.resetBtn {
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.resetBtn:hover {
+  color: var(--accent-magenta);
+  border-color: rgba(255, 0, 110, 0.25);
+  background: rgba(255, 0, 110, 0.06);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(255, 0, 110, 0.12);
+}
+
+.resetBtn:focus-visible {
+  outline: 2px solid var(--accent-magenta);
+  outline-offset: 2px;
+}

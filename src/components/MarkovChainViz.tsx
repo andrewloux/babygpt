@@ -146,6 +146,9 @@ export function MarkovChainViz() {
 
           const path = createPath(from, to, curve)
           const labelPos = getLabelPos(from, to, curve)
+          const label = edge.prob.toFixed(2)
+          const labelWidth = 46
+          const labelHeight = 22
 
           return (
             <g key={i} opacity={highlighted ? 1 : 0.15}>
@@ -155,6 +158,14 @@ export function MarkovChainViz() {
                 stroke={isActive ? '#f97316' : 'var(--text-muted)'}
                 strokeWidth={isActive ? 3 : 2}
                 markerEnd={isActive ? 'url(#arrow-active)' : 'url(#arrow)'}
+              />
+              <rect
+                x={labelPos.x - labelWidth / 2}
+                y={labelPos.y - labelHeight / 2}
+                width={labelWidth}
+                height={labelHeight}
+                rx="6"
+                className={styles.labelBg}
               />
               <text
                 x={labelPos.x}
@@ -167,7 +178,7 @@ export function MarkovChainViz() {
                 fontWeight="600"
                 fontFamily="var(--font-mono)"
               >
-                {edge.prob.toFixed(2)}
+                {label}
               </text>
             </g>
           )

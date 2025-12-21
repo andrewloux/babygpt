@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { VizCard } from './VizCard'
+import { Slider } from './Slider'
 import styles from './GradientDescentViz.module.css'
 
 const LOSS_FN = (w: number) => 0.5 * w * w
@@ -54,18 +56,8 @@ export function GradientDescentViz() {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.ambientGlow} />
-      <div className={styles.card}>
-        <div className={styles.header}>
-          <div className={styles.headerText}>
-            <h3 className={styles.title}>Gradient Descent</h3>
-            <p className={styles.subtitle}>Use the slope to decide which way is “down”</p>
-          </div>
-          <span className={styles.figNum}>Fig. 2.4</span>
-        </div>
-
-        <div className={styles.graphContainer}>
+    <VizCard title="Gradient Descent" subtitle="Use the slope to decide which way is “down”" figNum="Fig. 2.4">
+      <div className={styles.graphContainer}>
           <svg className={styles.curveSvg} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label="Loss curve with tangent and step">
             <defs>
               <linearGradient id="lossGradient" x1="0" y1="0" x2="1" y2="0">
@@ -146,66 +138,65 @@ export function GradientDescentViz() {
               />
             )}
           </svg>
-        </div>
+      </div>
 
-        <div className={styles.explanation}>
-          {stepCount === 0 && 'Start here. The goal is to reach the bottom (loss = 0).'}
-          {stepCount > 0 && !isDone && 'Stepping down against the slope…'}
-          {isDone && 'Converged. The slope is effectively zero.'}
-        </div>
+      <div className={styles.explanation}>
+        {stepCount === 0 && 'Start here. The goal is to reach the bottom (loss = 0).'}
+        {stepCount > 0 && !isDone && 'Stepping down against the slope…'}
+        {isDone && 'Converged. The slope is effectively zero.'}
+      </div>
 
-        <div className={styles.formulaContainer}>
-          <div className={styles.formula}>
-            <span className={`${styles.term} ${styles.wTerm}`}>
-              w <span className={styles.termName}>Current position</span>
-            </span>
-            <span className={styles.op}>←</span>
-            <span className={`${styles.term} ${styles.wTerm}`}>
-              w <span className={styles.termName}>Current position</span>
-            </span>
-            <span className={styles.op}>−</span>
-            <span className={`${styles.term} ${styles.etaTerm}`}>
-              η <span className={styles.termName}>Step size ({eta.toFixed(1)})</span>
-            </span>
-            <span className={styles.op}>·</span>
-            <span className={`${styles.term} ${styles.slopeTerm}`}>
-              slope <span className={styles.termName}>Steepness ({currentSlope.toFixed(2)})</span>
-            </span>
-          </div>
-        </div>
-
-        <div className={styles.controls}>
-          <button className={styles.btn} type="button" onClick={reset}>
-            Reset
-          </button>
-
-          <div className={styles.etaControl}>
-            <label className={styles.etaLabel} htmlFor="eta">
-              η
-            </label>
-            <input
-              id="eta"
-              type="range"
-              min="0.1"
-              max="1.0"
-              step="0.1"
-              value={eta}
-              onChange={(e) => setEta(parseFloat(e.target.value))}
-              className={styles.etaSlider}
-            />
-            <span className={styles.etaValue}>{eta.toFixed(1)}</span>
-          </div>
-
-          <button
-            className={`${styles.btn} ${styles.primaryBtn}`}
-            type="button"
-            onClick={takeStep}
-            disabled={isDone}
-          >
-            Take step
-          </button>
+      <div className={styles.formulaContainer}>
+        <div className={styles.formula}>
+          <span className={`${styles.term} ${styles.wTerm}`}>
+            w <span className={styles.termName}>Current position</span>
+          </span>
+          <span className={styles.op}>←</span>
+          <span className={`${styles.term} ${styles.wTerm}`}>
+            w <span className={styles.termName}>Current position</span>
+          </span>
+          <span className={styles.op}>−</span>
+          <span className={`${styles.term} ${styles.etaTerm}`}>
+            η <span className={styles.termName}>Step size ({eta.toFixed(1)})</span>
+          </span>
+          <span className={styles.op}>·</span>
+          <span className={`${styles.term} ${styles.slopeTerm}`}>
+            slope <span className={styles.termName}>Steepness ({currentSlope.toFixed(2)})</span>
+          </span>
         </div>
       </div>
-    </div>
+
+      <div className={styles.controls}>
+        <button className={styles.btn} type="button" onClick={reset}>
+          Reset
+        </button>
+
+        <div className={styles.etaControl}>
+          <label className={styles.etaLabel} htmlFor="eta">
+            η
+          </label>
+          <Slider
+            id="eta"
+            wrap={false}
+            min={0.1}
+            max={1.0}
+            step={0.1}
+            value={eta}
+            onValueChange={setEta}
+            ariaLabel="Step size eta"
+          />
+          <span className={styles.etaValue}>{eta.toFixed(1)}</span>
+        </div>
+
+        <button
+          className={`${styles.btn} ${styles.primaryBtn}`}
+          type="button"
+          onClick={takeStep}
+          disabled={isDone}
+        >
+          Take step
+        </button>
+      </div>
+    </VizCard>
   )
 }

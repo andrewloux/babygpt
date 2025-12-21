@@ -20,7 +20,7 @@
   letter-spacing: 0.05em;
   padding: 0.25rem 0.5rem;
   background: #ef444422;
-  color: #ef4444;
+  color: var(--accent-red);
   border-radius: 4px;
 }
 
@@ -46,6 +46,6 @@
 }
 
 .fail {
-  color: #ef4444;
+  color: var(--accent-red);
   font-weight: 500;
 }
