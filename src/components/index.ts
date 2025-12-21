@@ -38,6 +38,7 @@ export { PointerVsFlat } from './PointerVsFlat'
 export { NgramGraphViz } from './NgramGraphViz'
 export { NgramSamplingDemo } from './NgramSamplingDemo'
 export { GeneralizationGapViz } from './GeneralizationGapViz'
+export { ConditioningShiftViz } from './ConditioningShiftViz'
 
 // Interactive demos
 export { CorridorDemo } from './CorridorDemo'

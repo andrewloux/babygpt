@@ -45,6 +45,7 @@ import {
   NgramSamplingDemo,
   CausalMaskViz,
   GeneralizationGapViz,
+  ConditioningShiftViz,
   NgramGraphViz,
 } from '../components'
 
@@ -519,6 +520,7 @@ export function Chapter1() {
           <li><Term>P(e | th)</Term> = probability of 'e' appearing after "th" (much higher—think "the", "them", "there")</li>
           <li><Term>P(q | th)</Term> = probability of 'q' appearing after "th" (basically zero)</li>
         </ul>
+        <ConditioningShiftViz />
         <Paragraph>
           The context changes the distribution. Once you see this, the rest of language modeling is just figuring out how to compute these conditional probabilities efficiently.
         </Paragraph>

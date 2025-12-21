@@ -1,0 +1,260 @@
+.layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.controls {
+  padding: 0.25rem 0;
+}
+
+.controlsTitle {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 0.75rem;
+}
+
+.contextButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.contextButton {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.22);
+  color: rgba(255, 255, 255, 0.78);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: border-color var(--transition-smooth), background var(--transition-smooth), transform 0.06s ease;
+}
+
+.contextButton:hover {
+  border-color: rgba(0, 217, 255, 0.45);
+  background: rgba(0, 0, 0, 0.32);
+}
+
+.contextButton:active {
+  transform: translateY(1px);
+}
+
+.contextButtonActive {
+  border-color: rgba(255, 0, 170, 0.55);
+  background: rgba(255, 0, 170, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.contextBlurb {
+  margin-top: 0.85rem;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.legend {
+  display: flex;
+  gap: 0.9rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.swatch {
+  width: 18px;
+  height: 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.swatchBase {
+  background: linear-gradient(90deg, rgba(0, 217, 255, 0.65), rgba(0, 217, 255, 0.25));
+}
+
+.swatchCond {
+  background: linear-gradient(90deg, rgba(255, 0, 170, 0.7), rgba(255, 0, 170, 0.25));
+}
+
+.legendText {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.chartPanel {
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.axes {
+  pointer-events: none;
+}
+
+.axisLineBack {
+  stroke: rgba(0, 217, 255, 0.35);
+  stroke-width: 1;
+}
+
+.axisLineFront {
+  stroke: rgba(255, 0, 170, 0.35);
+  stroke-width: 1;
+}
+
+.axisLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: rgba(255, 255, 255, 0.55);
+}
+
+.tick {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  fill: rgba(255, 255, 255, 0.6);
+}
+
+.group {
+  cursor: default;
+}
+
+.prism {
+  transition: opacity var(--transition-smooth);
+}
+
+.prismDim {
+  opacity: 0.32;
+}
+
+.prismHighlight rect,
+.prismHighlight polygon {
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 1;
+}
+
+.faceBase {
+  fill: rgba(0, 217, 255, 0.5);
+}
+
+.topBase {
+  fill: rgba(0, 217, 255, 0.28);
+}
+
+.sideBase {
+  fill: rgba(0, 217, 255, 0.18);
+}
+
+.faceCond {
+  fill: rgba(255, 0, 170, 0.55);
+}
+
+.topCond {
+  fill: rgba(255, 0, 170, 0.28);
+}
+
+.sideCond {
+  fill: rgba(255, 0, 170, 0.18);
+}
+
+.readout {
+  margin-top: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.readoutLeft {
+  min-width: 0;
+}
+
+.readoutTitle {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 0.35rem;
+}
+
+.readoutToken {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.readoutMono {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.readoutHint {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.readoutRight {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.readoutRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.readoutLabel {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.readoutValue {
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 700;
+}
+
+.readoutMonoSmall {
+  font-family: var(--font-mono);
+  color: rgba(0, 217, 255, 0.9);
+}
+
+.footer {
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
