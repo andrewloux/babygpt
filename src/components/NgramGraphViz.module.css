@@ -73,6 +73,10 @@
 .corpusLine code {
   background: transparent;
   padding: 0;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  color: var(--text-primary);
 }
 
 .svg {
