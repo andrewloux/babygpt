@@ -170,7 +170,7 @@ export function CorridorDemo({ corpus = DEFAULT_CORPUS }: CorridorDemoProps) {
           value={input}
           onChange={handleChange}
           maxLength={MAX_LEN}
-          placeholder="Start typing..."
+          placeholder="Type to see the corridor narrow..."
         />
 
         <div className={styles.statsRow}>
@@ -267,12 +267,8 @@ export function CorridorDemo({ corpus = DEFAULT_CORPUS }: CorridorDemoProps) {
           </div>
         </div>
 
-        <div className={styles.formula}>
-          {input.length === 0 ? (
-            <span className={styles.formulaResult}>
-              Type to see the corridor narrow...
-            </span>
-          ) : (
+        {input.length > 0 ? (
+          <div className={styles.formula}>
             <span className={styles.formulaResult}>
               {steps.map((s, i) => (
                 <span key={`${s.context}-${s.nextChar}-${i}`}>
@@ -287,8 +283,8 @@ export function CorridorDemo({ corpus = DEFAULT_CORPUS }: CorridorDemoProps) {
                 {prefixCount}/{N} ({(cumulativeProb * 100).toFixed(1)}%) of this corpus
               </span>
             </span>
-          )}
-        </div>
+          </div>
+        ) : null}
       </div>
     </div>
   )

@@ -44,6 +44,7 @@ import {
   PointerVsFlat,
   NgramSamplingDemo,
   CausalMaskViz,
+  GeneralizationGapViz,
   NgramGraphViz,
 } from '../components'
 
@@ -231,17 +232,17 @@ export function Chapter1() {
       {/* Section 1.1.2 */}
       <Section number="1.1.2" title="The Problem With Sequences">
         <Paragraph>
-          Cool, so we understand single-token probability. But text isn't one token. It's a <em>sequence</em> of tokens. The word "cat" is three events happening in order: <Term>c</Term>, then <Term>a</Term>, then <Term>t</Term>.
+          We've mastered the single character. But language isn't just one character; it's a stream. The word "cat" isn't one event—it's three events happening in a row: first <Term>c</Term>, then <Term>a</Term>, then <Term>t</Term>.
         </Paragraph>
         <Paragraph>
-          So here's the question: what's the probability of this <em>entire sequence</em> happening?
+          To build a language model, we need to answer a harder question: how likely is that <em>entire chain</em> of events?
         </Paragraph>
         <Paragraph>
-          Mathematicians call this the <Highlight>joint probability</Highlight>:
+          Mathematicians call this <Highlight>joint probability</Highlight>. It asks: what are the odds of all these things happening, in this specific order, all at once?
         </Paragraph>
         <MathBlock
           equation="P(x_1, x_2, x_3, \ldots, x_t)"
-          explanation={`"What's the probability of seeing x₁ AND x₂ AND x₃... all in that exact order?"`}
+          explanation={`"The probability of sequence x₁...xt existing"`}
         />
         <Paragraph>
           For "cat":
@@ -290,8 +291,10 @@ export function Chapter1() {
         <Paragraph>
           But wait—<em>why</em> should we expect "the cat" to help predict "the dog"? Because humans generalize based on <strong>syntactic role</strong>: both "cat" and "dog" are nouns that appear after an article. They serve the same grammatical function. Counting models have no notion of "role"—they only match exact strings. This is the fundamental limitation we're building toward fixing. (Spoiler: embeddings in Chapter 2 will encode these roles as geometric relationships.)
         </Paragraph>
+      </Section>
 
-        <Section number="1.1.3" title="Why This Happens">
+      {/* Section 1.1.3 */}
+      <Section number="1.1.3" title="Why This Happens">
           <Paragraph>
             The reason your corpus can never cover enough sequences is pure combinatorics. The space of possible sequences <Highlight>explodes exponentially</Highlight> with length:
           </Paragraph>
@@ -301,7 +304,21 @@ export function Chapter1() {
           <ExplosionDemo />
 
           <Paragraph>
-            Slide that to N=10 and watch what happens. With just 27 characters, you get 205 trillion possible 10-character sequences. Your training corpus—no matter how large—is a speck. Most valid English sequences will never appear in your data, so counting assigns them P=0.
+            Slide that to N=10 and watch what happens. With just 27 characters, you get <strong>205 trillion</strong> possible
+            10-character sequences. Your training corpus—no matter how large—is a speck compared to that space.
+          </Paragraph>
+          <Paragraph>
+            It's tempting to think this problem goes away at the word level because words come from a fixed dictionary. And
+            yes: the token set is finite.
+          </Paragraph>
+          <Paragraph>
+            But the combinatorics is still exponential. The number of length-T sequences is <Term>|V|^T</Term>, where <Term>|V|</Term> is your vocabulary size. For a typical word vocabulary of 50,000 tokens, the number of
+            possible 10-word sequences is <Term>50,000^{10}</Term>—around <strong>10^{47}</strong>. Astronomical.
+          </Paragraph>
+          <Paragraph>
+            Also, not all of those sequences are valid English. The problem is that the set of <em>valid</em> sequences is
+            still enormous, and a counting/lookup model has no way to assign reasonable probability to sequences it never
+            saw. It just says <Term>P = 0</Term>.
           </Paragraph>
 
           <Callout variant="info" title="Geometric Intuition">
@@ -339,29 +356,54 @@ export function Chapter1() {
             </Paragraph>
           </Callout>
 
-          <Paragraph>
-            The counting approach is still just a giant lookup table—same idea as before, just scaled up. To this naive model, "cat" and "dog" are just symbols. <code>"the cat sat"</code> and <code>"the dog sat"</code>{' '}
-            are different keys. Learning one doesn't automatically change the other, because the model has no way to share
-            information between keys. It's a phone book: entries don't talk to each other.
-          </Paragraph>
-        </Section>
+		          <Paragraph>
+		            The counting approach is still just a giant lookup table—same idea as before, just scaled up. To this naive model, "cat" and "dog" are just symbols. <Term>"the cat sat"</Term> and <Term>"the dog sat"</Term> are different keys. Learning one doesn't automatically change the other, because the model has no way to share information between keys. It's a phone book: entries don't talk to each other.
+		          </Paragraph>
 
+	        <Paragraph>
+	          So if we want to compute probabilities from real, finite data, we need to stop treating whole sequences as one
+	          giant key.
+	        </Paragraph>
+	        <Paragraph>
+	          The solution is <Highlight>decomposition</Highlight>—break the joint probability into smaller, learnable pieces.
+	        </Paragraph>
+	        <Paragraph>
+	          These smaller pieces rely on the <Term>Markov Assumption</Term>: the idea that the probability of the next character depends only on a small window of recent history, not the entire history of the universe.
+	        </Paragraph>
         <Paragraph>
-          The solution? <Highlight>Decomposition</Highlight>—break the joint probability into smaller, learnable pieces.</Paragraph>
-        <Paragraph>
-          These smaller pieces rely on the <Term>Markov Assumption</Term>: the idea that the probability of the next character depends only on a small window of recent history, not the entire history of the universe.
+          This is the trade the Markov assumption is making: you pick a window and pretend the world outside that window
+          doesn't matter.
         </Paragraph>
         <Paragraph>
-          What dies when you truncate context? Consider "The doctor said she would arrive at noon." With <Term>n=2</Term>, when predicting the next word after "would", you only see "would"—you've lost "doctor" and "she". Gender agreement, professional roles, the entire topic. With <Term>n=5</Term>, you see "she would arrive at"—still no doctor. Long-range coherence requires long-range memory, and the Markov assumption throws it away.
+          In other words, an n-gram model comes with a built-in <Term>context length</Term>. With <Term>n=2</Term>, you only
+          look at the last 1 token. With <Term>n=5</Term>, you only look at the last 4 tokens. Everything earlier is
+          invisible.
+        </Paragraph>
+        <Paragraph>
+          What dies when you truncate context is whatever requires looking farther back.
+        </Paragraph>
+        <Paragraph>
+          Example sentence:
+        </Paragraph>
+        <CodeBlock filename="sentence.txt">{`The keys to the cabinet in the hallway are missing.`}</CodeBlock>
+        <Paragraph>
+          Suppose we're trying to predict the next word right before <Term>are</Term>.
+        </Paragraph>
+        <ul>
+          <li><strong>n = 2:</strong> the model sees <Term>"hallway"</Term>. It has no idea if the subject was <Term>key</Term> or <Term>keys</Term>.</li>
+          <li><strong>n = 5:</strong> it sees <Term>"cabinet in the hallway"</Term>. Still no subject.</li>
+          <li><strong>n = 8:</strong> it finally sees <Term>"keys to the cabinet in the hallway"</Term>, and now <Term>are</Term> makes sense.</li>
+        </ul>
+        <Paragraph>
+          Longer context helps. But longer context also creates more possible contexts, which brings sparsity roaring back:
+          there are fewer repeats to learn from. This is the constant tension in language modeling: memory versus data.
         </Paragraph>
         <Paragraph>
           We call these pieces <Term>n-grams</Term>. An n-gram is just a chunk of n consecutive characters:
         </Paragraph>
         <NgramExamples />
         <Paragraph>
-          An <Term>n-gram model</Term> is what happens when you pick a specific <Term>n</Term> and commit. If <Term>n=3</Term>{' '}
-          (a trigram model), you predict the next character using only the last <Term>2</Term> characters. If <Term>n=2</Term>{' '}
-          (a bigram model), you only look at the last <Term>1</Term>.
+          An <Term>n-gram model</Term> is what happens when you pick a specific <Term>n</Term> and commit. If <Term>n=3</Term> (a trigram model), you predict the next character using only the last <Term>2</Term> characters. If <Term>n=2</Term> (a bigram model), you only look at the last <Term>1</Term>.
         </Paragraph>
         <MathBlock
           equation={`P(x_t \\,|\\, x_{1:t-1}) \\approx P(x_t \\,|\\, x_{t-n+1:t-1})`}
@@ -390,8 +432,7 @@ export function Chapter1() {
           <SparsityViz rows={defaultSparsityData} />
           <Paragraph>
             <strong>The insight:</strong> Exact long contexts are rare. Short ones are everywhere. In this corpus,
-            <Term>the next morning</Term> shows up only <strong>9</strong> times, but the suffix <Term>ing</Term> shows up{' '}
-            <strong>3,960</strong> times. Nothing magical happened—we stopped matching a whole phrase and started counting
+            <Term>the next morning</Term> shows up only <strong>9</strong> times, but the suffix <Term>ing</Term> shows up <strong>3,960</strong> times. Nothing magical happened—we stopped matching a whole phrase and started counting
             one of the reusable little chunks phrases are built from.
           </Paragraph>
           <Paragraph>
@@ -416,32 +457,33 @@ export function Chapter1() {
         </Paragraph>
         <CorridorDemo />
         <Paragraph>
-          This isn't a trick or a formula to memorize. It's just the bookkeeping for "of those, of those, of those." Once
-          you see the corridor narrowing, multiplication is what keeps track.
+          It can look like a formula at first. It's just the bookkeeping for "of those, of those, of those." Once you see
+          the corridor narrowing, multiplication is what keeps track.
         </Paragraph>
-        <Callout variant="info" title="Why “AND” multiplies">
-          <Paragraph>
-            Imagine 1,000 equally likely worlds.
-          </Paragraph>
-          <Paragraph>
-            Event <Term>A</Term> happens in 200 of them, so <Term>P(A) = 200/1000 = 0.2</Term>.
-          </Paragraph>
-          <Paragraph>
-            Now zoom in and only look at the <em>A-worlds</em> (200 worlds). Inside that smaller pile, <Term>B</Term> happens in 50, so <Term>P(B | A) = 50/200 = 0.25</Term>.
-          </Paragraph>
-          <Paragraph>
-            Zoom in again: among the 50 worlds where <Term>A</Term> and <Term>B</Term> happened, <Term>C</Term> happens in 10, so <Term>P(C | A, B) = 10/50 = 0.2</Term>.
-          </Paragraph>
-          <Paragraph>
-            So <Term>P(A \u2227 B \u2227 C) = 10/1000 = 0.01</Term>. And the multiplication is just the same filtering written as arithmetic: <Term>0.2 × 0.25 × 0.2 = 0.01</Term>.
-          </Paragraph>
-        </Callout>
+        <Paragraph>
+          Why does "AND" mean multiply? Think of it as filtering. Imagine starting with 1,000 equally likely worlds.
+        </Paragraph>
+        <Paragraph>
+          First, filter for event <Term>A</Term>. Say it happens in 200 of them. That's <Term>200/1000 = 0.2</Term>.
+        </Paragraph>
+        <Paragraph>
+          Now, <em>throw away the other 800 worlds</em>. We are currently standing in the 200 "A-worlds."
+        </Paragraph>
+        <Paragraph>
+          Next, filter for event <Term>B</Term>. Inside this smaller pile, maybe B happens in 50 of them. That fraction is <Term>50/200 = 0.25</Term>.
+        </Paragraph>
+        <Paragraph>
+          Finally, filter for <Term>C</Term>. Among those 50 surviving worlds, C happens in 10. That's <Term>10/50 = 0.2</Term>.
+        </Paragraph>
+        <Paragraph>
+          How many worlds survived all three filters? 10 out of the original 1,000. That's <Term>0.01</Term>. And the math tracks the filters exactly: <Term>0.2 × 0.25 × 0.2 = 0.01</Term>. Multiplication is just repeated filtering.
+        </Paragraph>
         <Paragraph>
           That decomposition has a name: the <Highlight>chain rule of probability</Highlight>. But before we write it down formally, we need to make one concept precise: what exactly do we mean by "the fraction that continues with 'a', given we're already at 'c'"?
         </Paragraph>
       </Section>
 
-      {/* Section 1.1.3 */}
+      {/* Section 1.1.4 */}
       <Section number="1.1.4" title="Conditional Probability">
         <Paragraph>
           That phrase—"given we're already at X"—is doing a lot of heavy lifting. It has a precise name: <Highlight>conditional probability</Highlight>.
@@ -895,31 +937,55 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
         <Paragraph>
           KenLM solves the <strong>speed</strong> problem, but fails the <strong>generalization</strong> test because it relies on exact matching. It can tell you efficiently that it has never seen "dog sat" before, but it cannot take the next step—using what it knows about "cat sat" to make a guess. It is a brilliant system for retrieving exactly what you have seen, and useless for inferring what you haven't.
         </Paragraph>
-        <Callout variant="info" title="Concrete Numbers: The One Billion Word Benchmark">
-          <Paragraph>
-            On the One Billion Word Benchmark, an unpruned Kneser–Ney 5-gram lands around <strong>perplexity 67.6</strong>. Perplexity measures how "confused" the model is — it's the number of equally-likely choices the model behaves as if it's picking from. Lower is better: a perfect model has perplexity 1 (certain), while perplexity 67 means the model is still weighing ~67 candidates per character. For context, call it 60–100 depending on the corpus — far from Shannon's ~1.3 bits/character estimate for English. That gap isn't a software bug — it's the fundamental limit of counting without sharing.
-          </Paragraph>
-          <Paragraph>
-            The reason n-grams faded isn't that they "stopped working." It's that decoders ask the language model an outrageous number of questions per second, and neural models took a while to get fast (and good) enough. Once neural models caught up on speed, their ability to generalize gave them an insurmountable edge.
-          </Paragraph>
-        </Callout>
-        <Callout variant="info" title="Train vs. Test">
-          <Paragraph>
-            Evaluate on text the model <em>didn't</em> train on. A counting model can look amazing on its own training data by memorizing exact contexts.
-          </Paragraph>
-          <Paragraph>
-            Held-out text is where the warehouse emptiness shows up as a number.
-          </Paragraph>
-        </Callout>
-        <Callout variant="info" title="When Was This the Dominant Approach?">
-          <Paragraph>Rough timeline:</Paragraph>
-          <ul>
-            <li><strong>1990s → early 2010s:</strong> n-grams (often 3–5 grams) were the default language model inside many production decoders for speech recognition and statistical machine translation.</li>
-            <li><strong>Early 2000s:</strong> neural language models show up on paper, but they're too slow to be the thing you query millions of times inside a decoder. <Cite n={5} /></li>
-            <li><strong>2010s:</strong> faster neural LMs and neural machine translation start taking over new systems.</li>
-            <li><strong>Late 2010s:</strong> Transformers make neural language models the default for general-purpose text generation.</li>
-          </ul>
-        </Callout>
+        <Paragraph>
+          To compare language models, we need a score that tells us: <em>how surprised is the model by real text?</em>
+          Surprises are where the learning signal lives.
+        </Paragraph>
+        <Paragraph>
+          If the correct next token happens, and the model assigned it probability <Term>p</Term>, then lower <Term>p</Term> should mean “more surprise.” A handy way to measure that is in <strong>bits</strong>:
+        </Paragraph>
+        <Paragraph>
+          <Term>p = 1/2</Term> feels like <Term>1</Term> bit of surprise (a coin flip). <Term>p = 1/4</Term> feels like <Term>2</Term> bits. <Term>p = 1/8</Term> is <Term>3</Term> bits. In general:
+        </Paragraph>
+        <MathBlock equation={String.raw`\text{surprise}(p) = -\log_2(p)`} />
+        <Paragraph>
+          Now average that surprise across a long held-out string, and you get <Term>average surprise</Term> (also called <Term>cross-entropy</Term>). Finally, convert it back into “effective number of choices”:
+        </Paragraph>
+        <MathBlock equation={String.raw`\text{perplexity} = 2^{\text{average surprise}}`} />
+        <Paragraph>
+          Tiny example: suppose over two steps the model assigns the correct next token probabilities <Term>0.5</Term> and <Term>0.25</Term>. The surprises are <Term>1</Term> bit and <Term>2</Term> bits, so the average is <Term>(1 + 2)/2 = 1.5</Term> bits/token. Perplexity is <Term>2^{1.5}</Term> ≈ <Term>2.83</Term>—about “three plausible options” on average.
+        </Paragraph>
+        <Paragraph>
+          One annoying detail: raw counts love to assign <Term>p = 0</Term> to unseen n-grams. That makes surprise infinite,
+          and it blows up perplexity. So practical n-gram models use <Highlight>smoothing</Highlight>: discount a little
+          probability mass from the seen stuff and use it to give the unseen stuff a non-zero floor, usually by backing off
+          to shorter contexts.
+        </Paragraph>
+        <Paragraph>
+          <Term>Kneser–Ney</Term> is a famous smoothing scheme that does something subtle in the backoff distribution: it
+          treats a word as “more generally likely” if it appears after <em>many different contexts</em>, not just if it has a
+          big raw count. “Francisco” can be frequent but mostly follow “San.” Meanwhile “the” shows up after everything.
+          Kneser–Ney tries to capture that difference.
+        </Paragraph>
+        <Paragraph>
+          With smoothing in place, you can get real benchmark numbers. On the One Billion Word Benchmark, an unpruned <Term>Kneser–Ney 5-gram</Term> lands around <strong>perplexity 67.6</strong>. That's miles better than random
+          guessing, but still far from Shannon's ~1.3 bits/character estimate for English. That gap isn't a software bug—it's
+          the limit of counting without sharing.
+        </Paragraph>
+        <Paragraph>
+          Important: you measure this on <strong>held-out text</strong> (test data). On its own training data, a counting
+          model can look amazing because it literally memorized exact contexts. Held-out text is where the warehouse
+          emptiness shows up as a number.
+        </Paragraph>
+        <Paragraph>
+          Rough timeline:
+        </Paragraph>
+        <ul>
+          <li><strong>1990s → early 2010s:</strong> n-grams (often 3–5 grams) were the default language model inside many production decoders for speech recognition and statistical machine translation.</li>
+          <li><strong>Early 2000s:</strong> neural language models show up on paper, but they're too slow to be the thing you query millions of times inside a decoder. <Cite n={5} /></li>
+          <li><strong>2010s:</strong> faster neural LMs and neural machine translation start taking over new systems.</li>
+          <li><strong>Late 2010s:</strong> Transformers make neural language models the default for general-purpose text generation.</li>
+        </ul>
         <Paragraph>
           What if we stored something else entirely? What if similar situations could share information?
         </Paragraph>
@@ -1184,6 +1250,24 @@ P(b|a) = (1 + 1) / 3 = 2/3`}</CodeBlock>
           </ul>
         </Callout>
         <Paragraph>
+          Before we touch code, let's pin down what we already earned in Section 1.1:
+        </Paragraph>
+        <ul>
+          <li><strong>Probabilities are distributions:</strong> they describe a spread over options, and they sum to 1.</li>
+          <li><strong>Conditioning is filtering:</strong> <Term>P(X | Y)</Term> means "only count the worlds where Y happened."</li>
+          <li><strong>Sequences decompose:</strong> the chain rule turns a sequence probability into a product of next-token probabilities.</li>
+          <li><strong>Logs measure surprise:</strong> <Term>-log₂(p)</Term> turns tiny probabilities into manageable numbers, and averages give us entropy / perplexity.</li>
+          <li><strong>Counting doesn't generalize:</strong> exact-match tables hit sparsity and have no way to share information between similar contexts.</li>
+        </ul>
+        <Paragraph>
+          By the end of this chapter, you'll build the pipeline that turns raw text into the thing a model can actually train on:
+        </Paragraph>
+        <ul>
+          <li><strong>Vocabulary:</strong> collect the unique tokens and assign each an integer ID (<Term>stoi</Term>/<Term>itos</Term>).</li>
+          <li><strong>Encode / decode:</strong> convert text ↔ IDs so we can move between human strings and model numbers.</li>
+          <li><strong>Sliding window:</strong> generate (context → target) training pairs with a chosen context length.</li>
+        </ul>
+        <Paragraph>
           Okay, enough theory. Let's build something.
         </Paragraph>
         <Paragraph>
@@ -1193,8 +1277,7 @@ P(b|a) = (1 + 1) / 3 = 2/3`}</CodeBlock>
           We need a translation layer. <Highlight>Tokenization</Highlight> is the process of converting text into a sequence of integers that a model can actually process. Mathematicians call this <Term>discretization</Term>—mapping the continuous or symbolic world of human thought onto a discrete set of integers that a machine can manipulate.
         </Paragraph>
         <Paragraph>
-          The obvious first instinct is to tokenize <em>words</em>—that's how humans read. But word-level models hit immediate pain: vocabularies of 50,000+ entries, unknown words (OOV) everywhere, and most word-contexts never repeat in training data. The sparsity problem from{' '}
-          <SectionLink to="1.1">Section 1.1</SectionLink> hits even harder.
+          The obvious first instinct is to tokenize <em>words</em>—that's how humans read. But word-level models hit immediate pain: vocabularies of 50,000+ entries, unknown words (OOV) everywhere, and most word-contexts never repeat in training data. The sparsity problem from <SectionLink to="1.1">Section 1.1</SectionLink> hits even harder.
         </Paragraph>
         <Paragraph>
           So for BabyGPT, we drop to <Term>character-level tokenization</Term>. Not because words are "wrong," but because characters make the core mechanics visible: tiny vocab (~80 characters for English), zero OOV (every character is known), and patterns that actually recombine. The math is identical—we're just turning the knobs to "small" so we can see what's happening.
@@ -1271,6 +1354,10 @@ itos = {i: ch for ch, i in stoi.items()}
           Now we can actually <em>use</em> the vocabulary.
         </Paragraph>
         <Paragraph>
+          The word <strong>code</strong> just means “an agreed mapping.” In this chapter, our codebook is two tiny
+          dictionaries: <Term>stoi</Term> and <Term>itos</Term>.
+        </Paragraph>
+        <Paragraph>
           <strong>Encoding</strong> means: walk through the text and replace each character with its ID using <Term>stoi</Term>.
         </Paragraph>
         <Paragraph>
@@ -1299,8 +1386,7 @@ itos = {i: ch for ch, i in stoi.items()}
       {/* Section 1.3 */}
       <Section number="1.3" title="The Sliding Window">
         <Paragraph>
-          We've got text → integers. But simply feeding a stream of numbers isn't enough. We need to structure this data to operationalize the <Highlight>Decomposition Strategy</Highlight> we derived in{' '}
-          <SectionLink to="1.1">Section 1.1</SectionLink>.
+          We've got text → integers. But simply feeding a stream of numbers isn't enough. We need to structure this data to operationalize the <Highlight>Decomposition Strategy</Highlight> we derived in <SectionLink to="1.1">Section 1.1</SectionLink>.
         </Paragraph>
         <Paragraph>
           This is where we start to tame the generalization and sparsity issues. By breaking the massive text into small, overlapping chunks (the "grams" in n-grams), we force the model to focus on <Term>local structure</Term>.
@@ -1739,9 +1825,7 @@ print(f"First Y: {Y[0]}")               # [2, 4, 4, 5] ("ello")`}</CodeBlock>
           </Paragraph>
         </Callout>
         <Paragraph>
-          Here's how embeddings solve the sparsity problem. With embeddings, an unseen context like{' '}
-          <Term>"the dog"</Term> becomes a <strong>combination</strong> of vectors you've seen:{' '}
-          <code>E['t'] + E['h'] + E['e'] + E[' '] + E['d'] + E['o'] + E['g']</code>. You've trained on each of those
+          Here's how embeddings solve the sparsity problem. With embeddings, an unseen context like <Term>"the dog"</Term> becomes a <strong>combination</strong> of vectors you've seen: <code>E['t'] + E['h'] + E['e'] + E[' '] + E['d'] + E['o'] + E['g']</code>. You've trained on each of those
           vectors in other contexts. The model can interpolate—it doesn't need to have seen this exact string, because
           it's built from known parts. Similarity in embedding space enables similarity in predictions.
         </Paragraph>
@@ -1753,6 +1837,23 @@ print(f"First Y: {Y[0]}")               # [2, 4, 4, 5] ("ello")`}</CodeBlock>
 
       {/* Section 1.8: Exercises */}
       <Section number="1.8" title="Exercises">
+        <Paragraph>
+          These are small, concrete checks that the mechanics are really in your hands—not just on the page.
+        </Paragraph>
+        <Paragraph>
+          You’re about to practice three moves that show up everywhere in language modeling:
+        </Paragraph>
+        <ul>
+          <li><strong>Decompose a sequence:</strong> use the chain rule to turn P(text) into a product of next-token probabilities.</li>
+          <li><strong>Handle tokenization edge cases:</strong> decide what “unknown token” means in code.</li>
+          <li><strong>Count the data you’re creating:</strong> understand how the sliding window turns one string into many training pairs.</li>
+        </ul>
+        <Paragraph>
+          Before you start, here’s the core pain that pushes us beyond “just count it”: exact-match models love to declare
+          perfectly reasonable continuations <Term>impossible</Term> because they weren’t in the training set.
+        </Paragraph>
+        <GeneralizationGapViz />
+
         <Exercise
           number="1.1"
           title="Chain Rule by Hand"

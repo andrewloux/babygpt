@@ -63,15 +63,25 @@
   font-size: 18px;
   background: var(--code-bg);
   border: 1px solid var(--border-color);
+  border-left: 3px solid var(--accent-yellow);
   border-radius: 6px;
   color: var(--accent-cyan);
   outline: none;
   margin-bottom: 20px;
   text-transform: lowercase;
+  caret-color: var(--accent-cyan);
+  transition:
+    box-shadow var(--transition-smooth),
+    border-top-color var(--transition-smooth),
+    border-right-color var(--transition-smooth),
+    border-bottom-color var(--transition-smooth);
 }
 
 .input:focus {
-  border-color: var(--accent-cyan);
+  border-top-color: rgba(0, 217, 255, 0.55);
+  border-right-color: rgba(0, 217, 255, 0.55);
+  border-bottom-color: rgba(0, 217, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.18);
 }
 
 .input::placeholder {

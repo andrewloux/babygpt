@@ -1,117 +1,292 @@
-.container {
+.layout {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 24px;
-  background: var(--bg-paper);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  max-width: 400px;
-  margin: 2rem auto;
+  gap: 1.25rem;
 }
 
-.grid {
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.85rem 1.25rem;
+}
+
+.legendRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.legendHint {
+  flex-basis: 100%;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.35;
+}
+
+.swatch {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+}
+
+.swatchAllowed {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(0, 217, 255, 0.35), transparent 60%),
+    rgba(0, 217, 255, 0.12);
+  border-color: rgba(0, 217, 255, 0.35);
+}
+
+.swatchBlocked {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 0, 110, 0.35), transparent 60%),
+    rgba(255, 0, 110, 0.08);
+  border-color: rgba(255, 0, 110, 0.35);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.controlsLabel {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.65);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pill {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.pill:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 217, 255, 0.45);
+  background: rgba(0, 217, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.pill:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.25);
+}
+
+.pillActive {
+  border-color: rgba(0, 217, 255, 0.55);
+  background: rgba(0, 217, 255, 0.12);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.gridWrap {
+  padding: 1.1rem 1.1rem 1.25rem 1.1rem;
+}
+
+.timeArrow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 0.85rem;
+}
+
+.arrowLine {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(0, 217, 255, 0.35), rgba(255, 0, 110, 0.28));
+}
+
+.matrix {
+  --cell: clamp(36px, 7vw, 46px);
+  --label: clamp(54px, 12vw, 72px);
+  --gap: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  user-select: none;
+}
+
+.headerRow {
   display: grid;
-  grid-template-columns: 40px repeat(5, 40px); /* Label + 5 columns */
-  gap: 4px;
+  grid-template-columns: var(--label) repeat(5, var(--cell));
+  gap: var(--gap);
+  align-items: center;
 }
 
 .cornerCell {
-  /* Empty top-left corner */
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
 }
 
 .headerCell {
   display: flex;
   align-items: center;
   justify-content: center;
+  height: var(--cell);
   font-family: var(--font-mono);
   font-size: 0.85rem;
-  color: var(--text-secondary);
-  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.headerHot {
+  border-color: rgba(0, 217, 255, 0.22);
+  background: rgba(0, 217, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: var(--label) repeat(5, var(--cell));
+  gap: var(--gap);
+  align-items: center;
 }
 
 .rowLabel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 999px;
+  height: var(--cell);
   font-family: var(--font-mono);
   font-size: 0.85rem;
-  color: var(--text-secondary);
-  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+}
+
+.rowLabel:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 217, 255, 0.35);
+  background: rgba(0, 217, 255, 0.06);
+}
+
+.rowLabel:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.25);
+}
+
+.rowLabelActive {
+  border-color: rgba(0, 217, 255, 0.55);
+  background: rgba(0, 217, 255, 0.12);
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .cell {
-  width: 40px;
-  height: 40px;
+  height: var(--cell);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono);
-  font-weight: bold;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  border: 1px solid transparent;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast), opacity var(--transition-fast);
 }
 
-.visible {
-  background-color: rgba(16, 185, 129, 0.1); /* Emerald 500 with opacity */
-  color: var(--color-success);
-  border-color: rgba(16, 185, 129, 0.2);
+.allowed {
+  background: rgba(0, 217, 255, 0.08);
+  color: rgba(0, 217, 255, 0.92);
+  border-color: rgba(0, 217, 255, 0.2);
 }
 
-.hidden {
-  background-color: rgba(239, 68, 68, 0.05); /* Red 500 with opacity */
-  color: var(--text-tertiary);
-  opacity: 0.5;
+.blocked {
+  background: rgba(255, 0, 110, 0.04);
+  color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.06);
 }
 
-.cell.hovered {
-  transform: scale(1.1);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  z-index: 10;
+.cellDim {
+  opacity: 0.35;
 }
 
-.cell.visible.hovered {
-  background-color: rgba(16, 185, 129, 0.2);
-  border-color: var(--color-success);
-}
-
-.cell.hidden.hovered {
-  background-color: rgba(239, 68, 68, 0.1);
-  border-color: var(--color-error);
-  color: var(--color-error);
+.cellFocus {
   opacity: 1;
+  transform: translateY(-1px);
+  border-color: rgba(0, 217, 255, 0.6);
+  background: rgba(0, 217, 255, 0.16);
+  box-shadow: 0 0 0 1px rgba(0, 217, 255, 0.12) inset, 0 10px 24px -18px rgba(0, 217, 255, 0.7);
 }
 
-.caption {
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  width: 100%;
-  font-size: 0.9rem;
+.cellBlocked {
+  opacity: 1;
+  border-color: rgba(255, 0, 110, 0.6);
+  background: rgba(255, 0, 110, 0.12);
+  color: rgba(255, 255, 255, 0.85);
 }
 
-.explanation {
-  color: var(--text-primary);
+.footer {
+  font-family: var(--font-sans);
 }
 
-.visibleText {
-  color: var(--color-success);
-  font-weight: 600;
-  margin-left: 0.5rem;
+.footerTitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.85);
 }
 
-.hiddenText {
-  color: var(--color-error);
-  font-weight: 600;
-  margin-left: 0.5rem;
+.footerLine {
+  margin-top: 0.25rem;
+  color: rgba(255, 255, 255, 0.65);
 }
 
-.placeholder {
-  color: var(--text-tertiary);
-  font-style: italic;
+.footerToken {
+  font-family: var(--font-mono);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.footerGood {
+  font-family: var(--font-mono);
+  color: var(--accent-cyan);
+}
+
+.footerBad {
+  font-family: var(--font-mono);
+  color: var(--accent-magenta);
+}
+
+@media (max-width: 520px) {
+  .gridWrap {
+    padding: 1rem;
+  }
+
+  .legendHint {
+    font-size: 0.9rem;
+  }
 }

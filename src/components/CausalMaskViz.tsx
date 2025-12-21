@@ -1,68 +1,142 @@
-import React, { useState } from 'react'
+import { useMemo, useState } from 'react'
+
+import { VizCard } from './VizCard'
 import styles from './CausalMaskViz.module.css'
 
-export const CausalMaskViz: React.FC = () => {
-  const [hoveredCell, setHoveredCell] = useState<{ row: number; col: number } | null>(null)
+export function CausalMaskViz() {
   const size = 5
+  const [selectedRow, setSelectedRow] = useState<number>(Math.min(3, size - 1))
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null)
 
-  const getCellStatus = (row: number, col: number) => {
-    // Row = Position looking (Viewer)
-    // Col = Position being looked at (Target)
-    // Rule: Viewer can only see targets at indices <= viewer's index
-    return col <= row ? 'visible' : 'hidden'
-  }
+  const activeRow = hoveredRow ?? selectedRow
+
+  const canAttend = (row: number, col: number) => col <= row
+
+  const readout = useMemo(() => {
+    const token = `T${activeRow + 1}`
+    const canSee = `T1–T${activeRow + 1}`
+    const cantSee =
+      activeRow + 1 < size ? `T${activeRow + 2}–T${size}` : null
+
+    return { token, canSee, cantSee }
+  }, [activeRow, size])
 
   return (
-    <div className={styles.container}>
-      <div className={styles.grid}>
-        {/* Header Row */}
-        <div className={styles.cornerCell}></div>
-        {Array.from({ length: size }).map((_, col) => (
-          <div key={`header-${col}`} className={styles.headerCell}>
-            T{col + 1}
+    <VizCard
+      title="The Causal Mask"
+      subtitle="No peeking to the right"
+      footer={
+        <div className={styles.footer} aria-live="polite">
+          <div className={styles.footerTitle}>
+            <span className={styles.footerToken}>{readout.token}</span>{' '}
+            can attend to <span className={styles.footerGood}>{readout.canSee}</span>
           </div>
-        ))}
+          {readout.cantSee ? (
+            <div className={styles.footerLine}>
+              and cannot attend to <span className={styles.footerBad}>{readout.cantSee}</span>.
+            </div>
+          ) : (
+            <div className={styles.footerLine}>and it can see everything so far.</div>
+          )}
+        </div>
+      }
+    >
+      <div className={styles.layout}>
+        <div className={styles.legend}>
+          <div className={styles.legendRow}>
+            <span className={`${styles.swatch} ${styles.swatchAllowed}`} aria-hidden="true" />
+            <span>allowed</span>
+          </div>
+          <div className={styles.legendRow}>
+            <span className={`${styles.swatch} ${styles.swatchBlocked}`} aria-hidden="true" />
+            <span>blocked (future)</span>
+          </div>
+          <div className={styles.legendHint}>Rows are the token doing the looking. Columns are what it can look at.</div>
+        </div>
 
-        {/* Grid Rows */}
-        {Array.from({ length: size }).map((_, row) => (
-          <React.Fragment key={`row-${row}`}>
-            {/* Row Label */}
-            <div className={styles.rowLabel}>T{row + 1}</div>
-            
-            {/* Cells */}
-            {Array.from({ length: size }).map((_, col) => {
-              const status = getCellStatus(row, col)
-              const isHovered = hoveredCell?.row === row && hoveredCell?.col === col
-              
-              return (
+        <div className={styles.controls}>
+          <div className={styles.controlsLabel}>Select a row token:</div>
+          <div className={styles.pills}>
+            {Array.from({ length: size }).map((_, row) => (
+              <button
+                key={`pick-${row}`}
+                type="button"
+                className={`${styles.pill} ${row === selectedRow ? styles.pillActive : ''}`}
+                onClick={() => setSelectedRow(row)}
+                onMouseEnter={() => setHoveredRow(row)}
+                onMouseLeave={() => setHoveredRow(null)}
+                aria-pressed={row === selectedRow}
+                aria-label={`Select row token T${row + 1}`}
+              >
+                T{row + 1}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className={`panel-dark ${styles.gridWrap}`}>
+          <div className={styles.timeArrow} aria-hidden="true">
+            <span>past</span>
+            <span className={styles.arrowLine} />
+            <span>future</span>
+          </div>
+
+          <div className={styles.matrix} role="grid" aria-label="Causal attention mask grid">
+            <div className={styles.headerRow} role="row">
+              <div className={styles.cornerCell} aria-hidden="true">
+                row\col
+              </div>
+              {Array.from({ length: size }).map((_, col) => (
                 <div
-                  key={`${row}-${col}`}
-                  className={`${styles.cell} ${styles[status]} ${isHovered ? styles.hovered : ''}`}
-                  onMouseEnter={() => setHoveredCell({ row, col })}
-                  onMouseLeave={() => setHoveredCell(null)}
+                  key={`header-${col}`}
+                  className={`${styles.headerCell} ${col <= activeRow ? styles.headerHot : ''}`}
                 >
-                  {status === 'visible' ? '1' : '0'}
+                  T{col + 1}
                 </div>
-              )
-            })}
-          </React.Fragment>
-        ))}
-      </div>
+              ))}
+            </div>
 
-      <div className={styles.caption}>
-        {hoveredCell ? (
-          <div className={styles.explanation}>
-            <strong>Position {hoveredCell.row + 1}</strong> looking at <strong>Position {hoveredCell.col + 1}</strong>:
-            <span className={getCellStatus(hoveredCell.row, hoveredCell.col) === 'visible' ? styles.visibleText : styles.hiddenText}>
-              {getCellStatus(hoveredCell.row, hoveredCell.col) === 'visible' 
-                ? ' ALLOWED (Past/Present)' 
-                : ' BLOCKED (Future)'}
-            </span>
+            {Array.from({ length: size }).map((_, row) => (
+              <div key={`row-${row}`} className={styles.row} role="row">
+                <button
+                  type="button"
+                  className={`${styles.rowLabel} ${row === activeRow ? styles.rowLabelActive : ''}`}
+                  onClick={() => setSelectedRow(row)}
+                  onMouseEnter={() => setHoveredRow(row)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                  aria-pressed={row === selectedRow}
+                  aria-label={`Row token T${row + 1}`}
+                >
+                  T{row + 1}
+                </button>
+
+                {Array.from({ length: size }).map((_, col) => {
+                  const allowed = canAttend(row, col)
+                  const isFocusRow = row === activeRow
+                  const isFocusCell = isFocusRow && allowed
+                  const isBlockedCell = isFocusRow && !allowed
+
+                  return (
+                    <div
+                      key={`cell-${row}-${col}`}
+                      className={[
+                        styles.cell,
+                        allowed ? styles.allowed : styles.blocked,
+                        isFocusCell ? styles.cellFocus : '',
+                        isBlockedCell ? styles.cellBlocked : '',
+                        !isFocusRow ? styles.cellDim : '',
+                      ].join(' ')}
+                      aria-hidden="true"
+                    >
+                      {allowed ? '1' : '0'}
+                    </div>
+                  )
+                })}
+              </div>
+            ))}
           </div>
-        ) : (
-          <div className={styles.placeholder}>Hover over the grid to check visibility</div>
-        )}
+        </div>
       </div>
-    </div>
+    </VizCard>
   )
 }
