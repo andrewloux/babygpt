@@ -177,13 +177,13 @@ export function Chapter1() {
         </WorkedExample>
         <Callout variant="info" title="Why Logs?">
           <Paragraph>
-            Shannon used logarithms for a theoretical reason (information is additive). This matters for language because characters in text are approximately independent given their context—seeing 'h' after 't' doesn't change how surprising the next character is. So we can score entire sequences by summing per-character surprises. In fact, <strong>the logarithm is the <em>unique</em> function</strong> that satisfies the requirements we need: (1) surprise adds for independent events, (2) lower probability means higher surprise, and (3) surprise changes smoothly with probability. Shannon proved this uniqueness theorem—log isn't arbitrary, it's <em>forced</em> by what we want surprise to do.
+            We’re going to score entire sequences, not just one next‑character guess. Sequence probability is a product (one “of those” after another), but we’d rather work with sums than with tiny products. Logs are the translation layer: <Term>log(a × b) = log(a) + log(b)</Term>.
           </Paragraph>
           <Paragraph>
-            But there's also a ruthlessly practical reason: <strong>numerical stability</strong>. Probabilities vanish fast. If you multiply 0.1 a hundred times (for a 100-token sequence), you get 10<sup>-100</sup>. Standard floating point numbers (float64) only work down to about 10<sup>-324</sup>. A sequence of 400 words would underflow to zero.
+            This is why we define <Term>surprise = -log₂(p)</Term>: per‑token surprises add. (If you use <Term>ln</Term> instead of <Term>log₂</Term>, you just change units; the additivity is the point.)
           </Paragraph>
           <Paragraph>
-            Logs rescue us by turning multiplication into addition: <Term>log(a × b) = log(a) + log(b)</Term>. In log-space, that tiny 10<sup>-100</sup> becomes a safe, manageable -100.
+            There’s also a ruthlessly practical reason: <strong>numerical stability</strong>. Probabilities vanish fast. Multiply <Term>0.1</Term> a hundred times and you get 10<sup>-100</sup>. Push that a few hundred tokens and float64 underflows to zero. In log‑space, that same number is just <Term>-100</Term> (base‑10) — a totally normal value you can keep adding to. Tiny concrete example: <Term>0.2 × 0.25 × 0.2 = 0.01</Term>, and <Term>log₁₀(0.2) + log₁₀(0.25) + log₁₀(0.2) ≈ -2</Term>.
           </Paragraph>
         </Callout>
         <MathBlock
@@ -254,10 +254,18 @@ export function Chapter1() {
           Now here's the problem. How do we actually <em>compute</em> this number?
         </Paragraph>
         <Paragraph>
-          The naive approach: just memorize every possible sequence and its probability.
+          Let's try to solve it from first principles, with infinite resources.
         </Paragraph>
         <Paragraph>
-          The naive approach is <Highlight>brute force memorization</Highlight>. You treat every specific sequence (like "the cat sat") as a unique, atomic event. You don't learn that "cat" follows "the". You just memorize "the-cat-sat" as one giant, unbreakable block.
+          If you had unlimited storage, you'd build an index where <em>the entire sequence</em> is the key. The model would be a giant dictionary: exact string in, probability out.
+        </Paragraph>
+        <CodeBlock filename="lookup_table.json">{`{
+  "the cat sat": 1,
+  "the dog sat": 1,
+  "the cat ate": 1
+}`}</CodeBlock>
+        <Paragraph>
+          This is brute force memorization. You treat "the cat sat" as one atomic event. You don't learn that <Term>cat</Term> often follows <Term>the</Term>. You just store <Term>the-cat-sat</Term> as a single unbreakable block.
         </Paragraph>
         <MathBlock
           equation="P(x_{1:T}) = \frac{C(x_{1:T})}{N}"
@@ -274,6 +282,10 @@ export function Chapter1() {
         <Paragraph>
           See the problem? "the dog" returns P=0 even though both "the" and "dog" appear separately. To a counting model, "the cat" and "the dog" are completely unrelated keys. It doesn't know they're similar—it just checks: "Have I seen this exact sequence before?"
         </Paragraph>
+        <Paragraph>
+          If you prefer words: the same thing happens, only harsher, because the word vocabulary is enormous. A word-level bigram model is just “a graph of transitions,” and it still has no mechanism for sharing knowledge between different nouns:
+        </Paragraph>
+        <NgramGraphViz />
 
         <Paragraph>
           But wait—<em>why</em> should we expect "the cat" to help predict "the dog"? Because humans generalize based on <strong>syntactic role</strong>: both "cat" and "dog" are nouns that appear after an article. They serve the same grammatical function. Counting models have no notion of "role"—they only match exact strings. This is the fundamental limitation we're building toward fixing. (Spoiler: embeddings in Chapter 2 will encode these roles as geometric relationships.)
@@ -328,15 +340,7 @@ export function Chapter1() {
           </Callout>
 
           <Paragraph>
-            The counting approach is just a giant lookup table:
-          </Paragraph>
-          <CodeBlock filename="lookup_table.json">{`{
-  "the cat sat": 1,
-  "the dog sat": 1,
-  "the cat ate": 1
-}`}</CodeBlock>
-          <Paragraph>
-            To this naive model, "cat" and "dog" are just symbols. <code>"the cat sat"</code> and <code>"the dog sat"</code>{' '}
+            The counting approach is still just a giant lookup table—same idea as before, just scaled up. To this naive model, "cat" and "dog" are just symbols. <code>"the cat sat"</code> and <code>"the dog sat"</code>{' '}
             are different keys. Learning one doesn't automatically change the other, because the model has no way to share
             information between keys. It's a phone book: entries don't talk to each other.
           </Paragraph>
@@ -415,6 +419,23 @@ export function Chapter1() {
           This isn't a trick or a formula to memorize. It's just the bookkeeping for "of those, of those, of those." Once
           you see the corridor narrowing, multiplication is what keeps track.
         </Paragraph>
+        <Callout variant="info" title="Why “AND” multiplies">
+          <Paragraph>
+            Imagine 1,000 equally likely worlds.
+          </Paragraph>
+          <Paragraph>
+            Event <Term>A</Term> happens in 200 of them, so <Term>P(A) = 200/1000 = 0.2</Term>.
+          </Paragraph>
+          <Paragraph>
+            Now zoom in and only look at the <em>A-worlds</em> (200 worlds). Inside that smaller pile, <Term>B</Term> happens in 50, so <Term>P(B | A) = 50/200 = 0.25</Term>.
+          </Paragraph>
+          <Paragraph>
+            Zoom in again: among the 50 worlds where <Term>A</Term> and <Term>B</Term> happened, <Term>C</Term> happens in 10, so <Term>P(C | A, B) = 10/50 = 0.2</Term>.
+          </Paragraph>
+          <Paragraph>
+            So <Term>P(A \u2227 B \u2227 C) = 10/1000 = 0.01</Term>. And the multiplication is just the same filtering written as arithmetic: <Term>0.2 × 0.25 × 0.2 = 0.01</Term>.
+          </Paragraph>
+        </Callout>
         <Paragraph>
           That decomposition has a name: the <Highlight>chain rule of probability</Highlight>. But before we write it down formally, we need to make one concept precise: what exactly do we mean by "the fraction that continues with 'a', given we're already at 'c'"?
         </Paragraph>
@@ -810,6 +831,14 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
           <Cite n={4} />
           <Cite n={6} />
         </Paragraph>
+        <Callout variant="info" title="Does KenLM use words or characters?">
+          <Paragraph>
+            KenLM is an <em>n-gram</em> language model toolkit. In practice, it's usually trained on <strong>word tokens</strong> (that’s what classic speech recognition decoders wanted). But the tool itself doesn’t care what a “token” is—if you feed it characters as tokens, it becomes a character n-gram model.
+          </Paragraph>
+          <Paragraph>
+            In this chapter we use words when it helps readability, and characters when we want a tiny vocabulary. Same probability math, different Lego size.
+          </Paragraph>
+        </Callout>
         <Paragraph>
           Instead of following pointers from node to node, it does something much more raw:
         </Paragraph>
@@ -1069,13 +1098,6 @@ P(b|a) = (1 + 1) / 3 = 2/3`}</CodeBlock>
             },
           ]}
         />
-        <Paragraph>
-          Here's what a word-level bigram model looks like as a graph. Each node is a word, each edge is a transition probability:
-        </Paragraph>
-        <NgramGraphViz />
-        <Paragraph>
-          Notice how isolated each word is. "cat" and "dog" have no edges between them—the model can't share what it learned about one with the other. This is the sparsity trap visualized.
-        </Paragraph>
         <Paragraph>
           Now look at what happens when we switch to characters. We decompose the words into atoms.
         </Paragraph>
