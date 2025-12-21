@@ -7,10 +7,6 @@
 }
 
 .left {
-  background: rgba(0, 0, 0, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 0.95rem;
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
@@ -121,13 +117,11 @@
 }
 
 .right {
-  background: rgba(0, 0, 0, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 0.95rem;
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  padding-left: 1.25rem;
 }
 
 .barLabels {
@@ -303,5 +297,10 @@
 @media (max-width: 900px) {
   .grid {
     grid-template-columns: 1fr;
+  }
+
+  .right {
+    border-left: none;
+    padding-left: 0;
   }
 }
