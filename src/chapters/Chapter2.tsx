@@ -504,7 +504,10 @@ export function Chapter2() {
           <strong>Vectors are like Adjectives (Attributes).</strong> A vector is a list of measurable qualities: <Term>[Furry, Small, Living]</Term>. Now you can ask: how similar is John to Alice? Compare their <em>attributes</em>. John = [tall, quiet, left-handed]. Alice = [tall, quiet, right-handed]. They're similar on two dimensions, different on one. You can measure that.
         </Paragraph>
         <Paragraph>
-          This shift—from "Who are you?" (<strong>Name</strong>) to "What are you like?" (<strong>Adjectives</strong>)—is what makes learning possible. Integers can't learn because there's no operation that moves 17 toward 42. There's no "slightly more" in discrete label space. But vectors live in continuous space: you can write <Term>v += 0.01 * gradient</Term>. That nudge—moving coordinates by tiny amounts in directions that reduce error—is gradient descent. Continuous space enables it. Discrete labels don't.
+          This shift—from "Who are you?" (<strong>Name</strong>) to "What are you like?" (<strong>Adjectives</strong>)—is what makes learning possible. Integers can't learn because there's no operation that moves 17 toward 42. There's no "slightly more" in discrete label space.
+        </Paragraph>
+        <Paragraph>
+          Vectors live in continuous space. You can nudge them by tiny amounts. Tiny nudges add up. That's the entire reason they’re worth the trouble.
         </Paragraph>
         <DiscreteContinuousViz />
         <Paragraph>
@@ -1199,6 +1202,20 @@ score = float(np.dot(a, b))`}</CodeBlock>
         <Paragraph>
           Concretely: the model outputs a probability distribution for the next character. The training data then reveals what actually came next. The loss is the negative log‑probability the model assigned to the truth. If the model gave the truth a tiny probability, the loss is large.
         </Paragraph>
+
+        <Paragraph>
+          So we have a scoreboard (<Term>loss</Term>). Now we need a steering wheel: a rule that says how to change the numbers to make that score go down.
+        </Paragraph>
+        <Paragraph>
+          In 1D, you call it <em>slope</em>: if a function rises when you step to the right, you should step left to go downhill. In many dimensions, you have a slope for every knob you can turn. That whole collection of “which way is uphill?” slopes is the <strong>gradient</strong>.
+        </Paragraph>
+        <Paragraph>
+          To reduce loss, we step in the opposite direction. The learning rate <MathInline equation={String.raw`\eta`} /> is just “how big a step do we dare take?”
+        </Paragraph>
+        <MathBlock
+          equation={String.raw`\text{parameters} \leftarrow \text{parameters} - \eta \cdot \text{gradient}`}
+          explanation="Gradient descent: move downhill on the loss."
+        />
 
         <Callout variant="info" title="How Do We Measure Quality?">
           <Paragraph>
