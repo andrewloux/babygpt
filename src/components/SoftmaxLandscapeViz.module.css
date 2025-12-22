@@ -1,0 +1,286 @@
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.75rem;
+  align-items: start;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.controlsTitle {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.tokenButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.tokenButton {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.22);
+  color: rgba(255, 255, 255, 0.82);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: transform var(--transition-smooth), border-color var(--transition-smooth), background var(--transition-smooth);
+}
+
+.tokenButton:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.tokenButtonActive {
+  border-color: color-mix(in srgb, var(--token-accent) 55%, rgba(255, 255, 255, 0.18));
+  background: rgba(0, 0, 0, 0.32);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 0 0 3px rgba(0, 0, 0, 0.25);
+}
+
+.tokenDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--token-accent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--token-accent) 55%, transparent);
+}
+
+.tokenLabel {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.sliderBlock {
+  padding-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.sliderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.sliderLabel {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.sliderValue {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.sliderHint {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.resetButton {
+  align-self: flex-start;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.22);
+  color: rgba(255, 255, 255, 0.8);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: transform var(--transition-smooth), border-color var(--transition-smooth);
+}
+
+.resetButton:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.readout {
+  padding: 0.9rem 0.95rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.readoutTitle {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.readoutMono {
+  margin-top: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  color: rgba(255, 255, 255, 0.86);
+  line-height: 1.35;
+}
+
+.readoutMuted {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.readoutAccentCyan {
+  color: var(--accent-cyan);
+}
+
+.readoutAccentMagenta {
+  color: var(--accent-magenta);
+}
+
+.readoutRows {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.readoutRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+
+.readoutKey {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.readoutVal {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.readoutHint {
+  margin-top: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.readoutHintMuted {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.chartPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.axisHint {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.axisEmph {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  touch-action: none;
+}
+
+.plane {
+  fill: rgba(255, 255, 255, 0.03);
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1;
+}
+
+.axisLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: rgba(255, 255, 255, 0.45);
+}
+
+.prism {
+  transform-origin: center;
+}
+
+.prismDim {
+  opacity: 0.35;
+}
+
+.prismSelected .face {
+  stroke: rgba(255, 255, 255, 0.35);
+  stroke-width: 1.2;
+}
+
+.prismHover .face {
+  stroke: rgba(255, 255, 255, 0.75);
+  stroke-width: 1.4;
+}
+
+.top {
+  fill: rgba(var(--bar-rgb), 0.34);
+}
+
+.side {
+  fill: rgba(var(--bar-rgb), 0.18);
+}
+
+.face {
+  fill: rgba(var(--bar-rgb), 0.26);
+  stroke: rgba(var(--bar-rgb), 0.16);
+  stroke-width: 1;
+}
+
+.footer {
+  max-width: 70ch;
+}
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tokenButtons {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .tokenButton {
+    flex: 1 1 140px;
+  }
+}
+

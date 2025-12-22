@@ -37,6 +37,7 @@ import {
   EmbeddingInspector,
   SoftmaxWidget,
   SoftmaxSimplexViz,
+  SoftmaxLandscapeViz,
   GradientTraceDemo,
   GeometricDotProductViz,
   CrossEntropyViz,
@@ -951,6 +952,34 @@ score = float(np.dot(a, b))`}</CodeBlock>
           />
         </Callout>
 
+        <WorkedExample title="Softmax by hand (3 logits)">
+          <WorkedStep n="1">
+            <Paragraph>
+              Pick a tiny logit vector: <MathInline equation={String.raw`\ell=[2,\,-3,\,4]`} /> with <MathInline equation={String.raw`T=1`} />. The max is <MathInline equation={String.raw`m=4`} />.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="2">
+            <Paragraph>
+              Subtract the max (safe numerics, same probabilities):{' '}
+              <MathInline equation={String.raw`\ell'=\ell-m=[-2,\,-7,\,0]`} />.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="3">
+            <Paragraph>
+              Exponentiate: <MathInline equation={String.raw`e^{-2}\approx 0.135`} />, <MathInline equation={String.raw`e^{-7}\approx 0.00091`} />, <MathInline equation={String.raw`e^{0}=1`} />.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="4" final>
+            <Paragraph>
+              Normalize by the sum <MathInline equation={String.raw`S\approx 1.136`} />:
+              <MathInline equation={String.raw`p\approx [0.119,\;0.0008,\;0.880]`} />.
+            </Paragraph>
+            <WorkedNote>
+              Almost all the mass lands on the largest logit. Nothing “mystical” happened — we just turned score gaps into odds, then renormalized.
+            </WorkedNote>
+          </WorkedStep>
+        </WorkedExample>
+
         <Paragraph>
           Drag the sliders below. Two things happen:
         </Paragraph>
@@ -969,6 +998,26 @@ score = float(np.dot(a, b))`}</CodeBlock>
         <Paragraph>
           In the widget, try sliding <Term>T</Term> down toward <Term>0.1</Term> and up toward <Term>5</Term>. You're not changing which logit is biggest — you're changing how aggressively softmax concentrates probability mass on the winner.
         </Paragraph>
+
+        <WorkedExample title="Temperature sharpens (same logits, different T)">
+          <WorkedStep n="1">
+            <Paragraph>
+              Reuse the shifted logits from above: <MathInline equation={String.raw`\ell'=[-2,\,-7,\,0]`} />.
+              With <MathInline equation={String.raw`T=0.5`} />, we divide by <MathInline equation={String.raw`T`} /> so the gaps double:
+              <MathInline equation={String.raw`\ell'/T=[-4,\,-14,\,0]`} />.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="2" final>
+            <Paragraph>
+              Exponentiate and normalize:
+              <MathInline equation={String.raw`e^{-4}\approx 0.018`} />, <MathInline equation={String.raw`e^{-14}\approx 8\times 10^{-7}`} />, <MathInline equation={String.raw`e^{0}=1`} />
+              → <MathInline equation={String.raw`p\approx [0.018,\;0.0000008,\;0.982]`} />.
+            </Paragraph>
+            <WorkedNote>
+              The ratio view makes the rule obvious: <MathInline equation={String.raw`\frac{p_i}{p_j}=\exp\!\left(\frac{\ell_i-\ell_j}{T}\right)`} />. Lower <MathInline equation={String.raw`T`} /> makes the same logit gaps explode into larger odds.
+            </WorkedNote>
+          </WorkedStep>
+        </WorkedExample>
 
         <Paragraph>
           If the word <Term>temperature</Term> feels oddly physical here, that’s because it is. Long before language models, people had the same problem in another domain: “I have a set of states with scores (energies). How should probability mass spread across them?”
@@ -1004,6 +1053,11 @@ score = float(np.dot(a, b))`}</CodeBlock>
         <Paragraph>
           Watch how temperature pulls the point around: low temperature drives toward corners, high temperature drifts toward center. Same logits, different confidence levels.
         </Paragraph>
+
+        <Paragraph>
+          The simplex is “probability space” — it shows every valid distribution you could end up with. Sometimes it’s helpful to flip the view and look at softmax itself as a function: take two logit gaps, and ask what probability comes out.
+        </Paragraph>
+        <SoftmaxLandscapeViz />
 
         <Callout variant="info" title="Why the math plays nicely with training (softmax + cross-entropy)">
           <Paragraph>
