@@ -974,6 +974,9 @@ score = float(np.dot(a, b))`}</CodeBlock>
           If the word <Term>temperature</Term> feels oddly physical here, that’s because it is. Long before language models, people had the same problem in another domain: “I have a set of states with scores (energies). How should probability mass spread across them?”
         </Paragraph>
         <Paragraph>
+          The labels are different (<Term>logit</Term> vs <Term>energy</Term>), but the job is the same: take raw, unnormalized numbers and turn them into a distribution that (1) stays positive, (2) sums to 1, and (3) changes smoothly when you nudge the scores.
+        </Paragraph>
+        <Paragraph>
           Picture a marble rolling around in a bumpy bowl. Leave it alone, and it settles at the bottom — the low‑energy spot. Heat the bowl, and the marble starts bouncing. The hotter you make it, the more it visits places it would never reach when cold.
         </Paragraph>
         <Paragraph>
@@ -988,6 +991,9 @@ score = float(np.dot(a, b))`}</CodeBlock>
         </Paragraph>
         <Paragraph>
           Softmax is the same shape. If you treat <Term>score</Term> like “negative energy”, divide by <Term>T</Term>, exponentiate, and normalize, you get a distribution that gets sharper when cold and flatter when hot.
+        </Paragraph>
+        <Paragraph>
+          Back in our toy world (three options), the simplex is just the set of all valid 3‑way probability distributions. Temperature changes how aggressively the point moves toward a corner (certainty) versus staying nearer the middle (uncertainty).
         </Paragraph>
 
         <SoftmaxSimplexViz />
@@ -1011,6 +1017,9 @@ score = float(np.dot(a, b))`}</CodeBlock>
             If you predicted 80% on <Term>'e'</Term> but the truth was <Term>'a'</Term>, the signal says: “push probability away from <Term>'e'</Term> and toward <Term>'a'</Term>.”
             It’s redistribution, not black magic.
           </Paragraph>
+          <Paragraph>
+            This is why we cared about “smoothness” earlier: a differentiable probability map gives you a stable learning signal to follow.
+          </Paragraph>
         </Callout>
 
         <Paragraph>
@@ -1021,6 +1030,12 @@ score = float(np.dot(a, b))`}</CodeBlock>
           <li><strong>T = 1:</strong> Sample according to the raw logits.</li>
           <li><strong>T → ∞:</strong> Everything flattens toward uniform.</li>
         </ul>
+        <Paragraph>
+          One detail that clears up a lot of confusion: temperature is mostly a <strong>sampling knob</strong>. You apply it at inference time by rescaling logits before softmax. It doesn’t add knowledge or remove knowledge — it changes how willing you are to take second‑best options.
+        </Paragraph>
+        <Paragraph>
+          During training, we usually keep <Term>T</Term> fixed (often <Term>1</Term>) and let the model learn the logits themselves. At inference, temperature is you deciding how sharp you want those learned preferences to be.
+        </Paragraph>
         <details className="collapsible">
           <summary>Optional: a careful “why exp?” argument (maximum entropy)</summary>
           <Paragraph>
