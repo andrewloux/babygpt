@@ -160,7 +160,7 @@ export function CorridorDemo({ corpus = DEFAULT_CORPUS }: CorridorDemoProps) {
       <div className={styles.body}>
         <div className={styles.corpus}>
           <div className={styles.corpusLabel}>Training corpus (demo)</div>
-          {corpusLines}
+          <div className={styles.corpusLines}>{corpusLines}</div>
         </div>
 
         <label className={styles.label}>Type a prefix (try: a ca)</label>

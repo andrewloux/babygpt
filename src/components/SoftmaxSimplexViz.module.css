@@ -1,7 +1,9 @@
 .content {
   display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: 2rem;
+  grid-template-columns: minmax(240px, 280px) minmax(0, 520px);
+  justify-content: center;
+  gap: 1.5rem;
+  align-items: start;
 }
 
 @media (max-width: 768px) {
@@ -17,9 +19,9 @@
 }
 
 .scenario {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: rgba(255, 255, 255, 0.65);
-  padding: 0.85rem 1rem;
+  padding: 0.75rem 0.9rem;
   background:
     radial-gradient(ellipse 120% 80% at 50% 0%, rgba(0, 217, 255, 0.06), transparent 60%),
     rgba(0, 0, 0, 0.25);
@@ -132,14 +134,21 @@
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.02) inset,
     0 25px 40px -30px rgba(0, 0, 0, 0.7);
-  padding: 1.5rem;
-  min-height: 400px;
+  padding: 1.25rem;
+  min-height: 360px;
 }
 
 .svg {
   width: 100%;
-  max-width: 420px;
+  max-width: 460px;
   height: auto;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.dragging {
+  cursor: grabbing;
 }
 
 .triangleFill {
@@ -204,14 +213,14 @@
 }
 
 .explanation {
-  padding: 1rem 2rem;
-  font-size: 0.85rem;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.82rem;
   color: rgba(255, 255, 255, 0.55);
   background:
     radial-gradient(ellipse 120% 80% at 50% 100%, rgba(255, 255, 255, 0.02), transparent 60%),
     rgba(0, 0, 0, 0.18);
   border-top: 1px solid rgba(255, 255, 255, 0.06);
-  min-height: 3.5em;
+  min-height: 2.6em;
   line-height: 1.6;
   font-family: var(--font-mono);
   text-align: center;
