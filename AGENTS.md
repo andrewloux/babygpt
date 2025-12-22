@@ -12,7 +12,7 @@ This document teaches AI agents how to properly use the BabyGPT component librar
 We have a visual design system for interactive components. If you touch anything under `src/components/*{Viz,Demo}*.tsx` (or add a new one), follow:
 
 - **Spec:** `docs/visual-language.md`
-- **Reference screenshots:** `docs/assets/visual-audit/` (gold vs drift examples)
+- **Reference screenshots:** `docs/assets/visual-audit/gold/` and `docs/assets/visual-audit/drift/`
 
 High-level rules (the spec is the source of truth):
 

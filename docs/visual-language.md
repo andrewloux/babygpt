@@ -10,23 +10,23 @@ These are “what we mean” pictures. They live in `docs/assets/visual-audit/`.
 
 **Gold / target-ish**
 
-- `docs/assets/visual-audit/audit-ch2-axioms-vizcard.png` — `VizCard` “figure” style (serif title, mono subtitle, glass surface, calm gradients).
-- `docs/assets/visual-audit/audit-ch2-softmax-simplex.png` — `VizCard` + sliders + “cyan/magenta/yellow as semantic channels”.
-- `docs/assets/visual-audit/audit-ch2-softmax-landscape.png` — `VizCard` + interactive 3D-ish plot surface.
-- `docs/assets/visual-audit/audit-ch1-corridor.png` — “terminal/window” demo motif (top bar, code-ish panels, restrained glow).
-- `docs/assets/visual-audit/audit-ch1-kenlm.png` — another “engineer’s window” motif (structured layout, mono labels, restrained contrast).
+- `docs/assets/visual-audit/gold/audit-ch2-axioms-vizcard.png` — `VizCard` “figure” style (serif title, mono subtitle, glass surface, calm gradients).
+- `docs/assets/visual-audit/gold/audit-ch2-softmax-simplex.png` — `VizCard` + sliders + “cyan/magenta/yellow as semantic channels”.
+- `docs/assets/visual-audit/gold/audit-ch2-softmax-landscape.png` — `VizCard` + interactive 3D-ish plot surface.
+- `docs/assets/visual-audit/gold/audit-ch1-corridor.png` — “terminal/window” demo motif (top bar, code-ish panels, restrained glow).
+- `docs/assets/visual-audit/gold/audit-ch1-kenlm.png` — another “engineer’s window” motif (structured layout, mono labels, restrained contrast).
 
-![VizCard “figure” baseline](assets/visual-audit/audit-ch2-axioms-vizcard.png)
+![VizCard “figure” baseline](assets/visual-audit/gold/audit-ch2-axioms-vizcard.png)
 
-![Terminal/demo window motif](assets/visual-audit/audit-ch1-corridor.png)
+![Terminal/demo window motif](assets/visual-audit/gold/audit-ch1-corridor.png)
 
 **Drift / mismatched**
 
-- `docs/assets/visual-audit/audit-ch2-neuraltraining.png` — legacy heatmap + saturated red/green blocks + “default-ish” controls.
-- `docs/assets/visual-audit/audit-ch1-sparsemarkov-full.png` — raw orange/green/red palette + bespoke heading/badges that don’t match the rest.
-- `docs/assets/visual-audit/audit-ch2-onehot.png` — “faded” / low-contrast viz with its own surface tokens + inconsistent density.
+- `docs/assets/visual-audit/drift/audit-ch2-neuraltraining.png` — legacy heatmap + saturated red/green blocks + “default-ish” controls.
+- `docs/assets/visual-audit/drift/audit-ch1-sparsemarkov-full.png` — raw orange/green/red palette + bespoke heading/badges that don’t match the rest.
+- `docs/assets/visual-audit/drift/audit-ch2-onehot.png` — “faded” / low-contrast viz with its own surface tokens + inconsistent density.
 
-![Example of visual drift (do not copy)](assets/visual-audit/audit-ch2-neuraltraining.png)
+![Example of visual drift (do not copy)](assets/visual-audit/drift/audit-ch2-neuraltraining.png)
 
 If you’re not sure what to build: copy the *structure* of the “Gold” ones first, then adapt content.
 
