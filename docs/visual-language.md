@@ -4,6 +4,32 @@ This is an **audit of the current visual system** used by visualization componen
 
 Goal: make it easy for any engineer to add a new viz that *looks like BabyGPT* without guessing.
 
+## Visual references (Playwright screenshots)
+
+These are “what we mean” pictures. They live in `docs/assets/visual-audit/`.
+
+**Gold / target-ish**
+
+- `docs/assets/visual-audit/audit-ch2-axioms-vizcard.png` — `VizCard` “figure” style (serif title, mono subtitle, glass surface, calm gradients).
+- `docs/assets/visual-audit/audit-ch2-softmax-simplex.png` — `VizCard` + sliders + “cyan/magenta/yellow as semantic channels”.
+- `docs/assets/visual-audit/audit-ch2-softmax-landscape.png` — `VizCard` + interactive 3D-ish plot surface.
+- `docs/assets/visual-audit/audit-ch1-corridor.png` — “terminal/window” demo motif (top bar, code-ish panels, restrained glow).
+- `docs/assets/visual-audit/audit-ch1-kenlm.png` — another “engineer’s window” motif (structured layout, mono labels, restrained contrast).
+
+![VizCard “figure” baseline](assets/visual-audit/audit-ch2-axioms-vizcard.png)
+
+![Terminal/demo window motif](assets/visual-audit/audit-ch1-corridor.png)
+
+**Drift / mismatched**
+
+- `docs/assets/visual-audit/audit-ch2-neuraltraining.png` — legacy heatmap + saturated red/green blocks + “default-ish” controls.
+- `docs/assets/visual-audit/audit-ch1-sparsemarkov-full.png` — raw orange/green/red palette + bespoke heading/badges that don’t match the rest.
+- `docs/assets/visual-audit/audit-ch2-onehot.png` — “faded” / low-contrast viz with its own surface tokens + inconsistent density.
+
+![Example of visual drift (do not copy)](assets/visual-audit/audit-ch2-neuraltraining.png)
+
+If you’re not sure what to build: copy the *structure* of the “Gold” ones first, then adapt content.
+
 ## Scope (what was audited)
 
 Files: `src/components/*{Viz,Demo}.tsx` and their `*.module.css` counterparts (34 components).
@@ -39,6 +65,8 @@ These vizzes use `VizCard` (which itself applies `ambient-glow` + `card-glass`):
 **Pros:** consistent header, spacing, and outer surface.
 
 **Observed drift inside the card:** many of these still hardcode their own palettes (see “Color drift” below).
+
+**Target direction:** if a viz is “a figure” (has a title + optional figure number + dense content), it should probably be a `VizCard`.
 
 ### B) Standalone “custom card” containers (not `VizCard`)
 
@@ -144,3 +172,88 @@ Some components use `--code-bg` for non-code panels (e.g. memory “slots” in 
 
 Write the **target spec** (colors, surfaces, typography, spacing, interaction affordances), then update 3–5 “worst offender” components to prove the spec is real.
 
+---
+
+# Target spec (what “matches BabyGPT”)
+
+This is the part you follow when building new vizzes, or when refactoring old ones.
+
+## 1) Semantic colors (meaning, not vibes)
+
+We reuse the same few accent colors so the reader can learn them:
+
+- **Cyan** `var(--accent-cyan)` — “probability / distribution / the thing we want you to track”.
+- **Magenta** `var(--accent-magenta)` — “contrast / alternative distribution / second thing you compare to”.
+- **Yellow** `var(--accent-yellow)` — “highlight / attention / ‘this matters’”.
+- **Green** `var(--accent-green)` — “correct / hit / success”.
+- **Red** `var(--accent-red)` — “incorrect / miss / failure”.
+
+Rules:
+
+- Don’t introduce new brand-ish blues/greens/oranges as defaults. If you need more colors for *data* (heatmaps, gradients), derive them from these semantic anchors.
+- Avoid raw hex colors in component CSS unless it’s a deliberate data palette. Prefer `var(...)`.
+
+## 2) Surface palette (only a few backgrounds)
+
+Everything should feel like it’s made of 2–3 materials:
+
+- **Figure surface:** `VizCard` (`ambient-glow` + `card-glass`) for “a titled figure”.
+- **Nested panels:** use the global utilities:
+  - `.panel-dark` for “secondary surface inside a card”
+  - `.inset-box` for “math/results/inline demo blocks”
+- **Terminal/demo surface:** use `--code-bg` (plus a subtle border) only when the viz is explicitly “an app window”.
+
+Rules:
+
+- Don’t invent new one-off glass panels. Use `VizCard` or `.panel-dark`.
+- Border radii come from tokens: `--radius-lg` (cards), `--radius-md` (controls), `--radius-sm` (pills).
+
+## 3) Typography hierarchy (who speaks in what voice)
+
+- **Chapter + section headings:** sans (`var(--font-sans)`) — already handled by `Layout.module.css`.
+- **Viz titles:** serif (`var(--font-serif)`) — already handled by `VizCard`.
+- **Viz subtitles, labels, metrics:** mono (`var(--font-mono)`), usually uppercase with letter-spacing.
+- **Body prose inside vizzes:** inherit the page serif unless it’s a label/metric.
+
+Rules:
+
+- A viz title should look like a *captioned figure*, not like a dashboard widget.
+- Use mono to signal “this is a label/value” (counts, probs, axes, memory offsets).
+
+## 4) Interaction affordances
+
+- Hover/focus should match global patterns (`.hover-lift`, `.focus-glow`) and use cyan focus rings.
+- Buttons and sliders should be shared primitives (or at least styled consistently): same radius, border weight, and font.
+- Avoid “default HTML” controls sitting inside premium glass surfaces.
+
+## 5) Density + spacing
+
+- Prefer fewer, stronger panels over many nested boxes.
+- Use the spacing scale (`--space-*`) and keep padding consistent within a family of vizzes.
+- Visual symmetry matters: left/right padding should match, especially inside `VizCard`.
+
+---
+
+# Implementation notes (for refactors)
+
+## Fix token drift first (correctness)
+
+Some components reference CSS variables that don’t exist, which causes silent fallback rendering.
+
+Preferred fix: refactor those components to use existing tokens.
+
+Acceptable quick fix: define compatibility aliases in `src/styles/global.css`:
+
+- `--bg-main` → `--bg-primary`
+- `--bg-paper` → `--bg-secondary`
+- `--bg-hover` → `--bg-tertiary`
+- `--border-subtle` → `--border-color` (or a slightly more transparent border)
+- `--accent` → `--accent-cyan`
+- `--font-heading` → `--font-sans`
+
+## Refactor order (least risk → most opinionated)
+
+1. Replace undefined tokens (no visual taste required; just correctness).
+2. Replace raw color constants with semantic tokens.
+3. Convert “figure-style” custom containers into `VizCard`.
+4. Standardize controls (sliders/buttons) to shared components.
