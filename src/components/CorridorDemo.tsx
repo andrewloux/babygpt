@@ -159,7 +159,7 @@ export function CorridorDemo({ corpus = DEFAULT_CORPUS }: CorridorDemoProps) {
       </div>
       <div className={styles.body}>
         <div className={styles.corpus}>
-          <div className={styles.corpusLabel}>Training corpus (toy)</div>
+          <div className={styles.corpusLabel}>Training corpus (demo)</div>
           {corpusLines}
         </div>
 

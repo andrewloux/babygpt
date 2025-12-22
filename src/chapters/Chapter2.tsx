@@ -1042,7 +1042,7 @@ score = float(np.dot(a, b))`}</CodeBlock>
           Softmax is the same shape. If you treat <Term>score</Term> like “negative energy”, divide by <Term>T</Term>, exponentiate, and normalize, you get a distribution that gets sharper when cold and flatter when hot.
         </Paragraph>
         <Paragraph>
-          Back in our toy world (three options), the simplex is just the set of all valid 3‑way probability distributions. Temperature changes how aggressively the point moves toward a corner (certainty) versus staying nearer the middle (uncertainty).
+          To make the geometry visible, we’ll temporarily shrink the universe to three options. The simplex is the set of all valid 3‑way probability distributions. Temperature controls how aggressively the point moves toward a corner (certainty) versus staying nearer the middle (uncertainty).
         </Paragraph>
 
         <SoftmaxSimplexViz />
@@ -2078,7 +2078,7 @@ p \cdot p &= \sum_i p_i^2 \\
           }
         >
           <Paragraph>
-            Switch between at least two corpus presets (for example "tiny toy" and "qu-heavy"). For each corpus:
+            Switch between at least two corpus presets (for example "tiny demo" and "qu-heavy"). For each corpus:
           </Paragraph>
           <ol>
             <li>Pick <Term>A = 'q'</Term> and <Term>B = 'u'</Term>. What happens to the dot product?</li>

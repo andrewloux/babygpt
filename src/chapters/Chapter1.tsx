@@ -903,7 +903,7 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
         </Paragraph>
         <WorkedExample title="A tiny hash that cares about order">
           <WorkedStep n="1">
-            <p>Pick a toy hash rule: start with <code>h = 0</code>. For each character, update</p>
+            <p>Pick a simple hash rule: start with <code>h = 0</code>. For each character, update</p>
             <MathBlock equation={String.raw`h \leftarrow (h \cdot 31 + \text{code}(\text{char})) \bmod 97`} />
             <WorkedNote>
               This is not what KenLM uses — it’s just an easy example. The important part is the <code>h · 31</code>: earlier characters get
@@ -1795,7 +1795,7 @@ print(f"First Y: {Y[0]}")               # [2, 4, 4, 5] ("ello")`}</CodeBlock>
           And for each one of those contexts, the table needs to store <Term>|V|</Term> numbers (one probability per next character). So the number of stored values scales like <MathInline equation={String.raw`|V|^T \cdot |V| = |V|^{T+1}`} /> — plus the overhead of actually storing keys.
         </Paragraph>
         <Paragraph>
-          Tiny toy example: if <MathInline equation={String.raw`|V|=3`} /> (say <Term>{'{a,b,␣}'}</Term>) and <MathInline equation={String.raw`T=2`} />, then there are <MathInline equation={String.raw`3^2=9`} /> possible contexts. And each context needs a 3‑way next‑character distribution, so you’re already storing <MathInline equation={String.raw`9\cdot 3 = 27`} /> numbers.
+          Tiny example: if <MathInline equation={String.raw`|V|=3`} /> (say <Term>{'{a,b,␣}'}</Term>) and <MathInline equation={String.raw`T=2`} />, then there are <MathInline equation={String.raw`3^2=9`} /> possible contexts. And each context needs a 3‑way next‑character distribution, so you’re already storing <MathInline equation={String.raw`9\cdot 3 = 27`} /> numbers.
         </Paragraph>
         <MathBlock
           equation={`80^{100} \\approx 10^{190}`}

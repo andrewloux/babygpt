@@ -298,7 +298,7 @@ export function NgramGraphViz({ corpus = DEFAULT_CORPUS }: NgramGraphVizProps) {
       <div className={styles.header}>
         <div className={styles.titleBlock}>
           <div className={styles.title}>A Markov chain from counts</div>
-          <div className={styles.subtitle}>Word bigrams (n = 2) built from the toy corpus</div>
+          <div className={styles.subtitle}>Word bigrams (n = 2) built from a tiny demo corpus</div>
         </div>
         <div className={styles.badge}>STATE = 1 WORD</div>
       </div>
