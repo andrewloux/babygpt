@@ -970,6 +970,26 @@ score = float(np.dot(a, b))`}</CodeBlock>
           In the widget, try sliding <Term>T</Term> down toward <Term>0.1</Term> and up toward <Term>5</Term>. You're not changing which logit is biggest — you're changing how aggressively softmax concentrates probability mass on the winner.
         </Paragraph>
 
+        <Paragraph>
+          If the word <Term>temperature</Term> feels oddly physical here, that’s because it is. Long before language models, people had the same problem in another domain: “I have a set of states with scores (energies). How should probability mass spread across them?”
+        </Paragraph>
+        <Paragraph>
+          Picture a marble rolling around in a bumpy bowl. Leave it alone, and it settles at the bottom — the low‑energy spot. Heat the bowl, and the marble starts bouncing. The hotter you make it, the more it visits places it would never reach when cold.
+        </Paragraph>
+        <Paragraph>
+          In 1877, Ludwig Boltzmann wrote down a rule for how probability mass spreads across energy levels in a gas. (He was trying to explain pressure without being able to watch atoms directly.)
+        </Paragraph>
+        <MathBlock
+          equation={String.raw`P(\text{state}) = \frac{1}{Z} e^{-E/kT}`}
+          explanation="Boltzmann distribution (Z normalizes to sum to 1; T controls how spread out it is)."
+        />
+        <Paragraph>
+          The historical punchline is that this wasn’t immediately accepted — Ernst Mach was skeptical of atoms as a concept — and it took decades of evidence (including Einstein’s work on Brownian motion) for the “atom story” to become standard physics. The equation outlived the arguments.
+        </Paragraph>
+        <Paragraph>
+          Softmax is the same shape. If you treat <Term>score</Term> like “negative energy”, divide by <Term>T</Term>, exponentiate, and normalize, you get a distribution that gets sharper when cold and flatter when hot.
+        </Paragraph>
+
         <SoftmaxSimplexViz />
 
         <Paragraph>
@@ -997,66 +1017,34 @@ score = float(np.dot(a, b))`}</CodeBlock>
           One more useful intuition for temperature:
         </Paragraph>
         <ul>
-          <li><strong>T → 0:</strong> The model becomes a greedy argmax. Only the highest-logit token has any probability mass. Deterministic, repetitive, but "confident."</li>
-          <li><strong>T = 1:</strong> The model samples according to its raw logit scores. This is what the model "actually believes."</li>
-          <li><strong>T → ∞:</strong> All tokens become equally likely. The model forgets what it learned. Pure noise.</li>
+          <li><strong>T → 0:</strong> The model becomes a greedy argmax. Only the highest-logit token has any probability mass.</li>
+          <li><strong>T = 1:</strong> Sample according to the raw logits.</li>
+          <li><strong>T → ∞:</strong> Everything flattens toward uniform.</li>
         </ul>
         <details className="collapsible">
-          <summary>Optional: softmax has a physics cousin (Boltzmann)</summary>
+          <summary>Optional: a careful “why exp?” argument (maximum entropy)</summary>
           <Paragraph>
-            If you like the “temperature” metaphor: it’s not just a metaphor. The softmax-with-temperature form and the Boltzmann distribution share the same shape.
+            The honest version of the claim is: <em>if</em> you want the <strong>maximum‑entropy</strong> distribution subject to a constraint, you get an exponential family.
+            It’s not “the only possible mapping from scores to probabilities” in general — it’s the unique solution to a specific optimization problem.
           </Paragraph>
           <Paragraph>
-            Picture a marble rolling around in a bumpy bowl. Leave it alone, and it settles at the bottom — the low-energy spot. Heat the bowl, and the marble starts bouncing. The hotter you make it, the more it visits places it would never reach when cold.
+            Setup: you have outcomes <Term>i</Term> and you want probabilities <Term>p_i</Term>. You require:
           </Paragraph>
+          <ul>
+            <li><strong>Normalization:</strong> <MathInline equation={String.raw`\sum_i p_i = 1`} /></li>
+            <li><strong>A constraint:</strong> for physics it’s expected energy <MathInline equation={String.raw`\sum_i p_i E_i = \bar{E}`} />; for ML you can think of expected score.</li>
+            <li><strong>Least extra assumptions:</strong> maximize Shannon entropy <MathInline equation={String.raw`H(p)=-\sum_i p_i \log p_i`} />.</li>
+          </ul>
           <Paragraph>
-            In 1877, Ludwig Boltzmann wrote down a rule for how “probability mass” should spread across energy levels in a gas.
-            (He was trying to explain pressure without being able to watch atoms directly.)
+            Solving that constrained optimization (via Lagrange multipliers) gives:
           </Paragraph>
           <MathBlock
-            equation={String.raw`P(\text{state}) = \frac{1}{Z} e^{-E/kT}`}
-            explanation="Boltzmann distribution from statistical physics."
+            equation={String.raw`p_i = \frac{e^{\beta s_i}}{\sum_j e^{\beta s_j}}`}
+            explanation="An exponential family. β is an inverse-temperature-like scale (β = 1/T under a common convention)."
           />
           <Paragraph>
-            The story has some drama: Ernst Mach — an influential physicist at the time — didn’t believe atoms were real, and Boltzmann spent decades arguing for the framework. A few years after Boltzmann’s death, Einstein’s work on Brownian motion helped settle the “atoms are real” question, and the distribution became standard physics.
+            That’s the rigorous reason “exp + normalize” shows up in statistical physics and in models that need a smooth, normalized way to turn scores into probabilities.
           </Paragraph>
-          <WorkedExample title="Reading the isomorphism">
-            <WorkedStep n="1">
-              <Paragraph>
-                <strong>Energy ↔ negative score.</strong> Physics prefers low energy. Softmax prefers high score. That’s a sign convention: <Term>E</Term> corresponds to <Term>-score</Term>.
-              </Paragraph>
-            </WorkedStep>
-            <WorkedStep n="2">
-              <Paragraph>
-                <strong>Temperature ↔ temperature.</strong> Divide by <Term>T</Term>, exponentiate, normalize. Higher <Term>T</Term> spreads probability mass. Lower <Term>T</Term> concentrates it.
-              </Paragraph>
-            </WorkedStep>
-            <WorkedStep n="3">
-              <Paragraph>
-                <strong>Partition function ↔ denominator.</strong> <Term>Z</Term> is “the thing you divide by so it sums to 1.”
-              </Paragraph>
-            </WorkedStep>
-            <WorkedStep n="4" final>
-              <Paragraph>
-                <strong>The equations line up.</strong>
-              </Paragraph>
-              <MathBlock
-                equation={String.raw`P_{\text{physics}}(\text{state}) = \frac{e^{-E/kT}}{Z} \qquad P_{\text{softmax}}(\text{token}) = \frac{e^{s/T}}{\sum_j e^{s_j/T}}`}
-                explanation="Set s = -E (flip the sign), and they match."
-              />
-            </WorkedStep>
-          </WorkedExample>
-          <Callout variant="insight" title="Optional: why exp shows up so often (maximum entropy)">
-            <Paragraph>
-              There’s also a deeper “least extra assumptions” argument (maximum entropy).
-            </Paragraph>
-            <Paragraph>
-              Imagine you only know one constraint — like an average energy — and you want a distribution that doesn’t sneak in extra structure. Jaynes showed that the “most noncommittal” distribution consistent with the constraint has an exponential form.
-            </Paragraph>
-            <Paragraph>
-              In our setting, softmax is doing the same kind of thing: it respects score gaps and stays smooth, while not hard-coding a cutoff or a hand-tuned threshold.
-            </Paragraph>
-          </Callout>
         </details>
       </Section>
 
