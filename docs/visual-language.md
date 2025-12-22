@@ -8,6 +8,11 @@ Goal: make it easy for any engineer to add a new viz that *looks like BabyGPT* w
 
 These are “what we mean” pictures. They live in `docs/assets/visual-audit/`.
 
+For the “why”, see:
+
+- `docs/assets/visual-audit/gold/README.md` (what to copy)
+- `docs/assets/visual-audit/drift/README.md` (what’s drifting + fix direction)
+
 **Gold / target-ish**
 
 - `docs/assets/visual-audit/gold/audit-ch2-axioms-vizcard.png` — `VizCard` “figure” style (serif title, mono subtitle, glass surface, calm gradients).
