@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 
 import { VizCard } from './VizCard'
 import styles from './ConditioningShiftViz.module.css'
@@ -134,6 +134,10 @@ function clamp01(x: number) {
   return Math.max(0, Math.min(1, x))
 }
 
+function clamp(x: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, x))
+}
+
 function Prism({
   x,
   yBottom,
@@ -196,6 +200,25 @@ function Prism({
 export function ConditioningShiftViz() {
   const [contextKey, setContextKey] = useState(CONTEXTS[0].key)
   const [hovered, setHovered] = useState<TokenKey | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+
+  const DEPTH_X_DEFAULT = 8
+  const DEPTH_Y_DEFAULT = 6
+  const DEPTH_X_MIN = 0
+  const DEPTH_X_MAX = 18
+  const DEPTH_Y_MIN = 0
+  const DEPTH_Y_MAX = 14
+  const DRAG_SENSITIVITY = 0.06
+
+  const [depthX, setDepthX] = useState(DEPTH_X_DEFAULT)
+  const [depthY, setDepthY] = useState(DEPTH_Y_DEFAULT)
+  const dragState = useRef<{
+    pointerId: number
+    startClientX: number
+    startClientY: number
+    startDepthX: number
+    startDepthY: number
+  } | null>(null)
 
   const context = useMemo(() => CONTEXTS.find((c) => c.key === contextKey) ?? CONTEXTS[0], [contextKey])
 
@@ -237,21 +260,58 @@ export function ConditioningShiftViz() {
 
   const BAR_W = 28
   const GAP = 12
-  const DEPTH_X = 8
-  const DEPTH_Y = 6
   const LANE_X = 40
   const LANE_Y = 22
   const MAX_H = 120
   const ORIGIN_X = 68
   const BASELINE_Y = 180
   const laneWidth = SUPPORT.length * BAR_W + (SUPPORT.length - 1) * GAP
-  const viewW = ORIGIN_X + laneWidth + LANE_X + DEPTH_X + 72
+  // Keep the viewBox large enough for the *maximum* depth, then render the current depth inside it.
+  const viewW = ORIGIN_X + laneWidth + LANE_X + DEPTH_X_MAX + 72
   const viewH = BASELINE_Y + 70
 
   const hScale = overallMax === 0 ? 0 : MAX_H / overallMax
 
   const baseLabel = `P(next) = ${baseSum.toFixed(2)}`
   const condLabel = `P(next | ${context.context}) = ${condSum.toFixed(2)}`
+
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent<SVGSVGElement>) => {
+      e.preventDefault()
+      setHovered(null)
+      setIsDragging(true)
+      dragState.current = {
+        pointerId: e.pointerId,
+        startClientX: e.clientX,
+        startClientY: e.clientY,
+        startDepthX: depthX,
+        startDepthY: depthY,
+      }
+      e.currentTarget.setPointerCapture(e.pointerId)
+    },
+    [depthX, depthY]
+  )
+
+  const handlePointerMove = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
+    const state = dragState.current
+    if (!state || state.pointerId !== e.pointerId) return
+
+    const dx = e.clientX - state.startClientX
+    const dy = e.clientY - state.startClientY
+
+    const nextDepthX = clamp(state.startDepthX + dx * DRAG_SENSITIVITY, DEPTH_X_MIN, DEPTH_X_MAX)
+    const nextDepthY = clamp(state.startDepthY + -dy * DRAG_SENSITIVITY, DEPTH_Y_MIN, DEPTH_Y_MAX)
+
+    setDepthX(nextDepthX)
+    setDepthY(nextDepthY)
+  }, [])
+
+  const endDrag = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
+    const state = dragState.current
+    if (!state || state.pointerId !== e.pointerId) return
+    dragState.current = null
+    setIsDragging(false)
+  }, [])
 
   return (
     <VizCard
@@ -298,11 +358,18 @@ export function ConditioningShiftViz() {
         </div>
 
         <div className={styles.chartPanel}>
+          <div className={styles.interactionHint}>
+            Drag to rotate. <span className={styles.interactionHintMuted}>Hover a bar to inspect.</span>
+          </div>
           <svg
             className={styles.svg}
             viewBox={`0 0 ${viewW} ${viewH}`}
             role="img"
             aria-label="A 3D-style bar chart comparing unconditional and conditional probability distributions"
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={endDrag}
+            onPointerCancel={endDrag}
           >
             <defs>
               <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
@@ -360,14 +427,14 @@ export function ConditioningShiftViz() {
                 <g
                   key={item.key}
                   className={styles.group}
-                  onMouseEnter={() => setHovered(item.key)}
-                  onMouseLeave={() => setHovered(null)}
+                  onMouseEnter={() => (!isDragging ? setHovered(item.key) : null)}
+                  onMouseLeave={() => (!isDragging ? setHovered(null) : null)}
                 >
                   <rect
                     x={x0}
-                    y={BASELINE_Y - MAX_H - LANE_Y - DEPTH_Y - 4}
-                    width={BAR_W + LANE_X + DEPTH_X}
-                    height={MAX_H + LANE_Y + DEPTH_Y + 44}
+                    y={BASELINE_Y - MAX_H - LANE_Y - DEPTH_Y_MAX - 4}
+                    width={BAR_W + LANE_X + DEPTH_X_MAX}
+                    height={MAX_H + LANE_Y + DEPTH_Y_MAX + 44}
                     fill="transparent"
                   />
 
@@ -377,8 +444,8 @@ export function ConditioningShiftViz() {
                       yBottom={BASELINE_Y}
                       width={BAR_W}
                       height={baseH}
-                      depthX={DEPTH_X}
-                      depthY={DEPTH_Y}
+                      depthX={depthX}
+                      depthY={depthY}
                       faceClassName={styles.faceBase}
                       topClassName={styles.topBase}
                       sideClassName={styles.sideBase}
@@ -393,8 +460,8 @@ export function ConditioningShiftViz() {
                       yBottom={BASELINE_Y}
                       width={BAR_W}
                       height={condH}
-                      depthX={DEPTH_X}
-                      depthY={DEPTH_Y}
+                      depthX={depthX}
+                      depthY={depthY}
                       faceClassName={styles.faceCond}
                       topClassName={styles.topCond}
                       sideClassName={styles.sideCond}
@@ -438,4 +505,3 @@ export function ConditioningShiftViz() {
     </VizCard>
   )
 }
-

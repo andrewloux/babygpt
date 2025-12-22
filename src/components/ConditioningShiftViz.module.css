@@ -99,12 +99,33 @@
   border-radius: 16px;
   padding: 1rem;
   overflow: hidden;
+  position: relative;
+}
+
+.interactionHint {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 0.6rem 0;
+  letter-spacing: 0.01em;
+}
+
+.interactionHintMuted {
+  color: rgba(255, 255, 255, 0.42);
 }
 
 .svg {
   width: 100%;
   height: auto;
   display: block;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.svg:active {
+  cursor: grabbing;
 }
 
 .axes {
