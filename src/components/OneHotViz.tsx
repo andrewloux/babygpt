@@ -6,13 +6,13 @@ export function OneHotViz() {
   const [selected, setSelected] = useState<number | null>(null);
 
   return (
-    <div className={styles.container}>
+    <div className={`panel-dark ${styles.container}`}>
       <span className={styles.label}>Select a character to see its One-Hot Vector:</span>
       <div className={styles.vocabGrid}>
         {vocab.map((char, idx) => (
           <button
             key={char}
-            className={`${styles.tokenBtn} ${selected === idx ? styles.active : ''}`}
+            className={`${styles.tokenBtn} ${selected === idx ? styles.active : ''} focus-glow`}
             onClick={() => setSelected(idx)}
           >
             {char}

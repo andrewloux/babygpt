@@ -1,4 +1,5 @@
 import styles from './TrainingTimeViz.module.css'
+import { VizCard } from './VizCard'
 
 interface Bar {
   label: string
@@ -16,12 +17,7 @@ interface TrainingTimeVizProps {
 
 export function TrainingTimeViz({ title, subtitle, bars }: TrainingTimeVizProps) {
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.title}>{title}</div>
-        <div className={styles.subtitle}>{subtitle}</div>
-      </div>
-
+    <VizCard title={title} subtitle={subtitle} footer={<span>Same work. Different strategy.</span>}>
       <div className={styles.bars}>
         {bars.map((bar, i) => (
           <div key={i} className={styles.barRow}>
@@ -39,10 +35,6 @@ export function TrainingTimeViz({ title, subtitle, bars }: TrainingTimeVizProps)
           </div>
         ))}
       </div>
-
-      <div className={styles.footer}>
-        Same work. Different strategy.
-      </div>
-    </div>
+    </VizCard>
   )
 }

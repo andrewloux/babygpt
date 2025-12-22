@@ -251,6 +251,8 @@ Acceptable quick fix: define compatibility aliases in `src/styles/global.css`:
 - `--accent` → `--accent-cyan`
 - `--font-heading` → `--font-sans`
 
+Status: these compatibility aliases exist in `src/styles/global.css` as of 2025-12-22.
+
 ## Refactor order (least risk → most opinionated)
 
 1. Replace undefined tokens (no visual taste required; just correctness).

@@ -33,6 +33,13 @@
   --primary-dark: #00a6c2;
   --border-color: #2a2a3a;
   --code-bg: #0d0d14;
+  /* Compatibility aliases (legacy tokens used by older components) */
+  --bg-main: var(--bg-primary);
+  --bg-paper: var(--bg-secondary);
+  --bg-hover: var(--bg-tertiary);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --accent: var(--accent-cyan);
+  --font-heading: var(--font-sans);
 
   /* Transitions */
   --transition-fast: 0.15s ease;

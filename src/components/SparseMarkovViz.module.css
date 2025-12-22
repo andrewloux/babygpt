@@ -1,33 +1,33 @@
 .container {
   margin: 2rem 0;
-  padding: 1.5rem;
-  background: var(--bg-secondary);
-  border-radius: 8px;
-  border: 1px solid var(--border-subtle);
+  padding: var(--space-lg);
 }
 
 .header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-md);
 }
 
 .badge {
+  font-family: var(--font-mono);
   font-size: 0.7rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.25rem 0.5rem;
-  background: #ef444422;
-  color: var(--accent-red);
-  border-radius: 4px;
+  letter-spacing: 0.18em;
+  padding: 0.28rem 0.6rem;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
 }
 
 .title {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .svg {
@@ -42,7 +42,7 @@
   text-align: center;
   font-size: 0.85rem;
   color: var(--text-muted);
-  margin: 1rem 0 0 0;
+  margin: var(--space-md) 0 0 0;
 }
 
 .fail {

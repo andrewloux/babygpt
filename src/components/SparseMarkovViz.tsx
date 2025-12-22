@@ -24,7 +24,7 @@ export function SparseMarkovViz() {
   }
 
   return (
-    <div className={styles.container}>
+    <div className={`panel-dark ${styles.container}`}>
       <div className={styles.header}>
         <span className={styles.badge}>Word-Level</span>
         <span className={styles.title}>The Sparsity Problem</span>
@@ -41,7 +41,7 @@ export function SparseMarkovViz() {
             markerHeight="6"
             orient="auto-start-reverse"
           >
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="#22c55e" />
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent-green)" />
           </marker>
           <marker
             id="arrow-bad"
@@ -52,26 +52,26 @@ export function SparseMarkovViz() {
             markerHeight="6"
             orient="auto-start-reverse"
           >
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444" />
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent-red)" />
           </marker>
         </defs>
 
         {/* Good edge: dog → ran */}
         <g opacity={isEdgeHighlighted('dog', 'ran') ? 1 : 0.15}>
-          <path d="M 132 60 L 288 60" fill="none" stroke="#22c55e" strokeWidth="2.5" markerEnd="url(#arrow-good)" />
-          <text x="210" y="42" textAnchor="middle" fill="#22c55e" fontSize="12" fontWeight="600" fontFamily="var(--font-mono)">✓ seen</text>
+          <path d="M 132 60 L 288 60" fill="none" stroke="var(--accent-green)" strokeWidth="2.5" markerEnd="url(#arrow-good)" />
+          <text x="210" y="42" textAnchor="middle" fill="var(--accent-green)" fontSize="12" fontWeight="600" fontFamily="var(--font-mono)">✓ seen</text>
         </g>
 
         {/* Good edge: cat → sat */}
         <g opacity={isEdgeHighlighted('cat', 'sat') ? 1 : 0.15}>
-          <path d="M 132 160 L 288 160" fill="none" stroke="#22c55e" strokeWidth="2.5" markerEnd="url(#arrow-good)" />
-          <text x="210" y="178" textAnchor="middle" fill="#22c55e" fontSize="12" fontWeight="600" fontFamily="var(--font-mono)">✓ seen</text>
+          <path d="M 132 160 L 288 160" fill="none" stroke="var(--accent-green)" strokeWidth="2.5" markerEnd="url(#arrow-good)" />
+          <text x="210" y="178" textAnchor="middle" fill="var(--accent-green)" fontSize="12" fontWeight="600" fontFamily="var(--font-mono)">✓ seen</text>
         </g>
 
         {/* Bad edge: dog → sat (both words exist, but transition doesn't!) */}
         <g opacity={isEdgeHighlighted('dog', 'sat') ? 0.8 : 0.15}>
-          <path d="M 120 92 L 300 128" fill="none" stroke="#ef4444" strokeWidth="2" strokeDasharray="6 4" markerEnd="url(#arrow-bad)" />
-          <text x="210" y="95" textAnchor="middle" fill="#ef4444" fontSize="12" fontWeight="600" fontFamily="var(--font-mono)">✗ never seen</text>
+          <path d="M 120 92 L 300 128" fill="none" stroke="var(--accent-red)" strokeWidth="2" strokeDasharray="6 4" markerEnd="url(#arrow-bad)" />
+          <text x="210" y="95" textAnchor="middle" fill="var(--accent-red)" fontSize="12" fontWeight="600" fontFamily="var(--font-mono)">✗ never seen</text>
         </g>
 
         {/* "dog" node - top left */}
@@ -85,14 +85,14 @@ export function SparseMarkovViz() {
           <circle
             r="30"
             fill="var(--bg-primary)"
-            stroke="#f97316"
+            stroke="var(--accent-cyan)"
             strokeWidth={active === 'dog' ? 4 : 3}
             style={{
-              filter: active === 'dog' ? 'drop-shadow(0 0 12px #f97316)' : 'none',
+              filter: active === 'dog' ? 'drop-shadow(0 0 12px rgba(0, 217, 255, 0.65))' : 'none',
               transition: 'all 0.2s ease'
             }}
           />
-          <text textAnchor="middle" dominantBaseline="middle" fill="#f97316" fontSize="16" fontWeight="700" fontFamily="var(--font-mono)">dog</text>
+          <text textAnchor="middle" dominantBaseline="middle" fill="var(--accent-cyan)" fontSize="16" fontWeight="700" fontFamily="var(--font-mono)">dog</text>
         </g>
 
         {/* "cat" node - bottom left */}
@@ -106,14 +106,14 @@ export function SparseMarkovViz() {
           <circle
             r="30"
             fill="var(--bg-primary)"
-            stroke="#f97316"
+            stroke="var(--accent-cyan)"
             strokeWidth={active === 'cat' ? 4 : 3}
             style={{
-              filter: active === 'cat' ? 'drop-shadow(0 0 12px #f97316)' : 'none',
+              filter: active === 'cat' ? 'drop-shadow(0 0 12px rgba(0, 217, 255, 0.65))' : 'none',
               transition: 'all 0.2s ease'
             }}
           />
-          <text textAnchor="middle" dominantBaseline="middle" fill="#f97316" fontSize="16" fontWeight="700" fontFamily="var(--font-mono)">cat</text>
+          <text textAnchor="middle" dominantBaseline="middle" fill="var(--accent-cyan)" fontSize="16" fontWeight="700" fontFamily="var(--font-mono)">cat</text>
         </g>
 
         {/* "ran" node - top right */}
@@ -127,14 +127,14 @@ export function SparseMarkovViz() {
           <circle
             r="30"
             fill="var(--bg-primary)"
-            stroke="#22c55e"
+            stroke="var(--accent-green)"
             strokeWidth={active === 'ran' ? 4 : 3}
             style={{
-              filter: active === 'ran' ? 'drop-shadow(0 0 12px #22c55e)' : 'none',
+              filter: active === 'ran' ? 'drop-shadow(0 0 12px rgba(57, 255, 20, 0.45))' : 'none',
               transition: 'all 0.2s ease'
             }}
           />
-          <text textAnchor="middle" dominantBaseline="middle" fill="#22c55e" fontSize="16" fontWeight="700" fontFamily="var(--font-mono)">ran</text>
+          <text textAnchor="middle" dominantBaseline="middle" fill="var(--accent-green)" fontSize="16" fontWeight="700" fontFamily="var(--font-mono)">ran</text>
         </g>
 
         {/* "sat" node - bottom right */}
@@ -148,14 +148,14 @@ export function SparseMarkovViz() {
           <circle
             r="30"
             fill="var(--bg-primary)"
-            stroke="#22c55e"
+            stroke="var(--accent-green)"
             strokeWidth={active === 'sat' ? 4 : 3}
             style={{
-              filter: active === 'sat' ? 'drop-shadow(0 0 12px #22c55e)' : 'none',
+              filter: active === 'sat' ? 'drop-shadow(0 0 12px rgba(57, 255, 20, 0.45))' : 'none',
               transition: 'all 0.2s ease'
             }}
           />
-          <text textAnchor="middle" dominantBaseline="middle" fill="#22c55e" fontSize="16" fontWeight="700" fontFamily="var(--font-mono)">sat</text>
+          <text textAnchor="middle" dominantBaseline="middle" fill="var(--accent-green)" fontSize="16" fontWeight="700" fontFamily="var(--font-mono)">sat</text>
         </g>
       </svg>
 
