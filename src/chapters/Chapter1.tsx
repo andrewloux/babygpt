@@ -1779,15 +1779,27 @@ print(f"First Y: {Y[0]}")               # [2, 4, 4, 5] ("ello")`}</CodeBlock>
           English has long-range dependencies. If a sentence starts with "The <strong>boy</strong> who lived...", the pronoun 50 words later must be "<strong>he</strong>", not "she". To capture this, our context length needs to be large—say, 100 characters.
         </Paragraph>
         <Paragraph>
-          Here is the math for a lookup table with context length 100:
+          Be painfully literal about what that means. We're going to keep a <strong>sliding window</strong> of the last <Term>T</Term> characters. At each position <Term>t</Term>, the model sees the previous <Term>T</Term> characters and predicts the next one.
+        </Paragraph>
+        <Paragraph>
+          A pure counting model would store a lookup table keyed by that window. Input: “this exact 100‑character context”. Output: a full probability distribution over what comes next.
+        </Paragraph>
+        <Paragraph>
+          How many different keys can that table have? If your vocabulary has size <Term>|V|</Term>, then the number of possible length‑<Term>T</Term> contexts is:
         </Paragraph>
         <MathBlock
-          equation="\text{Possible Sequences} = \text{Vocab}^{\text{Context}}"
-          explanation="Exponential growth is not your friend."
+          equation={String.raw`\#\text{contexts} = |V|^T`}
+          explanation="A length‑T context is just T characters in a row. Each position has |V| choices."
         />
+        <Paragraph>
+          And for each one of those contexts, the table needs to store <Term>|V|</Term> numbers (one probability per next character). So the number of stored values scales like <MathInline equation={String.raw`|V|^T \cdot |V| = |V|^{T+1}`} /> — plus the overhead of actually storing keys.
+        </Paragraph>
+        <Paragraph>
+          Tiny toy example: if <MathInline equation={String.raw`|V|=3`} /> (say <Term>{'{a,b,␣}'}</Term>) and <MathInline equation={String.raw`T=2`} />, then there are <MathInline equation={String.raw`3^2=9`} /> possible contexts. And each context needs a 3‑way next‑character distribution, so you’re already storing <MathInline equation={String.raw`9\cdot 3 = 27`} /> numbers.
+        </Paragraph>
         <MathBlock
           equation={`80^{100} \\approx 10^{190}`}
-          explanation={`For comparison, the number of atoms in the observable universe is roughly 10⁸⁰.`}
+          explanation={`80 is a rough character vocabulary size for English text (letters, digits, space, punctuation). For comparison, the number of atoms in the observable universe is roughly 10⁸⁰.`}
         />
         <Paragraph>
           This isn't just a "buy a bigger hard drive" problem. This is a physics problem.
