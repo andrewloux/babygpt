@@ -11,6 +11,7 @@ import {
   Callout,
   ChapterMap,
   MathBlock,
+  MathInline,
   Cite,
   Citations,
   CodeBlock,
@@ -1999,7 +2000,7 @@ p \cdot p &= \sum_i p_i^2 \\
 \end{aligned}`}
               />
               <Paragraph>
-                For <Term>V = 27</Term>, the baseline is <Term>1/27 ≈ 0.037</Term>.
+                For <Term>V = 27</Term>, the baseline is <MathInline equation={String.raw`\frac{1}{27} \approx 0.037`} />.
               </Paragraph>
             </>
           }

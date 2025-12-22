@@ -13,6 +13,7 @@ import {
   Cite,
   Citations,
   MathBlock,
+  MathInline,
   NgramExamples,
   SparsityViz,
   defaultSparsityData,
@@ -312,10 +313,10 @@ export function Chapter1() {
             It's tempting to think this problem goes away at the word level because words come from a fixed dictionary. And
             yes: the token set is finite.
           </Paragraph>
-          <Paragraph>
-            But the combinatorics is still exponential. The number of length-T sequences is <Term>|V|^T</Term>, where <Term>|V|</Term> is your vocabulary size. For a typical word vocabulary of 50,000 tokens, the number of
-            possible 10-word sequences is <Term>50,000^{10}</Term>—around <strong>10^{47}</strong>. Astronomical.
-          </Paragraph>
+        <Paragraph>
+          But the combinatorics is still exponential. The number of length-T sequences is <MathInline equation={String.raw`|V|^T`} />, where <Term>|V|</Term> is your vocabulary size. For a typical word vocabulary of 50,000 tokens, the number of
+          possible 10-word sequences is <MathInline equation={String.raw`50{,}000^{10}`} />—around <strong>10^{47}</strong>. Astronomical.
+        </Paragraph>
           <Paragraph>
             Also, not all of those sequences are valid English. The problem is that the set of <em>valid</em> sequences is
             still enormous, and a counting/lookup model has no way to assign reasonable probability to sequences it never
@@ -976,7 +977,7 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
         </Paragraph>
         <MathBlock equation={String.raw`\text{perplexity} = 2^{\text{average surprise}}`} />
         <Paragraph>
-          Tiny example: suppose over two steps the model assigns the correct next token probabilities <Term>0.5</Term> and <Term>0.25</Term>. The surprises are <Term>1</Term> bit and <Term>2</Term> bits, so the average is <Term>(1 + 2)/2 = 1.5</Term> bits/token. Perplexity is <Term>2^{1.5}</Term> ≈ <Term>2.83</Term>—about “three plausible options” on average.
+          Tiny example: suppose over two steps the model assigns the correct next token probabilities <Term>0.5</Term> and <Term>0.25</Term>. The surprises are <Term>1</Term> bit and <Term>2</Term> bits, so the average is <MathInline equation={String.raw`\frac{1 + 2}{2} = 1.5`} /> bits/token. Perplexity is <MathInline equation={String.raw`2^{1.5}`} /> ≈ <Term>2.83</Term>—about “three plausible options” on average.
         </Paragraph>
         <Paragraph>
           One annoying detail: raw counts love to assign <Term>p = 0</Term> to unseen n-grams. That makes surprise infinite,

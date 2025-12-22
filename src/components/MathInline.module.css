@@ -1,0 +1,11 @@
+.mathInline {
+  color: var(--accent-cyan);
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+  white-space: nowrap;
+}
+
+.mathInline :global(.katex) {
+  font-size: 1em;
+}
+
