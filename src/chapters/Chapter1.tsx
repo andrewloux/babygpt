@@ -1562,7 +1562,21 @@ Input: [h, e, l]    Target: l`}</CodeBlock>
         </Paragraph>
         <Callout variant="info" title="Enforcing the Rules">
           <Paragraph>
-            How do we stop the model from cheating? When predicting character 5, you can only look at characters 0–4. If you could see character 5, you'd just copy it. The <Term>Causal Mask</Term> enforces this: position i only sees positions 0 through i−1. Later positions are blocked.
+            How do we stop the model from cheating? If you're trying to predict “the next thing”, you’re not allowed to look at the next thing.
+          </Paragraph>
+          <Paragraph>
+            The <Term>Causal Mask</Term> is just a little rule-table that says what each position is allowed to look at. It’s a <Term>T×T</Term> grid: rows are “the token doing the looking” and columns are “what it can look at.”
+          </Paragraph>
+          <ul>
+            <li>
+              Row <Term>i</Term> can look at columns <Term>0…i</Term> (the past, plus itself).
+            </li>
+            <li>
+              Row <Term>i</Term> cannot look at columns <Term>i+1…T−1</Term> (the future).
+            </li>
+          </ul>
+          <Paragraph>
+            In code, enforcement is blunt: when the model computes “attention scores” for every pair (row <Term>i</Term>, column <Term>j</Term>), we set the illegal future scores (<Term>j &gt; i</Term>) to <MathInline equation={String.raw`-\infty`} /> (or just a huge negative number) before turning scores into weights. After normalization, those weights become exactly zero. The future might as well not exist.
           </Paragraph>
         </Callout>
         <Paragraph>
