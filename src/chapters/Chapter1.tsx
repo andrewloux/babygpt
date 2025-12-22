@@ -899,8 +899,8 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
           The answer is that the <strong>hash function is order-sensitive</strong>. KenLM uses sophisticated hashes (like MurmurHash or CityHash) that mix the bits of every character based on its position.
           <Cite n={7} />
           <Cite n={8} />
-          <MathBlock equation='\text{Hash("dog sat")} \neq \text{Hash("sat dog")}' />
         </Paragraph>
+        <MathBlock equation='\text{Hash("dog sat")} \neq \text{Hash("sat dog")}' />
         <WorkedExample title="A tiny hash that cares about order">
           <WorkedStep n="1">
             <p>Pick a simple hash rule: start with <code>h = 0</code>. For each character, update</p>
