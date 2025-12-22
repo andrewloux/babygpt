@@ -1,6 +1,4 @@
-import katex from 'katex'
-import 'katex/dist/katex.min.css'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { VizCard } from './VizCard'
 import { Slider } from './Slider'
 import styles from './EmbeddingGradientViz.module.css'
@@ -63,22 +61,15 @@ function clampVec(v: Vec2, min: number, max: number): Vec2 {
   return [clamp(v[0], min, max), clamp(v[1], min, max)]
 }
 
-type Panel = 'explain' | 'trails' | 'auto'
-
 export function EmbeddingGradientViz() {
+  const svgRef = useRef<SVGSVGElement | null>(null)
+  const dragPointerId = useRef<number | null>(null)
+
   const [embeddings, setEmbeddings] = useState<Record<string, Vec2>>(INITIAL_EMBEDDINGS)
   const [contextChar, setContextChar] = useState<string>('a')
   const [actualChar, setActualChar] = useState<string>('t')
   const [eta, setEta] = useState(0.5)
   const [stepCount, setStepCount] = useState(0)
-  const [isAutoTraining, setIsAutoTraining] = useState(false)
-  const [autoSteps, setAutoSteps] = useState(50)
-  const [trainSpeed, setTrainSpeed] = useState(50)
-  const [trajectories, setTrajectories] = useState<Record<string, Vec2[]>>({})
-  const [showCompletionMessage, setShowCompletionMessage] = useState(false)
-  const [showTrails, setShowTrails] = useState(true)
-  const [trailLength, setTrailLength] = useState(20)
-  const [panel, setPanel] = useState<Panel | null>(null)
 
   // Compute softmax predictions based on dot products
   const contextEmb = embeddings[contextChar]
@@ -101,9 +92,51 @@ export function EmbeddingGradientViz() {
   // Gradient: predicted - actual (points FROM actual TOWARD predicted)
   const gradient = vecSub(predictedCentroid, actualEmb)
 
+  // Preview: where the context embedding will move on the next step.
+  const previewContextNext = useMemo(() => {
+    const rawNext = vecSub(contextEmb, vecScale(gradient, eta))
+    return clampVec(rawNext, 0.05, 0.95)
+  }, [contextEmb, gradient, eta])
+
   // SVG coordinate mapping (0-1 space to pixel space with margins)
   const toSvgX = (x: number) => MARGIN + x * (WIDTH - 2 * MARGIN)
   const toSvgY = (y: number) => HEIGHT - MARGIN - y * (HEIGHT - 2 * MARGIN)
+
+  const updateContextFromPointer = (e: React.PointerEvent) => {
+    const svg = svgRef.current
+    if (!svg) return
+    const rect = svg.getBoundingClientRect()
+    if (rect.width === 0 || rect.height === 0) return
+
+    const sx = ((e.clientX - rect.left) / rect.width) * WIDTH
+    const sy = ((e.clientY - rect.top) / rect.height) * HEIGHT
+
+    const x01 = (sx - MARGIN) / (WIDTH - 2 * MARGIN)
+    const y01 = (HEIGHT - MARGIN - sy) / (HEIGHT - 2 * MARGIN)
+    const newEmb = clampVec([x01, y01], 0.05, 0.95)
+
+    setEmbeddings((prev) => ({
+      ...prev,
+      [contextChar]: newEmb,
+    }))
+  }
+
+  const onContextPointerDown = (e: React.PointerEvent) => {
+    if (e.button !== 0) return
+    dragPointerId.current = e.pointerId
+    ;(e.currentTarget as Element).setPointerCapture(e.pointerId)
+    updateContextFromPointer(e)
+  }
+
+  const onContextPointerMove = (e: React.PointerEvent) => {
+    if (dragPointerId.current !== e.pointerId) return
+    updateContextFromPointer(e)
+  }
+
+  const onContextPointerUp = (e: React.PointerEvent) => {
+    if (dragPointerId.current !== e.pointerId) return
+    dragPointerId.current = null
+  }
 
   function sampleNext() {
     const probs = NEXT_PROBS[contextChar]
@@ -120,23 +153,23 @@ export function EmbeddingGradientViz() {
   }
 
   function takeStep() {
-    // Update: E[context] -= η × gradient
-    // Since gradient points uphill (toward predicted), subtracting it moves us downhill (toward actual)
-    const rawNewEmb = vecSub(embeddings[contextChar], vecScale(gradient, eta))
-    const newEmb = clampVec(rawNewEmb, 0.05, 0.95)
+    setEmbeddings((prev) => {
+      const ctxEmb = prev[contextChar]
+      const logitsNow = CHARS.map((c) => dot(ctxEmb, prev[c]))
+      const probsNow = softmax(logitsNow)
 
-    // Record trajectory (trimmed to max trail length)
-    setTrajectories((prev) => {
-      const newTrail = [...(prev[contextChar] || []), embeddings[contextChar]]
+      const predictedNow: Vec2 = CHARS.reduce(
+        (acc, c, i) => vecAdd(acc, vecScale(prev[c], probsNow[i])),
+        [0, 0] as Vec2
+      )
+      const gradNow = vecSub(predictedNow, prev[actualChar])
+      const rawNext = vecSub(ctxEmb, vecScale(gradNow, eta))
+      const next = clampVec(rawNext, 0.05, 0.95)
+
       return {
         ...prev,
-        [contextChar]: newTrail.slice(-trailLength),
+        [contextChar]: next,
       }
-    })
-
-    setEmbeddings({
-      ...embeddings,
-      [contextChar]: newEmb,
     })
     setStepCount((c) => c + 1)
   }
@@ -146,585 +179,360 @@ export function EmbeddingGradientViz() {
     setContextChar('a')
     setActualChar('t')
     setStepCount(0)
-    setTrajectories({})
-    setShowCompletionMessage(false)
   }
 
-  async function autoTrain() {
-    setIsAutoTraining(true)
-    setShowCompletionMessage(false)
-    setTrajectories({})
+  const probRows = useMemo(
+    () =>
+      CHARS.map((c, i) => ({ char: c, prob: predictions[i] }))
+        .sort((a, b) => b.prob - a.prob),
+    [predictions]
+  )
 
-    for (let i = 0; i < autoSteps; i++) {
-      // Cycle through contexts to ensure all characters get updated
-      const ctx = CHARS[i % CHARS.length]
-      setContextChar(ctx)
-      await new Promise((r) => setTimeout(r, trainSpeed))
-
-      // Sample next character based on probabilities
-      const probs = NEXT_PROBS[ctx]
-      const rand = Math.random()
-      let cumulative = 0
-      let nextChar = CHARS[CHARS.length - 1]
-      for (const c of CHARS) {
-        cumulative += probs[c]
-        if (rand < cumulative) {
-          nextChar = c
-          break
-        }
-      }
-      setActualChar(nextChar)
-      await new Promise((r) => setTimeout(r, trainSpeed))
-
-      // Take gradient step
-      // Compute gradient and new embedding, capturing old position for trajectory
-      let oldPosition: Vec2 | null = null
-      setEmbeddings((currentEmbeddings) => {
-        const currentContextEmb = currentEmbeddings[ctx]
-        oldPosition = currentContextEmb
-        const currentLogits = CHARS.map((c) => dot(currentContextEmb, currentEmbeddings[c]))
-        const currentPredictions = softmax(currentLogits)
-        const currentPredictedCentroid: Vec2 = CHARS.reduce(
-          (acc, c, idx) => vecAdd(acc, vecScale(currentEmbeddings[c], currentPredictions[idx])),
-          [0, 0] as Vec2
-        )
-        const currentActualEmb = currentEmbeddings[nextChar]
-        const currentGradient = vecSub(currentPredictedCentroid, currentActualEmb)
-        const rawNewEmb = vecSub(currentContextEmb, vecScale(currentGradient, eta))
-        const newEmb = clampVec(rawNewEmb, 0.05, 0.95)
-
-        return {
-          ...currentEmbeddings,
-          [ctx]: newEmb,
-        }
-      })
-
-      // Update trajectory with captured old position (after embeddings update)
-      if (oldPosition) {
-        const positionToRecord = oldPosition
-        setTrajectories((prev) => {
-          const newTrail = [...(prev[ctx] || []), positionToRecord]
-          return {
-            ...prev,
-            [ctx]: newTrail.slice(-trailLength),
-          }
-        })
-      }
-
-      setStepCount((c) => c + 1)
-      await new Promise((r) => setTimeout(r, trainSpeed))
-    }
-
-    setIsAutoTraining(false)
-    setShowCompletionMessage(true)
-  }
-
-  const explainEqHtml = useMemo(() => {
-    const blocks = [
-      String.raw`\hat{e} = \sum_j p_j \cdot E[j]`,
-      String.raw`\nabla_{E[c]} L = \hat{e} - E[\text{actual}]`,
-      String.raw`E[c] \leftarrow E[c] - \eta \cdot \nabla L`,
-    ]
-
-    return blocks.map((eq) =>
-      katex.renderToString(eq, {
-        throwOnError: false,
-        displayMode: true,
-      }),
-    )
-  }, [])
-
-  const togglePanel = (next: Panel) => {
-    setPanel((prev) => (prev === next ? null : next))
-  }
+  const edgeRows = useMemo(() => {
+    const top = probRows.slice(0, 3)
+    const actualRow = probRows.find((r) => r.char === actualChar)
+    if (actualRow && !top.some((r) => r.char === actualRow.char)) top.push(actualRow)
+    return top
+  }, [probRows, actualChar])
 
   return (
     <VizCard
-      title="Embedding Gradient Derivation"
-      subtitle="Understanding gradient descent: gradient points uphill, we move downhill"
+      title="One Gradient Step, In 2D"
+      subtitle="Drag the context embedding, watch the update direction"
       figNum="Fig. 2.5"
     >
-      <div className={styles.graphContainer}>
-          <svg className={styles.svg} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label="2D embedding space">
-            <defs>
-              <radialGradient id="contextGlow">
-                <stop offset="0%" stopColor="rgba(255,0,110,0.5)" />
-                <stop offset="100%" stopColor="rgba(255,0,110,0)" />
-              </radialGradient>
-              <radialGradient id="actualGlow">
-                <stop offset="0%" stopColor="rgba(0,217,255,0.5)" />
-                <stop offset="100%" stopColor="rgba(0,217,255,0)" />
-              </radialGradient>
-              <radialGradient id="predictedGlow">
-                <stop offset="0%" stopColor="rgba(255,214,10,0.5)" />
-                <stop offset="100%" stopColor="rgba(255,214,10,0)" />
-              </radialGradient>
-              <marker id="gradArrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
-                <polygon points="0 0, 10 4, 0 8" fill="rgba(255,214,10,0.95)" />
-              </marker>
-              <marker id="updateArrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
-                <polygon points="0 0, 10 4, 0 8" fill="rgba(255,0,110,0.95)" />
-              </marker>
-            </defs>
+      <div className={styles.layout}>
+        <div className={styles.left}>
+          <div className={styles.graphContainer}>
+            <div className={styles.plotArea}>
+              <svg
+                ref={svgRef}
+                className={styles.svg}
+                viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+                role="img"
+                aria-label="2D embedding space"
+              >
+                <defs>
+                <radialGradient id="contextGlow">
+                  <stop offset="0%" stopColor="rgba(255,0,110,0.45)" />
+                  <stop offset="100%" stopColor="rgba(255,0,110,0)" />
+                </radialGradient>
+                <radialGradient id="actualGlow">
+                  <stop offset="0%" stopColor="rgba(0,217,255,0.45)" />
+                  <stop offset="100%" stopColor="rgba(0,217,255,0)" />
+                </radialGradient>
+                <radialGradient id="predictedGlow">
+                  <stop offset="0%" stopColor="rgba(255,214,10,0.45)" />
+                  <stop offset="100%" stopColor="rgba(255,214,10,0)" />
+                </radialGradient>
+                <marker id="gradArrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+                  <polygon points="0 0, 10 4, 0 8" fill="rgba(255,214,10,0.95)" />
+                </marker>
+                <marker id="updateArrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+                  <polygon points="0 0, 10 4, 0 8" fill="rgba(255,0,110,0.95)" />
+                </marker>
+              </defs>
 
-            {/* Soft grid */}
-            {[0.25, 0.5, 0.75].map((i) => (
-              <line
-                key={`h-${i}`}
-                x1={MARGIN}
-                y1={toSvgY(i)}
-                x2={WIDTH - MARGIN}
-                y2={toSvgY(i)}
-                className={styles.gridLine}
-              />
-            ))}
-            {[0.25, 0.5, 0.75].map((i) => (
-              <line
-                key={`v-${i}`}
-                x1={toSvgX(i)}
-                y1={MARGIN}
-                x2={toSvgX(i)}
-                y2={HEIGHT - MARGIN}
-                className={styles.gridLine}
-              />
-            ))}
-
-            {/* Axes */}
-            <line
-              x1={MARGIN}
-              y1={toSvgY(0)}
-              x2={WIDTH - MARGIN}
-              y2={toSvgY(0)}
-              className={styles.axisLine}
-            />
-            <line
-              x1={toSvgX(0)}
-              y1={MARGIN}
-              x2={toSvgX(0)}
-              y2={HEIGHT - MARGIN}
-              className={styles.axisLine}
-            />
-
-            {/* Trajectory trails */}
-            {showTrails && Object.entries(trajectories).map(([char, trail]) => (
-              <g key={`trail-${char}`}>
-                {trail.map((pos, idx) => {
-                  const opacity = Math.max(0.1, idx / trail.length) * 0.5
-                  return (
-                    <circle
-                      key={`${char}-${idx}`}
-                      cx={toSvgX(pos[0])}
-                      cy={toSvgY(pos[1])}
-                      r="2"
-                      fill="rgba(255, 255, 255, 0.3)"
-                      opacity={opacity}
-                    />
-                  )
-                })}
-              </g>
-            ))}
-
-            {/* Character points */}
-            {CHARS.map((c) => {
-              const [x, y] = embeddings[c]
-              const isContext = c === contextChar
-              const isActual = c === actualChar
-              const svgX = toSvgX(x)
-              const svgY = toSvgY(y)
-
-              return (
-                <g key={c}>
-                  {/* Glow for context */}
-                  {isContext && (
-                    <circle
-                      cx={svgX}
-                      cy={svgY}
-                      r="22"
-                      fill="url(#contextGlow)"
-                      className={styles.glow}
-                    />
-                  )}
-                  {/* Glow for actual */}
-                  {isActual && (
-                    <circle
-                      cx={svgX}
-                      cy={svgY}
-                      r="22"
-                      fill="url(#actualGlow)"
-                      className={styles.glow}
-                    />
-                  )}
-                  {/* Context ring */}
-                  {isContext && (
-                    <circle
-                      cx={svgX}
-                      cy={svgY}
-                      r="12"
-                      fill="none"
-                      stroke="var(--accent-magenta)"
-                      strokeWidth="2"
-                      className={styles.contextRing}
-                    />
-                  )}
-                  {/* Point */}
-                  <circle
-                    cx={svgX}
-                    cy={svgY}
-                    r="5"
-                    fill={isActual ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.7)'}
-                    stroke="rgba(255,255,255,0.9)"
-                    strokeWidth="1"
-                    className={styles.point}
-                  />
-                  {/* Label */}
-                  <text
-                    x={svgX + 10}
-                    y={svgY - 10}
-                    className={styles.label}
-                    fill={isContext ? 'var(--accent-magenta)' : isActual ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.6)'}
-                  >
-                    {c}
-                  </text>
-                </g>
-              )
-            })}
-
-            {/* Probability-weighted connections showing centroid computation */}
-            {CHARS.map((char, i) => {
-              const prob = predictions[i]
-              const targetEmb = embeddings[char]
-
-              return (
+              {/* Soft grid */}
+              {[0.25, 0.5, 0.75].map((i) => (
                 <line
-                  key={`prob-${char}`}
-                  x1={toSvgX(contextEmb[0])}
-                  y1={toSvgY(contextEmb[1])}
-                  x2={toSvgX(targetEmb[0])}
-                  y2={toSvgY(targetEmb[1])}
-                  stroke="rgba(255,214,10,0.5)"
-                  strokeWidth={prob * 5}
-                  opacity={prob * 0.9}
-                  className={styles.probConnection}
+                  key={`h-${i}`}
+                  x1={MARGIN}
+                  y1={toSvgY(i)}
+                  x2={WIDTH - MARGIN}
+                  y2={toSvgY(i)}
+                  className={styles.gridLine}
                 />
-              )
-            })}
+              ))}
+              {[0.25, 0.5, 0.75].map((i) => (
+                <line
+                  key={`v-${i}`}
+                  x1={toSvgX(i)}
+                  y1={MARGIN}
+                  x2={toSvgX(i)}
+                  y2={HEIGHT - MARGIN}
+                  className={styles.gridLine}
+                />
+              ))}
 
-            {/* Predicted centroid */}
-            <g>
-              <circle
-                cx={toSvgX(predictedCentroid[0])}
-                cy={toSvgY(predictedCentroid[1])}
-                r="22"
-                fill="url(#predictedGlow)"
-                className={styles.glow}
+              {/* Axes */}
+              <line
+                x1={MARGIN}
+                y1={toSvgY(0)}
+                x2={WIDTH - MARGIN}
+                y2={toSvgY(0)}
+                className={styles.axisLine}
               />
+              <line
+                x1={toSvgX(0)}
+                y1={MARGIN}
+                x2={toSvgX(0)}
+                y2={HEIGHT - MARGIN}
+                className={styles.axisLine}
+              />
+
+              {/* Probability-weighted connections (show top few so the centroid feels computable) */}
+              {edgeRows.map((row) => {
+                const targetEmb = embeddings[row.char]
+                return (
+                  <line
+                    key={`prob-${row.char}`}
+                    x1={toSvgX(contextEmb[0])}
+                    y1={toSvgY(contextEmb[1])}
+                    x2={toSvgX(targetEmb[0])}
+                    y2={toSvgY(targetEmb[1])}
+                    stroke="rgba(0, 217, 255, 0.45)"
+                    strokeWidth={Math.max(1, row.prob * 7)}
+                    opacity={0.2 + row.prob * 0.85}
+                    className={styles.probConnection}
+                  />
+                )
+              })}
+
+              {/* Character points */}
+              {CHARS.map((c) => {
+                const [x, y] = embeddings[c]
+                const isContext = c === contextChar
+                const isActual = c === actualChar
+                const svgX = toSvgX(x)
+                const svgY = toSvgY(y)
+
+                return (
+                  <g key={c}>
+                    {isContext && (
+                      <circle
+                        cx={svgX}
+                        cy={svgY}
+                        r="24"
+                        fill="url(#contextGlow)"
+                        className={styles.glow}
+                      />
+                    )}
+                    {isActual && (
+                      <circle
+                        cx={svgX}
+                        cy={svgY}
+                        r="24"
+                        fill="url(#actualGlow)"
+                        className={styles.glow}
+                      />
+                    )}
+
+                    {/* Context ring (drag handle) */}
+                    {isContext && (
+                      <>
+                        <circle
+                          cx={svgX}
+                          cy={svgY}
+                          r="16"
+                          fill="none"
+                          stroke="var(--accent-magenta)"
+                          strokeWidth="2"
+                          className={styles.contextRing}
+                        />
+                        <circle
+                          cx={svgX}
+                          cy={svgY}
+                          r="18"
+                          fill="transparent"
+                          className={styles.contextHit}
+                          onPointerDown={onContextPointerDown}
+                          onPointerMove={onContextPointerMove}
+                          onPointerUp={onContextPointerUp}
+                          onPointerCancel={onContextPointerUp}
+                        />
+                      </>
+                    )}
+
+                    <circle
+                      cx={svgX}
+                      cy={svgY}
+                      r="6"
+                      fill={isActual ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.72)'}
+                      stroke="rgba(255,255,255,0.9)"
+                      strokeWidth="1"
+                      className={styles.point}
+                      onClick={() => !isContext && setActualChar(c)}
+                    />
+                    <text
+                      x={svgX + 10}
+                      y={svgY - 10}
+                      className={styles.label}
+                      fill={
+                        isContext
+                          ? 'var(--accent-magenta)'
+                          : isActual
+                            ? 'var(--accent-cyan)'
+                            : 'rgba(255,255,255,0.6)'
+                      }
+                    >
+                      {c}
+                    </text>
+                  </g>
+                )
+              })}
+
+              {/* Predicted centroid */}
+              <g>
+                <circle
+                  cx={toSvgX(predictedCentroid[0])}
+                  cy={toSvgY(predictedCentroid[1])}
+                  r="24"
+                  fill="url(#predictedGlow)"
+                  className={styles.glow}
+                />
+                <circle
+                  cx={toSvgX(predictedCentroid[0])}
+                  cy={toSvgY(predictedCentroid[1])}
+                  r="8"
+                  fill="none"
+                  stroke="var(--accent-yellow)"
+                  strokeWidth="2.5"
+                  className={styles.centroid}
+                />
+              </g>
+
+              {/* Gradient arrow: FROM actual TO predicted centroid (uphill) */}
+              <line
+                x1={toSvgX(actualEmb[0])}
+                y1={toSvgY(actualEmb[1])}
+                x2={toSvgX(predictedCentroid[0])}
+                y2={toSvgY(predictedCentroid[1])}
+                stroke="var(--accent-yellow)"
+                strokeWidth="2"
+                markerEnd="url(#gradArrow)"
+                className={styles.gradArrow}
+              />
+
+              {/* Update arrow: FROM context TO next context (downhill) */}
+              <line
+                x1={toSvgX(contextEmb[0])}
+                y1={toSvgY(contextEmb[1])}
+                x2={toSvgX(previewContextNext[0])}
+                y2={toSvgY(previewContextNext[1])}
+                stroke="var(--accent-magenta)"
+                strokeWidth="2.5"
+                strokeDasharray="6,4"
+                markerEnd="url(#updateArrow)"
+                className={styles.updateArrow}
+              />
+
+              {/* Ghost of next context position */}
               <circle
-                cx={toSvgX(predictedCentroid[0])}
-                cy={toSvgY(predictedCentroid[1])}
+                cx={toSvgX(previewContextNext[0])}
+                cy={toSvgY(previewContextNext[1])}
                 r="7"
                 fill="none"
-                stroke="var(--accent-yellow)"
-                strokeWidth="2.5"
-                className={styles.centroid}
+                stroke="rgba(255, 0, 110, 0.65)"
+                strokeWidth="2"
+                strokeDasharray="3,3"
+                className={styles.previewDot}
               />
-              <text
-                x={toSvgX(predictedCentroid[0]) + 12}
-                y={toSvgY(predictedCentroid[1]) + 16}
-                className={styles.label}
-                fill="var(--accent-yellow)"
-              >
-                predicted centroid
-              </text>
-            </g>
-
-            {/* Gradient arrow: FROM actual TO predicted (uphill direction) */}
-            <line
-              x1={toSvgX(actualEmb[0])}
-              y1={toSvgY(actualEmb[1])}
-              x2={toSvgX(predictedCentroid[0])}
-              y2={toSvgY(predictedCentroid[1])}
-              stroke="var(--accent-yellow)"
-              strokeWidth="2"
-              markerEnd="url(#gradArrow)"
-              className={styles.gradArrow}
-              opacity="0.7"
-            />
-
-            {/* Update direction arrow: FROM predicted TO actual (downhill, where we move) */}
-            {(() => {
-              // Calculate gradient direction in SVG pixel space for consistent visual offset
-              const actualSvgX = toSvgX(actualEmb[0])
-              const actualSvgY = toSvgY(actualEmb[1])
-              const predictedSvgX = toSvgX(predictedCentroid[0])
-              const predictedSvgY = toSvgY(predictedCentroid[1])
-
-              // Vector from actual to predicted in SVG space
-              const svgDx = predictedSvgX - actualSvgX
-              const svgDy = predictedSvgY - actualSvgY
-              const svgLength = Math.sqrt(svgDx ** 2 + svgDy ** 2)
-
-              let offsetX = 0
-              let offsetY = 0
-
-              // Only apply offset if gradient is non-negligible in SVG space
-              if (svgLength > 1) {
-                const OFFSET_PIXELS = 4 // Fixed pixel offset for visual separation
-                // Perpendicular vector: rotate 90 degrees in SVG space
-                const perpX = -svgDy / svgLength * OFFSET_PIXELS
-                const perpY = svgDx / svgLength * OFFSET_PIXELS
-                offsetX = perpX
-                offsetY = perpY
-              }
-
-              return (
-                <line
-                  x1={predictedSvgX + offsetX}
-                  y1={predictedSvgY + offsetY}
-                  x2={actualSvgX + offsetX}
-                  y2={actualSvgY + offsetY}
-                  stroke="var(--accent-magenta)"
-                  strokeWidth="2.5"
-                  strokeDasharray="5,3"
-                  markerEnd="url(#updateArrow)"
-                  className={styles.updateArrow}
-                />
-              )
-            })()}
-          </svg>
-        </div>
-
-        <div className={styles.legend} aria-label="Legend">
-          <div className={styles.legendRow}>
-            <span className={`${styles.legendLine} ${styles.legendGradient}`} aria-hidden="true" />
-            <span>gradient (uphill)</span>
-          </div>
-          <div className={styles.legendRow}>
-            <span className={`${styles.legendLine} ${styles.legendUpdate}`} aria-hidden="true" />
-            <span>update direction (downhill)</span>
-          </div>
-        </div>
-
-        <div className={styles.metrics} aria-label="Current state">
-          <div className={styles.metric}>
-            <div className={styles.metricLabel}>loss</div>
-            <div className={styles.metricValue}>{currentLoss.toFixed(3)}</div>
-          </div>
-          <div className={styles.metric}>
-            <div className={styles.metricLabel}>p(actual)</div>
-            <div className={styles.metricValue}>{(currentProbActual * 100).toFixed(1)}%</div>
-          </div>
-          <div className={styles.metric}>
-            <div className={styles.metricLabel}>step</div>
-            <div className={styles.metricValue}>{stepCount}</div>
-          </div>
-          <div className={styles.metric}>
-            <div className={styles.metricLabel}>context</div>
-            <div className={styles.metricValue}>'{contextChar}'</div>
-          </div>
-        </div>
-
-        <div className={styles.controls}>
-          <button className={styles.btn} type="button" onClick={reset} disabled={isAutoTraining}>
-            Reset
-          </button>
-
-          <div className={styles.contextControl}>
-            <label className={styles.contextLabel} htmlFor="context">
-              Context:
-            </label>
-            <select
-              id="context"
-              value={contextChar}
-              onChange={(e) => setContextChar(e.target.value)}
-              className={styles.contextSelect}
-              disabled={isAutoTraining}
-            >
-              {CHARS.map((c) => (
-                <option key={c} value={c}>
-                  '{c}'
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <button className={styles.btn} type="button" onClick={sampleNext} disabled={isAutoTraining}>
-            Sample next
-          </button>
-
-          <div className={styles.etaControl}>
-            <label className={styles.etaLabel} htmlFor="eta">
-              η
-            </label>
-            <Slider
-              id="eta"
-              wrap={false}
-              min={0.1}
-              max={1.0}
-              step={0.1}
-              value={eta}
-              onValueChange={setEta}
-              disabled={isAutoTraining}
-              ariaLabel="Step size eta"
-            />
-            <span className={styles.etaValue}>{eta.toFixed(1)}</span>
-          </div>
-
-          <button className={`${styles.btn} ${styles.primaryBtn}`} type="button" onClick={takeStep} disabled={isAutoTraining}>
-            Take step
-          </button>
-        </div>
-
-        <div className={styles.panelRow} role="tablist" aria-label="Controls">
-          <button
-            type="button"
-            className={`${styles.panelBtn} ${panel === 'explain' ? styles.panelBtnActive : ''}`}
-            onClick={() => togglePanel('explain')}
-            aria-selected={panel === 'explain'}
-          >
-            Explain
-          </button>
-          <button
-            type="button"
-            className={`${styles.panelBtn} ${panel === 'trails' ? styles.panelBtnActive : ''}`}
-            onClick={() => togglePanel('trails')}
-            aria-selected={panel === 'trails'}
-          >
-            Trails
-          </button>
-          <button
-            type="button"
-            className={`${styles.panelBtn} ${panel === 'auto' ? styles.panelBtnActive : ''}`}
-            onClick={() => togglePanel('auto')}
-            aria-selected={panel === 'auto'}
-          >
-            Auto
-          </button>
-          <div className={styles.panelHint}>
-            {panel ? 'Tap again to close.' : 'Open a panel if you want the math or knobs.'}
-          </div>
-        </div>
-
-        {panel === 'explain' && (
-          <div className={styles.panel} role="tabpanel" aria-label="Explanation">
-            {showCompletionMessage ? (
-              <div className={styles.panelNote}>
-                Training complete. Characters that predict similar next characters tend to drift toward similar places.
-              </div>
-            ) : (
-              <div className={styles.panelNote}>
-                Yellow lines are probabilities. Their weighted average is the predicted centroid. Yellow arrow points uphill (gradient). Magenta dashed arrow points downhill (the update direction).
-              </div>
-            )}
-
-            <div className={styles.eqStack} aria-label="Equations">
-              {explainEqHtml.map((html, idx) => (
-                <div
-                  key={idx}
-                  className={styles.eq}
-                  dangerouslySetInnerHTML={{ __html: html }}
-                />
-              ))}
+              </svg>
             </div>
-
-            <div className={styles.panelFine}>
-              We subtract the gradient because we’re minimizing loss: the gradient points in the direction loss increases fastest.
+            <div className={styles.plotHint}>
+              Drag the <span className={styles.hintContext}>magenta ring</span> (context). Click a point to set the{' '}
+              <span className={styles.hintActual}>actual</span>.
             </div>
           </div>
-        )}
+        </div>
 
-        {panel === 'trails' && (
-          <div className={styles.panel} role="tabpanel" aria-label="Trail controls">
-            <div className={styles.panelControls}>
-              <label className={styles.trailCheckbox}>
-                <input
-                  type="checkbox"
-                  checked={showTrails}
-                  onChange={(e) => setShowTrails(e.target.checked)}
-                  disabled={isAutoTraining}
-                />
-                <span className={styles.trailCheckboxLabel}>Show trails</span>
-              </label>
-              {showTrails && (
-                <div className={styles.trailLengthControl}>
-                  <label className={styles.trailLengthLabel} htmlFor="trailLength">
-                    Trail length
-                  </label>
-                  <Slider
-                    id="trailLength"
-                    wrap={false}
-                    min={5}
-                    max={50}
-                    step={5}
-                    value={trailLength}
-                    onValueChange={(v) => setTrailLength(Math.round(v))}
-                    disabled={isAutoTraining}
-                    ariaLabel="Trail length"
-                  />
-                  <span className={styles.trailLengthValue}>{trailLength}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {panel === 'auto' && (
-          <div className={styles.panel} role="tabpanel" aria-label="Auto training controls">
-            <div className={styles.autoTrainControls}>
-              <label className={styles.autoStepsLabel} htmlFor="autoSteps">
-                Steps
-              </label>
+        <div className={`${styles.right} panel-dark`} aria-label="Controls">
+          <div className={styles.pickers}>
+            <div className={styles.pickerRow}>
+              <span className={styles.pickerLabel}>Context</span>
               <select
-                id="autoSteps"
-                value={autoSteps}
-                onChange={(e) => setAutoSteps(parseInt(e.target.value))}
-                className={styles.autoStepsSelect}
-                disabled={isAutoTraining}
+                value={contextChar}
+                onChange={(e) => setContextChar(e.target.value)}
+                className={styles.pickerSelect}
               >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
+                {CHARS.map((c) => (
+                  <option key={`ctx-${c}`} value={c}>
+                    '{c}'
+                  </option>
+                ))}
               </select>
-              <div className={styles.speedControl}>
-                <label className={styles.speedLabel} htmlFor="trainSpeed">
-                  Speed
-                </label>
-                <span className={styles.speedLabelText}>Slow</span>
-                {/* Invert slider: right=fast (low delay), left=slow (high delay) */}
-                {(() => {
-                  const MIN_DELAY = 10
-                  const MAX_DELAY = 200
-                  const invert = (v: number) => MIN_DELAY + MAX_DELAY - v
-                  return (
-                    <Slider
-                      id="trainSpeed"
-                      wrap={false}
-                      min={MIN_DELAY}
-                      max={MAX_DELAY}
-                      step={10}
-                      value={invert(trainSpeed)}
-                      onValueChange={(v) => setTrainSpeed(invert(v))}
-                      disabled={isAutoTraining}
-                      ariaLabel="Auto-train speed"
-                    />
-                  )
-                })()}
-                <span className={styles.speedLabelText}>Fast</span>
-              </div>
-              <button
-                className={`${styles.btn} ${styles.autoTrainBtn}`}
-                type="button"
-                onClick={autoTrain}
-                disabled={isAutoTraining}
+            </div>
+
+            <div className={styles.pickerRow}>
+              <span className={styles.pickerLabel}>Actual</span>
+              <select
+                value={actualChar}
+                onChange={(e) => setActualChar(e.target.value)}
+                className={styles.pickerSelect}
               >
-                {isAutoTraining ? 'Training...' : 'Auto-train'}
+                {CHARS.map((c) => (
+                  <option key={`actual-${c}`} value={c}>
+                    '{c}'
+                  </option>
+                ))}
+              </select>
+              <button className={styles.smallBtn} type="button" onClick={sampleNext}>
+                Sample
               </button>
             </div>
-            <div className={styles.panelFine}>
-              Runs many small steps so you can watch points drift.
+          </div>
+
+          <div className={styles.stats}>
+            <div className={styles.stat}>
+              <div className={styles.statLabel}>loss</div>
+              <div className={styles.statValue}>{currentLoss.toFixed(3)}</div>
+            </div>
+            <div className={styles.stat}>
+              <div className={styles.statLabel}>p(actual)</div>
+              <div className={styles.statValue}>{(currentProbActual * 100).toFixed(1)}%</div>
+            </div>
+            <div className={styles.stat}>
+              <div className={styles.statLabel}>step</div>
+              <div className={styles.statValue}>{stepCount}</div>
             </div>
           </div>
-        )}
+
+          <div className={styles.etaControl}>
+            <span className={styles.etaLabel}>η</span>
+            <Slider
+              wrap={false}
+              min={0.05}
+              max={1.0}
+              step={0.05}
+              value={eta}
+              onValueChange={setEta}
+              ariaLabel="Step size eta"
+            />
+            <span className={styles.etaValue}>{eta.toFixed(2)}</span>
+          </div>
+
+          <div className={styles.actions}>
+            <button className={`${styles.btn} ${styles.primaryBtn}`} type="button" onClick={takeStep}>
+              Take step
+            </button>
+            <button className={styles.btn} type="button" onClick={reset}>
+              Reset
+            </button>
+          </div>
+
+          <div className={styles.probs} aria-label="Predicted probabilities">
+            <div className={styles.probHeader}>p(next | context)</div>
+            <div className={styles.probList}>
+              {probRows.map((row) => {
+                const isActual = row.char === actualChar
+                return (
+                  <div key={`p-${row.char}`} className={styles.probRow}>
+                    <span className={styles.probChar}>{row.char}</span>
+                    <div className={styles.probBarTrack} aria-hidden="true">
+                      <div
+                        className={`${styles.probBar} ${isActual ? styles.probBarActual : ''}`}
+                        style={{ width: `${row.prob * 100}%` }}
+                      />
+                    </div>
+                    <span className={styles.probValue}>{row.prob.toFixed(2)}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
     </VizCard>
   )
 }

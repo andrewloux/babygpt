@@ -185,24 +185,31 @@ export function Chapter2() {
             The coefficients come from a matching experiment. Put a target color patch on one side, give yourself a few "primaries" on the other, and turn the knobs until both patches look the same.
           </Paragraph>
           <Paragraph>
-            Those knob settings are the coordinates: how much "redness", "greenness", "blueness" you needed to match the experience.
+            Those knob settings are the coordinates. You aren't discovering what color "is" inside the patch — you're building a repeatable measurement: <em>how much of each basis light reproduces this experience?</em>
           </Paragraph>
           <Paragraph>
-            Then you can compare, interpolate, and do geometry on colors — because you built the coordinates out of something measurable.
+            Once you have that, you can compare, interpolate, and do geometry on colors — because you've turned a sensation into a stable vector of numbers.
           </Paragraph>
         </Callout>
         <Paragraph>
-          He called it the <em>Ausdehnungslehre</em> — literally "theory of extension." Looks scary, says the same thing: once something has coordinates, you can do coordinate math on it. Coordinates are just numbers you can scale, add, and mix.
+          He called it the <em>Ausdehnungslehre</em> — literally "theory of extension." The name looks scary. The move is simple: once something has coordinates, you can do coordinate math on it.
         </Paragraph>
         <Paragraph>
-          Grassmann got his numbers from a matching experiment — adjust knobs until patches look the same, read the settings. We get ours from counting — what follows each character, how often.
+          Grassmann got his numbers from matching — adjust knobs until patches look the same, read the settings. We get ours from counting: for each character, measure what tends to come next, and how often.
         </Paragraph>
         <Paragraph>
-          That gives you a new move: take a weighted average. Slide <Term>t</Term> below and watch the blend. In "Colors" mode it's just purple showing up. In "Characters" mode, you're blending two next‑character distributions from Chapter 1 and watching the model's bets morph smoothly.
+          That gives you a new move: take a weighted average. Slide <Term>t</Term> below and watch the blend. In "Colors" mode it’s purple showing up. In "Characters" mode you're blending two next‑character distributions from Chapter 1 and watching the model's bets morph smoothly.
         </Paragraph>
         <GrassmannViz />
         <Paragraph>
-          Colors aren't numbers. They're sensory experiences. Characters aren't numbers either — they're symbols. But both can be treated as coordinates in a space where <em>blending makes sense</em>. Purple is "half red, half blue." And a blend of <Term>'q'</Term> and <Term>'u'</Term> predicts a mix of what tends to follow each.
+          Colors aren't numbers. They're sensory experiences. Characters aren't numbers either — they're symbols. But both can be treated as coordinates in a space where <em>blending makes sense</em>. Purple is "half red, half blue."
+        </Paragraph>
+        <Paragraph>
+          Here’s the part that matters for language: if you blend <Term>'q'</Term> and <Term>'u'</Term>, you're really saying “take a mixture of their predictive habits.” For each candidate next character <Term>x</Term>, the blended predictor assigns:
+        </Paragraph>
+        <MathBlock equation={String.raw`P(x \mid \text{mix}) = (1-t)\,P(x\mid q) + t\,P(x\mid u)`} />
+        <Paragraph>
+          That’s why the bars in the demo slide smoothly instead of snapping.
         </Paragraph>
 
         <Paragraph>
@@ -210,8 +217,8 @@ export function Chapter2() {
         </Paragraph>
         <AxiomViz />
         <Paragraph>
-          If your objects satisfy these rules — linearity and commutativity — you get a <em>vector space</em>. In plain English:
-          you can treat things as <em>attributes</em>, mix them, scale them, and the math doesn't start keeping grudges about the order.
+          If the operations you care about obey these rules, you’re allowed to model your “attribute bundles” as a <em>vector space</em>.
+          The objects themselves aren’t secretly vectors — we’re choosing a coordinate system that makes mixing and scaling behave predictably.
         </Paragraph>
         <Paragraph>
           The missing piece is always: <em>what are the attributes?</em> For colors, they were literally knob settings from a matching
@@ -1059,22 +1066,9 @@ score = float(np.dot(a, b))`}</CodeBlock>
         </Paragraph>
         <SoftmaxLandscapeViz />
 
-        <Callout variant="info" title="Why the math plays nicely with training (softmax + cross-entropy)">
-          <Paragraph>
-            We’re going to train by minimizing a loss. That means we’ll need a direction to nudge parameters so the loss goes down.
-          </Paragraph>
-          <Paragraph>
-            When you pair softmax with cross-entropy loss, that nudge direction turns out to be unusually simple: for each output,
-            it’s basically <Term>what you predicted − what was correct</Term>.
-          </Paragraph>
-          <Paragraph>
-            If you predicted 80% on <Term>'e'</Term> but the truth was <Term>'a'</Term>, the signal says: “push probability away from <Term>'e'</Term> and toward <Term>'a'</Term>.”
-            It’s redistribution, not black magic.
-          </Paragraph>
-          <Paragraph>
-            This is why we cared about “smoothness” earlier: a differentiable probability map gives you a stable learning signal to follow.
-          </Paragraph>
-        </Callout>
+        <Paragraph>
+          There’s a reason we care about “smoothness” and not just “a way to normalize.” Later, we’re going to train by nudging numbers so a score goes down. A smooth probability map is something you can differentiate — which means it can tell you which way is uphill.
+        </Paragraph>
 
         <Paragraph>
           One more useful intuition for temperature:
