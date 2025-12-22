@@ -893,76 +893,63 @@ score = float(np.dot(a, b))`}</CodeBlock>
           But Chapter 1 established a hard rule: the model must output a <strong>probability distribution</strong>. The numbers must be between 0 and 1, and they must sum to exactly 1.
         </Paragraph>
         <Paragraph>
-          Why do we use <strong>Softmax</strong>? Why not something simpler? Let's build it from first principles.
+          Why do we use <strong>softmax</strong>? Why not something simpler? Let's build it from first principles.
         </Paragraph>
         <Paragraph>
-          Your brain does this every time you hear hoofbeats and think "probably horse, maybe zebra, definitely not unicorn" — you're running softmax over hypotheses, turning vague confidence levels into something that sums to certainty.
+          We want to take “scores” and turn them into “bets” — a set of numbers that add up to 1, so we can say what the model thinks is likely next.
         </Paragraph>
 
-        <Callout variant="insight" title="Deriving Softmax">
-          <Paragraph><strong>Attempt 1: Linear Normalization (The Fail)</strong></Paragraph>
-          <Paragraph>
-            Why not just divide each score by the sum?
-            <br />
-            Scores: <Term>[2, -3, 4]</Term>. Sum: <Term>3</Term>.
-            <br />
-            Probs: <Term>[0.66, -1.0, 1.33]</Term>.
-            <br />
-            <strong>Fail:</strong> Probabilities cannot be negative.
-          </Paragraph>
-
-          <Paragraph><strong>Attempt 2: Make it Positive (Exponentiation)</strong></Paragraph>
-          <Paragraph>
-            We need a function that turns <em>any</em> number (even negative infinity) into a positive number.
-            <br />
-            We use <Term>e<sup>x</sup></Term>.
-            <br />
-            <Term>e<sup>-5</sup> ≈ 0.006</Term> (Tiny, but positive).
-            <br />
-            <Term>e<sup>0</sup> = 1</Term>.
-            <br />
-            <Term>e<sup>5</sup> ≈ 148</Term> (Huge).
-          </Paragraph>
-          <Paragraph>
-            This doesn't just make things positive. It <strong>amplifies differences</strong>. Scores <Term>[2.0, 1.5]</Term> become <Term>[e<sup>2.0</sup>, e<sup>1.5</sup>] ≈ [7.4, 4.5]</Term>. A gap of 0.5 became a gap of 2.9. After normalizing: <Term>[0.62, 0.38]</Term>. The slightly-higher score gets most of the probability.
-          </Paragraph>
-          <Paragraph>
-            Why do we want this? Think of it as a betting game. You have $1 to spread across 27 characters. After you place your bets, we reveal the answer. Your score is how much you put on the correct character. Everything else is lost.
-          </Paragraph>
-          <Paragraph>
-            If you know 'e' is likely correct, every cent on 'a' is a cent not on 'e'. It's not just wasted — it actively hurts you, because the total is fixed at $1. The optimal strategy when you're confident: go all in.
-          </Paragraph>
-          <Paragraph>
-            Linear normalization doesn't do this. Scores <Term>[2.0, 1.5]</Term> become <Term>[0.57, 0.43]</Term> — almost a coin flip. You're betting 43 cents on something you think is less likely. Exponentiation fixes this: same scores become <Term>[0.62, 0.38]</Term>. Still not all-in, but the gap between "I think this" and "I think that" is now reflected in the bet sizes.
-          </Paragraph>
-
-          <Paragraph><strong>Attempt 3: Normalize</strong></Paragraph>
-          <Paragraph>
-            Now that everything is positive, we just divide by the total to make them sum to 1.
-          </Paragraph>
-        </Callout>
+        <Paragraph>
+          The annoying part is that logits don’t behave like probabilities:
+        </Paragraph>
+        <ul>
+          <li><strong>They can be negative.</strong> A logit of <Term>-5</Term> is allowed. A probability of <Term>-5</Term> is not.</li>
+          <li><strong>They don’t sum to anything.</strong> A valid distribution has a hard “budget” of 1.</li>
+          <li>
+            <strong>We want smoothness.</strong> If you nudge a logit by a tiny amount, the probability should change by a tiny amount. (Hard rules like “take the max” are brittle.)
+          </li>
+        </ul>
+        <Paragraph>
+          So let’s try a few naive ideas and watch them break.
+        </Paragraph>
+        <Paragraph>
+          <strong>Naive idea #1: divide by the sum.</strong> Suppose the scores are <Term>[2, -3, 4]</Term>. The sum is <Term>3</Term>, so you get <Term>[0.66, -1.0, 1.33]</Term>. Negative “probabilities” and values above 1. Not allowed.
+        </Paragraph>
+        <Paragraph>
+          <strong>Naive idea #2: clamp negatives to 0, then normalize.</strong> This avoids negative outputs, but it introduces a weird bias: once something hits 0, it can get “stuck” there (and ties become common). It also makes the mapping very sensitive to arbitrary thresholds.
+        </Paragraph>
+        <Paragraph>
+          <strong>Naive idea #3: shift everything up, then normalize.</strong> You can add a constant until all scores are positive, then divide by the sum. The problem is: <em>which constant?</em> Different shifts produce different probability ratios, so we’ve smuggled in a free parameter that changes the answer.
+        </Paragraph>
+        <Paragraph>
+          What we want is a way to (1) make everything positive, without arbitrary clipping, and (2) make gaps in score show up as gaps in “bet size”.
+        </Paragraph>
+        <Paragraph>
+          The exponential does exactly that. It turns any real number into a positive number, and it turns score differences into odds:
+          <Term>{' '}exp(a) / exp(b) = exp(a − b)</Term>. A small gap becomes a multiplicative ratio.
+        </Paragraph>
 
         <MathBlock
           equation={String.raw`\text{Softmax}(x_i) = \frac{e^{x_i}}{\sum_{j} e^{x_j}}`}
           explanation="Step 1: Exponentiate to ensure positivity and amplify the winner. Step 2: Divide by sum to normalize."
         />
 
-            <Callout variant="info" title="Softmax only cares about differences (and that's a lifesaver)">
-              <Paragraph>
-                Softmax has a quiet superpower: if you add the same constant to every logit, the probabilities don't change. It's blind to absolute level — it only sees gaps.
-              </Paragraph>
-              <MathBlock
-                equation={String.raw`\text{Softmax}(x_i + c) = \frac{e^{x_i + c}}{\sum_j e^{x_j + c}} = \frac{e^c e^{x_i}}{e^c \sum_j e^{x_j}} = \text{Softmax}(x_i)`}
-                explanation="The same exp(c) factor appears in every term, so it cancels."
-              />
-              <Paragraph>
-                That means we can choose <Term>c</Term> for convenience. The most useful choice is <Term>c = -m</Term>, where <Term>m</Term> is the largest logit.
-              </Paragraph>
-              <MathBlock
-                equation={String.raw`\text{Softmax}(x_i) = \frac{e^{x_i - m}}{\sum_{j} e^{x_j - m}} \quad \text{where } m = \max_j x_j`}
-                explanation="Same probabilities, but now the largest exponent is e⁰ = 1, and everything else is ≤ 1."
-              />
-            </Callout>
+        <Callout variant="info" title="Softmax only cares about differences (and that's a lifesaver)">
+          <Paragraph>
+            Softmax has a quiet superpower: if you add the same constant to every logit, the probabilities don't change. It's blind to absolute level — it only sees gaps.
+          </Paragraph>
+          <MathBlock
+            equation={String.raw`\text{Softmax}(x_i + c) = \frac{e^{x_i + c}}{\sum_j e^{x_j + c}} = \frac{e^c e^{x_i}}{e^c \sum_j e^{x_j}} = \text{Softmax}(x_i)`}
+            explanation="The same exp(c) factor appears in every term, so it cancels."
+          />
+          <Paragraph>
+            That means we can pick a convenient constant. In code, we almost always subtract the max logit so the largest exponent is <Term>e^0 = 1</Term> and nothing overflows.
+          </Paragraph>
+          <MathBlock
+            equation={String.raw`\text{Softmax}(x_i) = \frac{e^{x_i - m}}{\sum_{j} e^{x_j - m}} \quad \text{where } m = \max_j x_j`}
+            explanation="Same probabilities, but now every exponent is ≤ 1."
+          />
+        </Callout>
 
         <Paragraph>
           Drag the sliders below. Two things happen:
@@ -983,21 +970,6 @@ score = float(np.dot(a, b))`}</CodeBlock>
           In the widget, try sliding <Term>T</Term> down toward <Term>0.1</Term> and up toward <Term>5</Term>. You're not changing which logit is biggest — you're changing how aggressively softmax concentrates probability mass on the winner.
         </Paragraph>
 
-        <Callout variant="insight" title="Why exp? (The surprising answer)">
-          <Paragraph>
-            Here's something wild: softmax isn't just <em>a</em> way to turn scores into probabilities. It's the <strong>only</strong> way that makes mathematical sense.
-          </Paragraph>
-          <Paragraph>
-            Imagine you're betting on characters, but you want to be <em>as unbiased as possible</em> given what you know. You don't want to accidentally favor one character over another unless your scores tell you to.
-          </Paragraph>
-          <Paragraph>
-            There's a theorem (maximum entropy principle) that says: if you want the <strong>least-biased probability distribution</strong> that respects your score constraints, you must use <Term>exp(score)</Term>. Not <Term>score²</Term>. Not <Term>abs(score)</Term>. Only <Term>exp</Term>.
-          </Paragraph>
-          <Paragraph>
-            This explains why softmax appears <em>everywhere</em>: language model outputs, attention mechanisms, reinforcement learning, statistical physics. It's not a design choice — it's mathematical inevitability.
-          </Paragraph>
-        </Callout>
-
         <SoftmaxSimplexViz />
 
         <Paragraph>
@@ -1007,97 +979,85 @@ score = float(np.dot(a, b))`}</CodeBlock>
           Watch how temperature pulls the point around: low temperature drives toward corners, high temperature drifts toward center. Same logits, different confidence levels.
         </Paragraph>
 
-        <Callout variant="info" title="Why the gradient is so clean">
+        <Callout variant="info" title="Why the math plays nicely with training (softmax + cross-entropy)">
           <Paragraph>
-            Here's a gift from mathematics: when you pair softmax with cross-entropy loss, the gradient becomes beautifully simple.
+            We’re going to train by minimizing a loss. That means we’ll need a direction to nudge parameters so the loss goes down.
           </Paragraph>
           <Paragraph>
-            The gradient for each output is just: <Term>what you predicted - what was correct</Term>.
+            When you pair softmax with cross-entropy loss, that nudge direction turns out to be unusually simple: for each output,
+            it’s basically <Term>what you predicted − what was correct</Term>.
           </Paragraph>
           <Paragraph>
-            If you predicted 80% for 'e' but the answer was 'a', the gradient says: "push probability <em>away</em> from 'e' and <em>toward</em> 'a'." No complicated derivatives — just redistribution.
-          </Paragraph>
-          <Paragraph>
-            This isn't luck. Softmax and cross-entropy are <em>designed partners</em>. They both emerge from information theory, and their pairing cancels out ugly math, leaving just the intuitive "move probability toward truth."
+            If you predicted 80% on <Term>'e'</Term> but the truth was <Term>'a'</Term>, the signal says: “push probability away from <Term>'e'</Term> and toward <Term>'a'</Term>.”
+            It’s redistribution, not black magic.
           </Paragraph>
         </Callout>
 
         <Paragraph>
-          Picture a marble rolling around in a bumpy bowl. Leave it alone, and it settles at the bottom — the lowest-energy spot. Heat the bowl, and the marble starts bouncing. The hotter you make it, the more the marble explores high-energy ridges it would never visit otherwise.
+          One more useful intuition for temperature:
+        </Paragraph>
+        <ul>
+          <li><strong>T → 0:</strong> The model becomes a greedy argmax. Only the highest-logit token has any probability mass. Deterministic, repetitive, but "confident."</li>
+          <li><strong>T = 1:</strong> The model samples according to its raw logit scores. This is what the model "actually believes."</li>
+          <li><strong>T → ∞:</strong> All tokens become equally likely. The model forgets what it learned. Pure noise.</li>
+        </ul>
+        <details className="collapsible">
+          <summary>Optional: softmax has a physics cousin (Boltzmann)</summary>
+          <Paragraph>
+            If you like the “temperature” metaphor: it’s not just a metaphor. The softmax-with-temperature form and the Boltzmann distribution share the same shape.
           </Paragraph>
           <Paragraph>
-            Now imagine a trillion marbles in a trillion-dimensional bowl. Some configurations of the gas are low-energy (stable). Some are high-energy (chaotic). How do the marbles distribute themselves across all possible configurations?
+            Picture a marble rolling around in a bumpy bowl. Leave it alone, and it settles at the bottom — the low-energy spot. Heat the bowl, and the marble starts bouncing. The hotter you make it, the more it visits places it would never reach when cold.
           </Paragraph>
           <Paragraph>
-            In 1877, Ludwig Boltzmann wrote down an answer. He was trying to explain something simple: why does gas pressure exist? His answer required inventing a new mathematics — counting the number of ways atoms could arrange themselves — and the equation he derived looked like this:
+            In 1877, Ludwig Boltzmann wrote down a rule for how “probability mass” should spread across energy levels in a gas.
+            (He was trying to explain pressure without being able to watch atoms directly.)
           </Paragraph>
           <MathBlock
             equation={String.raw`P(\text{state}) = \frac{1}{Z} e^{-E/kT}`}
-            explanation="P(state) = probability of finding the system in that state. E = energy of the state. T = temperature. Z = normalization constant (the 'partition function'). k = Boltzmann's constant (just unit conversion)."
+            explanation="Boltzmann distribution from statistical physics."
           />
           <Paragraph>
-            The Austrian physics establishment was skeptical. Ernst Mach, the most influential physicist of the era, was a positivist who didn't believe atoms existed — you couldn't see them, so why assume they're real? Boltzmann spent decades defending his work. He died in 1906, still uncertain whether his ideas would survive him.
+            The story has some drama: Ernst Mach — an influential physicist at the time — didn’t believe atoms were real, and Boltzmann spent decades arguing for the framework. A few years after Boltzmann’s death, Einstein’s work on Brownian motion helped settle the “atoms are real” question, and the distribution became standard physics.
           </Paragraph>
-          <Paragraph>
-            Within five years, Einstein proved atoms were real (Brownian motion). Within twenty, Boltzmann's equation was carved into his tombstone. Today it's considered one of the most fundamental equations in physics.
-          </Paragraph>
-
           <WorkedExample title="Reading the isomorphism">
             <WorkedStep n="1">
               <Paragraph>
-                <strong>Energy ↔ Negative logit.</strong> In physics, low-energy states are "preferred" — particles naturally settle into them. In softmax, high-logit states are preferred — they get more probability. The sign flip: <Term>E</Term> in physics corresponds to <Term>-score</Term> in ML. Both measure "how much does nature (or the model) want to be here?"
+                <strong>Energy ↔ negative score.</strong> Physics prefers low energy. Softmax prefers high score. That’s a sign convention: <Term>E</Term> corresponds to <Term>-score</Term>.
               </Paragraph>
             </WorkedStep>
             <WorkedStep n="2">
               <Paragraph>
-                <strong>Temperature ↔ Temperature.</strong> Not a metaphor. The <Term>T</Term> in the API slider is mathematically identical to Kelvin. Divide all logits by <Term>T</Term>, then exponentiate. Higher T spreads probability mass across states. Lower T concentrates it on the winner.
+                <strong>Temperature ↔ temperature.</strong> Divide by <Term>T</Term>, exponentiate, normalize. Higher <Term>T</Term> spreads probability mass. Lower <Term>T</Term> concentrates it.
               </Paragraph>
             </WorkedStep>
             <WorkedStep n="3">
               <Paragraph>
-                <strong>Partition function ↔ Softmax denominator.</strong> <Term>Z</Term> in physics normalizes over all microstates. <Term>Σ exp(score_j / T)</Term> in softmax normalizes over all tokens. Same job: ensure probabilities sum to 1.
+                <strong>Partition function ↔ denominator.</strong> <Term>Z</Term> is “the thing you divide by so it sums to 1.”
               </Paragraph>
             </WorkedStep>
             <WorkedStep n="4" final>
               <Paragraph>
-                <strong>The equation is the same.</strong> Write them side by side:
+                <strong>The equations line up.</strong>
               </Paragraph>
               <MathBlock
                 equation={String.raw`P_{\text{physics}}(\text{state}) = \frac{e^{-E/kT}}{Z} \qquad P_{\text{softmax}}(\text{token}) = \frac{e^{s/T}}{\sum_j e^{s_j/T}}`}
-                explanation="Set s = -E (flip the sign convention), drop k (units), and they're identical."
+                explanation="Set s = -E (flip the sign), and they match."
               />
             </WorkedStep>
           </WorkedExample>
-
-          <Callout variant="insight" title="Why the same equation? (Maximum entropy)">
+          <Callout variant="insight" title="Optional: why exp shows up so often (maximum entropy)">
             <Paragraph>
-              Here's where it gets strange. The Boltzmann distribution isn't just <em>one</em> way to distribute particles. It's the <strong>only</strong> distribution that makes no assumptions beyond what you're forced to assume.
+              There’s also a deeper “least extra assumptions” argument (maximum entropy).
             </Paragraph>
             <Paragraph>
-              Imagine you know the average energy of a gas, but nothing else. You want to assign probabilities to each microstate. What's the most honest thing you can do? You want the distribution that's maximally uncertain — that makes as few additional claims as possible.
+              Imagine you only know one constraint — like an average energy — and you want a distribution that doesn’t sneak in extra structure. Jaynes showed that the “most noncommittal” distribution consistent with the constraint has an exponential form.
             </Paragraph>
             <Paragraph>
-              E.T. Jaynes proved in 1957 that the answer is unique: <Term>P(state) ∝ exp(-E/T)</Term>. Any other functional form smuggles in hidden assumptions. The exponential is the <em>neutral</em> choice.
-            </Paragraph>
-            <Paragraph>
-              Softmax inherits this property. When you convert logits to probabilities, you're not choosing exp because it's convenient. You're choosing it because any other function would secretly favor some tokens in ways your scores don't justify.
+              In our setting, softmax is doing the same kind of thing: it respects score gaps and stays smooth, while not hard-coding a cutoff or a hand-tuned threshold.
             </Paragraph>
           </Callout>
-
-          <Paragraph>
-            So when you slide the temperature dial in ChatGPT or Claude:
-          </Paragraph>
-          <ul>
-            <li><strong>T → 0:</strong> The model becomes a greedy argmax. Only the highest-logit token has any probability mass. Deterministic, repetitive, but "confident."</li>
-            <li><strong>T = 1:</strong> The model samples according to its raw logit scores. This is what the model "actually believes."</li>
-            <li><strong>T → ∞:</strong> All tokens become equally likely. The model forgets what it learned. Pure noise.</li>
-          </ul>
-          <Paragraph>
-            The metaphor isn't strained: you're heating up or cooling down the probability distribution. A hot model explores. A cold model exploits. The same tradeoff that governs which atoms end up where in a gas governs which words end up where in your sentence.
-          </Paragraph>
-          <Paragraph>
-            Boltzmann didn't know about language models. He was trying to explain why gases have pressure. But the equation he found — the one that describes how particles distribute across energy levels — turns out to be the <em>unique</em> solution to a deeper problem: how to assign probabilities without making hidden assumptions. That's why the same formula shows up in thermodynamics, neural networks, reinforcement learning, and Bayesian inference.
-          </Paragraph>
+        </details>
       </Section>
 
       <Section number="2.8" title="Tensors: Batching Patterns">
