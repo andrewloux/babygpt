@@ -36,48 +36,71 @@
   padding: 25px;
 }
 
-.collapsibles {
-  display: flex;
-  gap: 20px;
+.tabsWrap {
   margin-top: 20px;
 }
 
-.collapsible {
-  flex: 1;
+.tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.collapsibleHeader {
+.tab {
   font-family: var(--font-mono);
-  font-size: 13px;
-  padding: 10px 20px;
+  font-size: 12px;
+  padding: 8px 12px;
   border: 1px solid var(--border-color);
-  background: var(--bg-tertiary);
+  background: rgba(255, 255, 255, 0.04);
   color: var(--text-primary);
-  border-radius: 6px;
+  border-radius: 999px;
   cursor: pointer;
   transition: all 0.2s ease;
-  width: 100%;
-  text-align: left;
 }
 
-.collapsibleHeader:hover {
+.active {}
+.hintTab {}
+.solutionTab {}
+
+.tab:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.tab.active {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px -14px rgba(0, 0, 0, 0.7);
+}
+
+.hintTab:hover,
+.hintTab.active {
   border-color: var(--accent-yellow);
   background: rgba(255, 214, 10, 0.1);
 }
 
-.collapsibleHeader.solution:hover {
+.solutionTab:hover,
+.solutionTab.active {
   border-color: var(--accent-green);
   background: rgba(57, 255, 20, 0.1);
 }
 
-.collapsibleContent {
+.tabContent {
   margin-top: 15px;
-  padding: 20px;
-  background: var(--code-bg);
-  border-radius: 8px;
+  padding: 20px 20px 20px 17px;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(255, 255, 255, 0.03), transparent 60%),
+    var(--code-bg);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-left: 3px solid var(--accent-yellow);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
 }
 
-.collapsibleContent.solution {
+.hintContent {
+  border-left-color: var(--accent-yellow);
+  border-color: rgba(255, 214, 10, 0.18);
+}
+
+.solutionContent {
   border-left-color: var(--accent-green);
+  border-color: rgba(57, 255, 20, 0.18);
 }

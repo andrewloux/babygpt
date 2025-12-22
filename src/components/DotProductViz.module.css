@@ -90,8 +90,11 @@
 }
 
 .corpusHint code {
-  color: var(--accent-yellow);
-  background: rgba(255, 255, 255, 0.06);
+  --code-inline-bg: transparent;
+  --code-inline-border: transparent;
+  --code-inline-shadow: none;
+  --code-inline-padding: 0;
+  --code-inline-radius: 0;
 }
 
 /* Controls */
@@ -574,11 +577,6 @@
   background: rgba(255, 255, 255, 0.03);
 }
 
-.metricToyCell code {
-  color: var(--accent-cyan);
-  background: rgba(255, 255, 255, 0.06);
-}
-
 .metricToyNote {
   margin-top: 0.65rem;
   font-size: 0.85rem;
@@ -804,9 +802,9 @@
 }
 
 .contribsNote code {
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  --code-inline-bg: rgba(0, 0, 0, 0.22);
+  --code-inline-border: rgba(0, 217, 255, 0.16);
+  --code-inline-shadow: none;
 }
 
 .contribRow {

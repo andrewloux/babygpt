@@ -262,7 +262,11 @@
 }
 
 .lookupHint code {
-  color: var(--accent-yellow);
+  --code-inline-bg: transparent;
+  --code-inline-border: transparent;
+  --code-inline-shadow: none;
+  --code-inline-padding: 0;
+  --code-inline-radius: 0;
 }
 
 .lookupGrid {

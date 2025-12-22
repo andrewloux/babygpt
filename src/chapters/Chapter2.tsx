@@ -944,7 +944,7 @@ score = float(np.dot(a, b))`}</CodeBlock>
             explanation="The same exp(c) factor appears in every term, so it cancels."
           />
           <Paragraph>
-            That means we can pick a convenient constant. In code, we almost always subtract the max logit so the largest exponent is <Term>e^0 = 1</Term> and nothing overflows.
+            That means we can pick a convenient constant. In code, we almost always subtract the max logit so the largest exponent is <MathInline equation={String.raw`e^{0}=1`} /> and nothing overflows.
           </Paragraph>
           <MathBlock
             equation={String.raw`\text{Softmax}(x_i) = \frac{e^{x_i - m}}{\sum_{j} e^{x_j - m}} \quad \text{where } m = \max_j x_j`}

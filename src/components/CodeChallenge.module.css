@@ -62,15 +62,6 @@
   margin-bottom: 0;
 }
 
-.setup code {
-  background: var(--bg-code, rgba(0, 0, 0, 0.3));
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
-  font-family: var(--font-mono);
-  font-size: 0.9em;
-  color: var(--text-primary);
-}
-
 /* Prompt section */
 .promptSection {
   display: flex;
@@ -124,14 +115,6 @@
 
 .promptContent li {
   margin: 0.4rem 0;
-}
-
-.promptContent code {
-  background: var(--bg-code, rgba(0, 0, 0, 0.3));
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
-  font-family: var(--font-mono);
-  font-size: 0.9em;
 }
 
 /* Next button */
@@ -215,14 +198,6 @@
   margin: 0.4rem 0;
 }
 
-.checkpointContent code {
-  background: var(--bg-code, rgba(0, 0, 0, 0.3));
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
-  font-family: var(--font-mono);
-  font-size: 0.9em;
-}
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -277,9 +252,12 @@
 }
 
 .answerContent code {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
+  --code-inline-bg: transparent;
+  --code-inline-border: transparent;
+  --code-inline-shadow: none;
+  --code-inline-padding: 0;
+  --code-inline-radius: 0;
+  --code-inline-color: inherit;
 }
 
 /* Mobile adjustments */

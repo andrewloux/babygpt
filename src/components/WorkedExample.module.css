@@ -70,12 +70,10 @@
 }
 
 .workedExample code {
-  background: rgba(0, 0, 0, 0.18);
-  border: 1px solid rgba(0, 217, 255, 0.12);
-  box-shadow: none;
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  color: rgba(0, 217, 255, 0.92);
+  --code-inline-bg: rgba(0, 0, 0, 0.18);
+  --code-inline-border: rgba(0, 217, 255, 0.12);
+  --code-inline-shadow: none;
+  --code-inline-color: rgba(0, 217, 255, 0.92);
 }
 
 .workedExample pre code {

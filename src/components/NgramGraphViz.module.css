@@ -71,12 +71,12 @@
 }
 
 .corpusLine code {
-  background: transparent;
-  padding: 0;
-  border: 0;
-  box-shadow: none;
-  border-radius: 0;
-  color: var(--text-primary);
+  --code-inline-bg: transparent;
+  --code-inline-border: transparent;
+  --code-inline-shadow: none;
+  --code-inline-padding: 0;
+  --code-inline-radius: 0;
+  --code-inline-color: var(--text-primary);
 }
 
 .svg {

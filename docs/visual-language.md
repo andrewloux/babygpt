@@ -197,6 +197,7 @@ Rules:
 
 - Don’t introduce new brand-ish blues/greens/oranges as defaults. If you need more colors for *data* (heatmaps, gradients), derive them from these semantic anchors.
 - Avoid raw hex colors in component CSS unless it’s a deliberate data palette. Prefer `var(...)`.
+- **Callouts:** `info → cyan`, `insight → magenta`, `warning → yellow`. If the content is “core narrative”, prefer prose or a `Section` over stacking callouts.
 
 ## 2) Surface palette (only a few backgrounds)
 
@@ -236,6 +237,14 @@ Rules:
 - Prefer fewer, stronger panels over many nested boxes.
 - Use the spacing scale (`--space-*`) and keep padding consistent within a family of vizzes.
 - Visual symmetry matters: left/right padding should match, especially inside `VizCard`.
+
+## 6) Code + inline tokens (don’t drift)
+
+We want “code-looking things” to feel like one product:
+
+- **Inline code in prose:** use the global `code` styling (blue/cyan). It is controlled by `--code-inline-*` tokens in `src/styles/global.css`.
+- **Inline code inside mono UI labels/panels:** override the same tokens locally (often making the background/border transparent) so you don’t get “pill inside pill” visual noise.
+- **Code blocks:** `CodeBlock` uses `--code-bg` with a subtle highlight and a consistent filename header.
 
 ---
 

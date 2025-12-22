@@ -4,13 +4,28 @@
   padding: 25px 30px;
   margin: 25px 0;
   text-align: center;
+  max-width: 100%;
 }
 
 .equation {
   font-family: var(--font-mono);
-  font-size: 20px;
+  font-size: clamp(16px, 2.4vw, 20px);
   color: var(--accent-cyan);
   margin-bottom: 12px;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+}
+
+.equation :global(.katex-display) {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.equation :global(.katex-display > .katex) {
+  flex: 0 0 auto;
 }
 
 .explanation {

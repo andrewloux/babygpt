@@ -10,8 +10,7 @@ type ExerciseProps = {
 };
 
 export const Exercise = ({ number, title, children, hint, solution }: ExerciseProps) => {
-  const [showHint, setShowHint] = useState(false);
-  const [showSolution, setShowSolution] = useState(false);
+  const [activeTab, setActiveTab] = useState<'hint' | 'solution' | null>(null);
 
   return (
     <div className={styles.exercise}>
@@ -22,59 +21,51 @@ export const Exercise = ({ number, title, children, hint, solution }: ExercisePr
       <div className={styles.body}>
         {children}
         {(hint || solution) && (
-          <div className={styles.collapsibles}>
-            {hint && (
-              <Collapsible
-                type="hint"
-                isOpen={showHint}
-                onToggle={() => setShowHint(!showHint)}
+          <div className={styles.tabsWrap}>
+            <div className={styles.tabs}>
+              {hint && (
+                <button
+                  type="button"
+                  className={[
+                    styles.tab,
+                    styles.hintTab,
+                    activeTab === 'hint' ? styles.active : '',
+                  ].join(' ')}
+                  onClick={() => setActiveTab(activeTab === 'hint' ? null : 'hint')}
+                  aria-pressed={activeTab === 'hint'}
+                >
+                  Hint
+                </button>
+              )}
+              {solution && (
+                <button
+                  type="button"
+                  className={[
+                    styles.tab,
+                    styles.solutionTab,
+                    activeTab === 'solution' ? styles.active : '',
+                  ].join(' ')}
+                  onClick={() => setActiveTab(activeTab === 'solution' ? null : 'solution')}
+                  aria-pressed={activeTab === 'solution'}
+                >
+                  Solution
+                </button>
+              )}
+            </div>
+
+            {activeTab && (
+              <div
+                className={[
+                  styles.tabContent,
+                  activeTab === 'solution' ? styles.solutionContent : styles.hintContent,
+                ].join(' ')}
               >
-                {hint}
-              </Collapsible>
-            )}
-            {solution && (
-              <Collapsible
-                type="solution"
-                isOpen={showSolution}
-                onToggle={() => setShowSolution(!showSolution)}
-              >
-                {solution}
-              </Collapsible>
+                {activeTab === 'hint' ? hint : solution}
+              </div>
             )}
           </div>
         )}
       </div>
-    </div>
-  );
-};
-
-type CollapsibleProps = {
-  type: 'hint' | 'solution';
-  isOpen: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-};
-
-const Collapsible = ({
-  type,
-  isOpen,
-  onToggle,
-  children,
-}: CollapsibleProps) => {
-  const label = type === 'hint' ? 'Show Hint' : 'Show Solution';
-  return (
-    <div className={styles.collapsible}>
-      <button
-        onClick={onToggle}
-        className={`${styles.collapsibleHeader} ${type === 'solution' ? styles.solution : ''}`}
-      >
-        {isOpen ? 'Hide' : label}
-      </button>
-      {isOpen && (
-        <div className={`${styles.collapsibleContent} ${type === 'solution' ? styles.solution : ''}`}>
-          {children}
-        </div>
-      )}
     </div>
   );
 };
