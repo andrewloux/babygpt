@@ -7,6 +7,23 @@ This document teaches AI agents how to properly use the BabyGPT component librar
 - KEY: Use 'bd' for task tracking.
 - RUN `bd quickstart` ASAP to get the lay of the land
 
+## Visual Language (Vizzes + Demos)
+
+We have a visual design system for interactive components. If you touch anything under `src/components/*{Viz,Demo}*.tsx` (or add a new one), follow:
+
+- **Spec:** `docs/visual-language.md`
+- **Reference screenshots:** `docs/assets/visual-audit/` (gold vs drift examples)
+
+High-level rules (the spec is the source of truth):
+
+- Prefer **semantic colors** (cyan/magenta/yellow/green/red) via CSS variables (`--accent-*`) instead of random hex values.
+- Prefer a small **surface palette**:
+  - “Figure” vizzes use `VizCard` (`ambient-glow` + `card-glass`).
+  - Nested content uses `.panel-dark` / `.inset-box`.
+  - “Terminal/window” look should be intentional (use `--code-bg` only when it’s explicitly an app/demo surface).
+- Use tokenized radii/spacing (`--radius-*`, `--space-*`) and shared interaction affordances (`.focus-glow`, `.hover-lift`).
+- Avoid “token drift”: don’t introduce new CSS vars unless they’re defined in `src/styles/global.css`.
+
 
 ## Voice & Tone
 
