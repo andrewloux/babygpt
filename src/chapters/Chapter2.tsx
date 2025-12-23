@@ -960,7 +960,7 @@ score = float(np.dot(a, b))`}</CodeBlock>
 
         <MathBlock
           equation={String.raw`\text{Softmax}(x_i) = \frac{e^{x_i}}{\sum_{j} e^{x_j}}`}
-          explanation="Step 1: Exponentiate to ensure positivity and amplify the winner. Step 2: Divide by sum to normalize."
+          explanation="Take each score x_i and turn it into a positive weight with e^{x_i}. Then divide by the total weight so everything sums to 1. (Weights → probabilities.)"
         />
 
         <Callout variant="info" title="Softmax only cares about differences (and that's a lifesaver)">
