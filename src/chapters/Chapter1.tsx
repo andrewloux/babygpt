@@ -1276,24 +1276,33 @@ P(b|a) = (1 + 1) / 3 = 2/3`}</CodeBlock>
             <li><strong>Output:</strong> integer tokens, plus (context → target) training pairs</li>
           </ul>
         </Callout>
-        <Paragraph>
-          Before we touch code, let's pin down what we already earned in Section 1.1:
-        </Paragraph>
-        <ul>
-          <li><strong>Probabilities are distributions:</strong> they describe a spread over options, and they sum to 1.</li>
-          <li><strong>Conditioning is filtering:</strong> <Term>P(X | Y)</Term> means "only count the worlds where Y happened."</li>
-          <li><strong>Sequences decompose:</strong> the chain rule turns a sequence probability into a product of next-token probabilities.</li>
-          <li><strong>Logs measure surprise:</strong> <Term>-log₂(p)</Term> turns tiny probabilities into manageable numbers, and averages give us entropy / perplexity.</li>
-          <li><strong>Counting doesn't generalize:</strong> exact-match tables hit sparsity and have no way to share information between similar contexts.</li>
-        </ul>
-        <Paragraph>
-          By the end of this chapter, you'll build the pipeline that turns raw text into the thing a model can actually train on:
-        </Paragraph>
-        <ul>
-          <li><strong>Vocabulary:</strong> collect the unique tokens and assign each an integer ID (<Term>stoi</Term>/<Term>itos</Term>).</li>
-          <li><strong>Encode / decode:</strong> convert text ↔ IDs so we can move between human strings and model numbers.</li>
-          <li><strong>Sliding window:</strong> generate (context → target) training pairs with a chosen context length.</li>
-        </ul>
+        <Invariants title="Before We Touch Code">
+          <InvariantItem>Probabilities are distributions (they sum to 1).</InvariantItem>
+          <InvariantItem>
+            Conditioning is filtering: <Term>P(X | Y)</Term> means “only count the worlds where Y happened.”
+          </InvariantItem>
+          <InvariantItem>
+            Sequences decompose: the chain rule turns a sequence probability into a product of next-token probabilities.
+          </InvariantItem>
+          <InvariantItem>
+            Logs measure surprise: <Term>-log₂(p)</Term> turns tiny probabilities into manageable numbers, and averages give us entropy/perplexity.
+          </InvariantItem>
+          <InvariantItem>
+            Counting doesn’t generalize: exact-match tables hit sparsity and have no way to share information between similar contexts.
+          </InvariantItem>
+        </Invariants>
+
+        <Invariants title="What You’ll Build in Chapter 1">
+          <InvariantItem>
+            <strong>Vocabulary:</strong> collect the unique tokens and assign each an integer ID (<Term>stoi</Term>/<Term>itos</Term>).
+          </InvariantItem>
+          <InvariantItem>
+            <strong>Encode / decode:</strong> convert text ↔ IDs so we can move between human strings and model numbers.
+          </InvariantItem>
+          <InvariantItem>
+            <strong>Sliding window:</strong> generate (context → target) training pairs with a chosen context length.
+          </InvariantItem>
+        </Invariants>
         <Paragraph>
           Okay, enough theory. Let's build something.
         </Paragraph>
