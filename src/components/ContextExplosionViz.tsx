@@ -89,6 +89,20 @@ export function ContextExplosionViz() {
             </div>
           </div>
 
+          <div className={styles.overlap} aria-label="Why overlap matters">
+            <div className={styles.overlapTitle}>Overlap (sharing)</div>
+            <div className={styles.overlapGrid}>
+              <div className={styles.overlapCol}>
+                <div className={styles.overlapLabelBad}>Lookup:</div>
+                <div className={styles.overlapText}>each length‑T context is its own key → no sharing</div>
+              </div>
+              <div className={styles.overlapCol}>
+                <div className={styles.overlapLabelGood}>Embeddings:</div>
+                <div className={styles.overlapText}>the same token row is reused across many contexts → evidence overlaps</div>
+              </div>
+            </div>
+          </div>
+
           <details className={`collapsible ${styles.whatIsT}`}>
             <summary>What is T?</summary>
             <div className={styles.whatIsTBody}>
