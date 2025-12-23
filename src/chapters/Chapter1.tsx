@@ -175,8 +175,8 @@ export function Chapter1() {
           </WorkedStep>
           <WorkedStep n="3" final>
             <p>
-              So <Term>P(next='h' | 't')</Term> = <strong><MathInline equation={String.raw`\\frac{2}{5}=0.40`} /></strong>, and the surprise is{' '}
-              <strong><MathInline equation={String.raw`-\\log_2(0.40)\\approx 1.32\\,\\text{bits}`} /></strong>.
+              So <Term>P(next='h' | 't')</Term> = <strong><MathInline equation={String.raw`\frac{2}{5}=0.40`} /></strong>, and the surprise is{' '}
+              <strong><MathInline equation={String.raw`-\log_2(0.40)\approx 1.32\,\text{bits}`} /></strong>.
             </p>
             <WorkedNote>This is the pipeline: counts → probability → bits. "th" is common in English, so seeing 'h' after 't' isn't that surprising—about 1.3 bits.</WorkedNote>
           </WorkedStep>
@@ -455,7 +455,7 @@ export function Chapter1() {
           The probability of arriving at a specific sequence is just: <em>what fraction of the original space survives all these narrowings?</em> At step 1, some fraction starts with 'c'. Of those, some fraction continues with 'a'. Of those, some fraction continues with 't'.
         </Paragraph>
         <Paragraph>
-          Mathematically, "of those" means <Highlight>multiplication</Highlight>. If <MathInline equation={String.raw`\\frac{1}{4}`} /> of paths start with <Term>c</Term>, and <MathInline equation={String.raw`\\frac{1}{2}`} /> of <em>those</em> continue with <Term>a</Term>, then <MathInline equation={String.raw`\\frac{1}{2}\\times\\frac{1}{4}=\\frac{1}{8}`} /> of all paths start with <Term>ca</Term>.
+          Mathematically, "of those" means <Highlight>multiplication</Highlight>. If <MathInline equation={String.raw`\frac{1}{4}`} /> of paths start with <Term>c</Term>, and <MathInline equation={String.raw`\frac{1}{2}`} /> of <em>those</em> continue with <Term>a</Term>, then <MathInline equation={String.raw`\frac{1}{2}\times\frac{1}{4}=\frac{1}{8}`} /> of all paths start with <Term>ca</Term>.
         </Paragraph>
         <Paragraph>
           <em>Step through each token and watch the corridor shrink. The sequence probability is the product of these survival fractions.</em>
@@ -470,16 +470,16 @@ export function Chapter1() {
           Here's the same thing from first principles. Imagine starting with 1,000 equally likely worlds.
         </Paragraph>
         <Paragraph>
-          First, filter for event <Term>A</Term>. Say it happens in 200 of them. That's <MathInline equation={String.raw`\\frac{200}{1000}=0.2`} />.
+          First, filter for event <Term>A</Term>. Say it happens in 200 of them. That's <MathInline equation={String.raw`\frac{200}{1000}=0.2`} />.
         </Paragraph>
         <Paragraph>
           Now, <em>throw away the other 800 worlds</em>. We are currently standing in the 200 "A-worlds."
         </Paragraph>
         <Paragraph>
-          Next, filter for event <Term>B</Term>. Inside this smaller pile, maybe B happens in 50 of them. That fraction is <MathInline equation={String.raw`\\frac{50}{200}=0.25`} />.
+          Next, filter for event <Term>B</Term>. Inside this smaller pile, maybe B happens in 50 of them. That fraction is <MathInline equation={String.raw`\frac{50}{200}=0.25`} />.
         </Paragraph>
         <Paragraph>
-          Finally, filter for <Term>C</Term>. Among those 50 surviving worlds, C happens in 10. That's <MathInline equation={String.raw`\\frac{10}{50}=0.2`} />.
+          Finally, filter for <Term>C</Term>. Among those 50 surviving worlds, C happens in 10. That's <MathInline equation={String.raw`\frac{10}{50}=0.2`} />.
         </Paragraph>
         <Paragraph>
           How many worlds survived all three filters? 10 out of the original 1,000. That's <Term>0.01</Term>. And the math tracks the filters exactly: <Term>0.2 × 0.25 × 0.2 = 0.01</Term>. Multiplication is just repeated filtering.
@@ -634,7 +634,7 @@ P({\small\text{"the next morning"}}) &= P({\small\text{the}}) \times P({\small\t
 &\approx \frac{5}{6} \times \frac{4}{5} \times \frac{2}{4} \;=\; \frac{2}{6} \;=\; \frac{C({\small\text{"the next morning"}})}{N}
 \end{aligned}`} />
           <Paragraph>
-            Look at the 5: it's the denominator of <MathInline equation={String.raw`\\frac{5}{6}`} /> and the numerator of <MathInline equation={String.raw`\\frac{4}{5}`} />. Both are C("the"). The 4 is C("the next") — denominator of one fraction, numerator of the next. Each prefix count appears exactly twice and cancels. That's telescoping.
+            Look at the 5: it's the denominator of <MathInline equation={String.raw`\frac{5}{6}`} /> and the numerator of <MathInline equation={String.raw`\frac{4}{5}`} />. Both are C("the"). The 4 is C("the next") — denominator of one fraction, numerator of the next. Each prefix count appears exactly twice and cancels. That's telescoping.
           </Paragraph>
         </Callout>
         <Paragraph>
@@ -1149,7 +1149,7 @@ P(a|a) = 0/1 = 0`}</CodeBlock>
               <CodeBlock lang="text">{`P(a|a) = (0 + 1) / 3 = 1/3
 P(b|a) = (1 + 1) / 3 = 2/3`}</CodeBlock>
               <Paragraph>
-                With smoothing, every step in <Term>"aaaa"</Term> has probability <MathInline equation={String.raw`\\frac{1}{3}`} />, so:
+                With smoothing, every step in <Term>"aaaa"</Term> has probability <MathInline equation={String.raw`\frac{1}{3}`} />, so:
               </Paragraph>
               <CodeBlock lang="text">{`H = - (1/3) * (log2(1/3) + log2(1/3) + log2(1/3))
   = -log2(1/3)
