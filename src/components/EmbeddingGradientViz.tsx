@@ -70,6 +70,7 @@ export function EmbeddingGradientViz() {
   const [actualChar, setActualChar] = useState<string>('t')
   const [eta, setEta] = useState(0.5)
   const [stepCount, setStepCount] = useState(0)
+  const [rightTab, setRightTab] = useState<'controls' | 'probs'>('controls')
 
   // Compute softmax predictions based on dot products
   const contextEmb = embeddings[contextChar]
@@ -438,99 +439,126 @@ export function EmbeddingGradientViz() {
         </div>
 
         <div className={`${styles.right} panel-dark`} aria-label="Controls">
-          <div className={styles.pickers}>
-            <div className={styles.pickerRow}>
-              <span className={styles.pickerLabel}>Context</span>
-              <select
-                value={contextChar}
-                onChange={(e) => setContextChar(e.target.value)}
-                className={styles.pickerSelect}
-              >
-                {CHARS.map((c) => (
-                  <option key={`ctx-${c}`} value={c}>
-                    '{c}'
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.pickerRow}>
-              <span className={styles.pickerLabel}>Actual</span>
-              <select
-                value={actualChar}
-                onChange={(e) => setActualChar(e.target.value)}
-                className={styles.pickerSelect}
-              >
-                {CHARS.map((c) => (
-                  <option key={`actual-${c}`} value={c}>
-                    '{c}'
-                  </option>
-                ))}
-              </select>
-              <button className={styles.smallBtn} type="button" onClick={sampleNext}>
-                Sample
-              </button>
-            </div>
-          </div>
-
-          <div className={styles.stats}>
-            <div className={styles.stat}>
-              <div className={styles.statLabel}>loss</div>
-              <div className={styles.statValue}>{currentLoss.toFixed(3)}</div>
-            </div>
-            <div className={styles.stat}>
-              <div className={styles.statLabel}>p(actual)</div>
-              <div className={styles.statValue}>{(currentProbActual * 100).toFixed(1)}%</div>
-            </div>
-            <div className={styles.stat}>
-              <div className={styles.statLabel}>step</div>
-              <div className={styles.statValue}>{stepCount}</div>
-            </div>
-          </div>
-
-          <div className={styles.etaControl}>
-            <span className={styles.etaLabel}>η</span>
-            <Slider
-              wrap={false}
-              min={0.05}
-              max={1.0}
-              step={0.05}
-              value={eta}
-              onValueChange={setEta}
-              ariaLabel="Step size eta"
-            />
-            <span className={styles.etaValue}>{eta.toFixed(2)}</span>
-          </div>
-
-          <div className={styles.actions}>
-            <button className={`${styles.btn} ${styles.primaryBtn}`} type="button" onClick={takeStep}>
-              Take step
+          <div className={styles.tabs} role="tablist" aria-label="Panel tabs">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={rightTab === 'controls'}
+              className={`${styles.tabBtn} ${rightTab === 'controls' ? styles.tabBtnActive : ''}`}
+              onClick={() => setRightTab('controls')}
+            >
+              Controls
             </button>
-            <button className={styles.btn} type="button" onClick={reset}>
-              Reset
+            <button
+              type="button"
+              role="tab"
+              aria-selected={rightTab === 'probs'}
+              className={`${styles.tabBtn} ${rightTab === 'probs' ? styles.tabBtnActive : ''}`}
+              onClick={() => setRightTab('probs')}
+            >
+              Probabilities
             </button>
           </div>
 
-          <div className={styles.probs} aria-label="Predicted probabilities">
-            <div className={styles.probHeader}>p(next | context)</div>
-            <div className={styles.probList}>
-              {probRows.map((row) => {
-                const isActual = row.char === actualChar
-                return (
-                  <div key={`p-${row.char}`} className={styles.probRow}>
-                    <span className={styles.probChar}>{row.char}</span>
-                    <div className={styles.probBarTrack} aria-hidden="true">
-                      <div
-                        className={`${styles.probBar} ${isActual ? styles.probBarActual : ''}`}
-                        style={{ width: `${row.prob * 100}%` }}
-                      />
-                    </div>
-                    <span className={styles.probValue}>{row.prob.toFixed(2)}</span>
-                  </div>
-                )
-              })}
+          {rightTab === 'controls' ? (
+            <div className={styles.controlsPane} role="tabpanel" aria-label="Controls">
+              <div className={styles.pickers}>
+                <div className={styles.pickerRow}>
+                  <span className={styles.pickerLabel}>Context</span>
+                  <select
+                    value={contextChar}
+                    onChange={(e) => setContextChar(e.target.value)}
+                    className={styles.pickerSelect}
+                  >
+                    {CHARS.map((c) => (
+                      <option key={`ctx-${c}`} value={c}>
+                        '{c}'
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className={styles.pickerRow}>
+                  <span className={styles.pickerLabel}>Actual</span>
+                  <select
+                    value={actualChar}
+                    onChange={(e) => setActualChar(e.target.value)}
+                    className={styles.pickerSelect}
+                  >
+                    {CHARS.map((c) => (
+                      <option key={`actual-${c}`} value={c}>
+                        '{c}'
+                      </option>
+                    ))}
+                  </select>
+                  <button className={styles.smallBtn} type="button" onClick={sampleNext}>
+                    Sample
+                  </button>
+                </div>
+              </div>
+
+              <div className={styles.stats}>
+                <div className={styles.stat}>
+                  <div className={styles.statLabel}>loss</div>
+                  <div className={styles.statValue}>{currentLoss.toFixed(3)}</div>
+                </div>
+                <div className={styles.stat}>
+                  <div className={styles.statLabel}>p(actual)</div>
+                  <div className={styles.statValue}>{(currentProbActual * 100).toFixed(1)}%</div>
+                </div>
+                <div className={styles.stat}>
+                  <div className={styles.statLabel}>step</div>
+                  <div className={styles.statValue}>{stepCount}</div>
+                </div>
+              </div>
+
+              <div className={styles.etaControl}>
+                <span className={styles.etaLabel}>η</span>
+                <Slider
+                  wrap={false}
+                  min={0.05}
+                  max={1.0}
+                  step={0.05}
+                  value={eta}
+                  onValueChange={setEta}
+                  ariaLabel="Step size eta"
+                />
+                <span className={styles.etaValue}>{eta.toFixed(2)}</span>
+              </div>
+
+              <div className={styles.actions}>
+                <button className={`${styles.btn} ${styles.primaryBtn}`} type="button" onClick={takeStep}>
+                  Take step
+                </button>
+                <button className={styles.btn} type="button" onClick={reset}>
+                  Reset
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className={styles.probsPane} role="tabpanel" aria-label="Probabilities">
+              <div className={styles.probs} aria-label="Predicted probabilities">
+                <div className={styles.probHeader}>p(next | context)</div>
+                <div className={styles.probList}>
+                  {probRows.map((row) => {
+                    const isActual = row.char === actualChar
+                    return (
+                      <div key={`p-${row.char}`} className={styles.probRow}>
+                        <span className={styles.probChar}>{row.char}</span>
+                        <div className={styles.probBarTrack} aria-hidden="true">
+                          <div
+                            className={`${styles.probBar} ${isActual ? styles.probBarActual : ''}`}
+                            style={{ width: `${row.prob * 100}%` }}
+                          />
+                        </div>
+                        <span className={styles.probValue}>{row.prob.toFixed(2)}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </VizCard>
