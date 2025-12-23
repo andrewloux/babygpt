@@ -18,6 +18,6 @@ Spec: `docs/visual-language.md`
 - `audit-ch2-axioms-vizcard.png` — VizCard baseline (title/subtitle/figure framing).
 - `audit-ch2-softmax-simplex.png` — sliders + figure surface; semantic colors as channels.
 - `audit-ch2-softmax-landscape.png` — interactive 3D-ish plot inside a figure layout.
+- `audit-ch2-histograms-coordinates.png` — segmented stepper + tight hierarchy (one primary surface per step).
 - `audit-ch1-corridor.png` — “terminal/window” demo motif (structured, restrained, readable).
 - `audit-ch1-kenlm.png` — “engineer’s window” motif (mono labels, balanced layout).
-

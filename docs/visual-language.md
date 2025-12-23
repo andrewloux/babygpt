@@ -18,6 +18,7 @@ For the “why”, see:
 - `docs/assets/visual-audit/gold/audit-ch2-axioms-vizcard.png` — `VizCard` “figure” style (serif title, mono subtitle, glass surface, calm gradients).
 - `docs/assets/visual-audit/gold/audit-ch2-softmax-simplex.png` — `VizCard` + sliders + “cyan/magenta/yellow as semantic channels”.
 - `docs/assets/visual-audit/gold/audit-ch2-softmax-landscape.png` — `VizCard` + interactive 3D-ish plot surface.
+- `docs/assets/visual-audit/gold/audit-ch2-histograms-coordinates.png` — stepper/controls + “one primary surface per step” layout.
 - `docs/assets/visual-audit/gold/audit-ch1-corridor.png` — “terminal/window” demo motif (top bar, code-ish panels, restrained glow).
 - `docs/assets/visual-audit/gold/audit-ch1-kenlm.png` — another “engineer’s window” motif (structured layout, mono labels, restrained contrast).
 

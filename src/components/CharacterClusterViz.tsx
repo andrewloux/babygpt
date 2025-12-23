@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import styles from './CharacterClusterViz.module.css'
 import { VOCAB, cosineSimilarity } from '../data/characterData'
+import { VizCard } from './VizCard'
 
 const DEFAULT_CORPUS = `It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.
 
@@ -165,12 +166,15 @@ export function CharacterClusterViz({
         </div>
         {top5.map((d) => (
           <div key={d.char} className={styles.barRow}>
-            <div className={styles.barLabel}>{d.char === ' ' ? '␣' : d.char}</div>
-            <div className={styles.barTrack}>
-              <div className={styles.barFill} style={{ width: `${d.p * 100}%` }}>
-                <span className={styles.barPct}>{(d.p * 100).toFixed(0)}%</span>
-                <span className={styles.barCount}>{d.count.toLocaleString()}×</span>
+            <div className={styles.barLeft}>
+              <div className={styles.barLabel}>{d.char === ' ' ? '␣' : d.char}</div>
+              <div className={styles.barTrack}>
+                <div className={styles.barFill} style={{ width: `${d.p * 100}%` }} />
               </div>
+            </div>
+            <div className={styles.barRight}>
+              <span className={styles.barPct}>{(d.p * 100).toFixed(0)}%</span>
+              <span className={styles.barCount}>{d.count.toLocaleString()}×</span>
             </div>
           </div>
         ))}
@@ -179,109 +183,109 @@ export function CharacterClusterViz({
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.ambientGlow} />
-
-      <div className={styles.card}>
-        <div className={styles.header}>
-          <h3 className={styles.title}>From Histograms to Coordinates</h3>
-
-          <div className={styles.topControls} aria-label="Pick two context characters">
-            <label className={styles.picker}>
-              <span className={`${styles.pickerLabel} ${styles.pickerLabelA}`}>A</span>
-              <select
-                className={`${styles.pickerSelect} ${styles.pickerSelectA}`}
-                value={charA}
-                onChange={(e) => setCharA(e.target.value)}
-              >
-                {VOCAB.map(c => (
-                  <option key={c} value={c}>
-                    {c === ' ' ? 'Space' : c}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={styles.picker}>
-              <span className={`${styles.pickerLabel} ${styles.pickerLabelB}`}>B</span>
-              <select
-                className={`${styles.pickerSelect} ${styles.pickerSelectB}`}
-                value={charB}
-                onChange={(e) => setCharB(e.target.value)}
-              >
-                {VOCAB.map(c => (
-                  <option key={c} value={c}>
-                    {c === ' ' ? 'Space' : c}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <ol className={styles.stepper} aria-label="Three-step walkthrough">
-            <li className={styles.stepItem}>
-              <button
-                type="button"
-                className={`${styles.stepPill} ${activeStep === 1 ? styles.stepPillActive : ''}`}
-                onClick={() => setActiveStep(1)}
-                aria-current={activeStep === 1 ? 'step' : undefined}
-              >
-                <span className={styles.stepNum}>1</span>
-                <span className={styles.stepText}>
-                  <span className={styles.stepTitle}>Counts</span>
-                  <span className={styles.stepMeta}>(data)</span>
-                </span>
-              </button>
-            </li>
-            <li className={styles.stepItem}>
-              <button
-                type="button"
-                className={`${styles.stepPill} ${activeStep === 2 ? styles.stepPillActive : ''}`}
-                onClick={() => setActiveStep(2)}
-                aria-current={activeStep === 2 ? 'step' : undefined}
-              >
-                <span className={styles.stepNum}>2</span>
-                <span className={styles.stepText}>
-                  <span className={styles.stepTitle}>Postcard</span>
-                  <span className={styles.stepMeta}>(2D)</span>
-                </span>
-              </button>
-            </li>
-            <li className={styles.stepItem}>
-              <button
-                type="button"
-                className={`${styles.stepPill} ${activeStep === 3 ? styles.stepPillActive : ''}`}
-                onClick={() => setActiveStep(3)}
-                aria-current={activeStep === 3 ? 'step' : undefined}
-              >
-                <span className={styles.stepNum}>3</span>
-                <span className={styles.stepText}>
-                  <span className={styles.stepTitle}>Similarity</span>
-                  <span className={styles.stepMeta}>(score)</span>
-                </span>
-              </button>
-            </li>
-          </ol>
+    <VizCard
+      title="From Histograms to Coordinates"
+      subtitle="Counts → postcard → similarity"
+      figNum="Fig. 2.3"
+      footer={
+        <p className={styles.footerText}>
+          <strong>The link:</strong> the histograms are the fingerprints. Training tries to give characters coordinates whose
+          similarities behave like fingerprint similarities.
+        </p>
+      }
+    >
+      <div className={styles.toolbar} aria-label="Controls">
+        <div className={styles.topControls} aria-label="Pick two context characters">
+          <label className={styles.picker}>
+            <span className={`${styles.pickerLabel} ${styles.pickerLabelA}`}>A</span>
+            <select
+              className={`${styles.pickerSelect} ${styles.pickerSelectA}`}
+              value={charA}
+              onChange={(e) => setCharA(e.target.value)}
+            >
+              {VOCAB.map(c => (
+                <option key={c} value={c}>
+                  {c === ' ' ? 'Space' : c}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className={styles.picker}>
+            <span className={`${styles.pickerLabel} ${styles.pickerLabelB}`}>B</span>
+            <select
+              className={`${styles.pickerSelect} ${styles.pickerSelectB}`}
+              value={charB}
+              onChange={(e) => setCharB(e.target.value)}
+            >
+              {VOCAB.map(c => (
+                <option key={c} value={c}>
+                  {c === ' ' ? 'Space' : c}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
 
+        <div className={styles.segmented} role="tablist" aria-label="Walkthrough steps">
+          <button
+            type="button"
+            role="tab"
+            className={`${styles.segment} ${activeStep === 1 ? styles.segmentActive : ''}`}
+            onClick={() => setActiveStep(1)}
+            aria-selected={activeStep === 1}
+            tabIndex={activeStep === 1 ? 0 : -1}
+          >
+            <span className={styles.segmentKicker}>1</span>
+            <span className={styles.segmentLabel}>Counts</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            className={`${styles.segment} ${activeStep === 2 ? styles.segmentActive : ''}`}
+            onClick={() => setActiveStep(2)}
+            aria-selected={activeStep === 2}
+            tabIndex={activeStep === 2 ? 0 : -1}
+          >
+            <span className={styles.segmentKicker}>2</span>
+            <span className={styles.segmentLabel}>Postcard</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            className={`${styles.segment} ${activeStep === 3 ? styles.segmentActive : ''}`}
+            onClick={() => setActiveStep(3)}
+            aria-selected={activeStep === 3}
+            tabIndex={activeStep === 3 ? 0 : -1}
+          >
+            <span className={styles.segmentKicker}>3</span>
+            <span className={styles.segmentLabel}>Similarity</span>
+          </button>
+        </div>
+      </div>
+
+      <div className={`panel-dark ${styles.stage}`}>
         {activeStep === 1 && (
           <>
-            <div className={styles.stepNote}>
-              <strong>Step 1: counts → probabilities.</strong> Scan the corpus and count every adjacent pair (current → next).
-              Normalize each row into a next‑character distribution.
+            <div className={styles.stageIntro}>
+              <strong>Counts → probabilities.</strong> Scan the corpus and count every adjacent pair (current → next).
             </div>
 
-            <div className={styles.corpusSection}>
+            <div className={`inset-box ${styles.corpusSection}`}>
+              <div className={styles.corpusHeader}>
+                <div className={styles.corpusTitle}>Training text</div>
+                <div className={styles.corpusHint}>We lower-case and treat punctuation as spaces.</div>
+              </div>
               <textarea
                 className={styles.corpusInput}
                 value={corpus}
                 onChange={(e) => setCorpus(e.target.value)}
-                rows={3}
+                rows={4}
                 spellCheck={false}
               />
             </div>
 
             <div className={styles.histGrid} aria-label="Next-character distributions for A and B">
-              <div className={`${styles.charCard} ${styles.charCardA}`}>
+              <div className={`inset-box ${styles.charCard} ${styles.charCardA}`}>
                 <div className={styles.charHeader}>
                   <strong className={`${styles.vectorLabel} ${styles.vectorLabelA}`}>
                     After {charA === ' ' ? 'space' : `'${charA}'`}
@@ -289,7 +293,7 @@ export function CharacterClusterViz({
                 </div>
                 {renderHist(charA)}
               </div>
-              <div className={`${styles.charCard} ${styles.charCardB}`}>
+              <div className={`inset-box ${styles.charCard} ${styles.charCardB}`}>
                 <div className={styles.charHeader}>
                   <strong className={`${styles.vectorLabel} ${styles.vectorLabelB}`}>
                     After {charB === ' ' ? 'space' : `'${charB}'`}
@@ -303,16 +307,15 @@ export function CharacterClusterViz({
 
         {activeStep === 2 && (
           <>
-            <div className={styles.stepNote}>
-              <strong>Step 2: a 2D postcard.</strong> Each character has 27 probabilities. We’ll plot just two of them as X/Y
-              so you can see the cloud.
+            <div className={styles.stageIntro}>
+              <strong>A 2D postcard.</strong> Each character has 27 probabilities. We plot just two of them as X/Y so you can
+              see the cloud.
             </div>
 
             <div className={styles.spatialPlotArea}>
               <div className={`${styles.axisLabel} ${styles.xAxisLabel}`}>{axisXLabel} →</div>
               <div className={`${styles.axisLabel} ${styles.yAxisLabel}`}>↑ {axisYLabel}</div>
 
-              {/* Vectors for A and B */}
               <svg
                 className={styles.spatialOverlay}
                 viewBox="0 0 100 100"
@@ -320,26 +323,12 @@ export function CharacterClusterViz({
                 aria-hidden="true"
               >
                 <defs>
-                  <linearGradient
-                    id="vectorA"
-                    gradientUnits="userSpaceOnUse"
-                    x1="0"
-                    y1="100"
-                    x2={aX}
-                    y2={aY}
-                  >
+                  <linearGradient id="vectorA" gradientUnits="userSpaceOnUse" x1="0" y1="100" x2={aX} y2={aY}>
                     <stop offset="0%" stopColor="rgba(0, 217, 255, 0)" />
                     <stop offset="70%" stopColor="rgba(0, 217, 255, 0.35)" />
                     <stop offset="100%" stopColor="rgba(0, 217, 255, 0.95)" />
                   </linearGradient>
-                  <linearGradient
-                    id="vectorB"
-                    gradientUnits="userSpaceOnUse"
-                    x1="0"
-                    y1="100"
-                    x2={bX}
-                    y2={bY}
-                  >
+                  <linearGradient id="vectorB" gradientUnits="userSpaceOnUse" x1="0" y1="100" x2={bX} y2={bY}>
                     <stop offset="0%" stopColor="rgba(255, 0, 110, 0)" />
                     <stop offset="70%" stopColor="rgba(255, 0, 110, 0.33)" />
                     <stop offset="100%" stopColor="rgba(255, 0, 110, 0.92)" />
@@ -371,43 +360,12 @@ export function CharacterClusterViz({
                   </marker>
                 </defs>
 
-                <line
-                  className={styles.vectorLineAGlow}
-                  x1={0}
-                  y1={100}
-                  x2={aX}
-                  y2={aY}
-                  stroke="rgba(0, 217, 255, 0.25)"
-                />
-                <line
-                  className={styles.vectorLineA}
-                  x1={0}
-                  y1={100}
-                  x2={aX}
-                  y2={aY}
-                  stroke="url(#vectorA)"
-                  markerEnd="url(#arrowA)"
-                />
-                <line
-                  className={styles.vectorLineBGlow}
-                  x1={0}
-                  y1={100}
-                  x2={bX}
-                  y2={bY}
-                  stroke="rgba(255, 0, 110, 0.20)"
-                />
-                <line
-                  className={styles.vectorLineB}
-                  x1={0}
-                  y1={100}
-                  x2={bX}
-                  y2={bY}
-                  stroke="url(#vectorB)"
-                  markerEnd="url(#arrowB)"
-                />
+                <line className={styles.vectorLineAGlow} x1={0} y1={100} x2={aX} y2={aY} stroke="rgba(0, 217, 255, 0.25)" />
+                <line className={styles.vectorLineA} x1={0} y1={100} x2={aX} y2={aY} stroke="url(#vectorA)" markerEnd="url(#arrowA)" />
+                <line className={styles.vectorLineBGlow} x1={0} y1={100} x2={bX} y2={bY} stroke="rgba(255, 0, 110, 0.20)" />
+                <line className={styles.vectorLineB} x1={0} y1={100} x2={bX} y2={bY} stroke="url(#vectorB)" markerEnd="url(#arrowB)" />
               </svg>
 
-              {/* Points */}
               {points.map(p => (
                 <button
                   key={p.char}
@@ -428,19 +386,19 @@ export function CharacterClusterViz({
             <div className={styles.hintRow}>
               Tip: click for A, <strong>shift+click</strong> for B.
               <span className={styles.hintDivider} aria-hidden="true">·</span>
-              This plot uses only two coordinates.
+              The real “fingerprint” is 27‑D; this is a 2‑D slice.
             </div>
           </>
         )}
 
         {activeStep === 3 && (
           <>
-            <div className={styles.stepNote}>
-              <strong>Step 3: one score.</strong> Roll one next‑character from A and one from B. The dot product is the chance
-              the two rolls match.
+            <div className={styles.stageIntro}>
+              <strong>One score.</strong> Roll one next‑character from A and one from B. The dot product is the chance the two
+              rolls match.
             </div>
 
-            <div className={styles.simCard}>
+            <div className={`inset-box ${styles.simCard}`}>
               <div className={styles.simBlock}>
                 <div className={styles.simLabel}>Overlap (dot)</div>
                 <div className={styles.simValue}>{matchProb.toFixed(4)}</div>
@@ -461,9 +419,7 @@ export function CharacterClusterViz({
               </div>
 
               <details className={styles.details}>
-                <summary className={styles.detailsSummary}>
-                  Optional: normalize lengths (cosine similarity)
-                </summary>
+                <summary className={styles.detailsSummary}>Optional: normalize lengths (cosine similarity)</summary>
                 <div className={styles.detailsBody}>
                   <div className={styles.detailsRow}>
                     <div className={styles.detailsLabel}>cos(A, B)</div>
@@ -487,19 +443,10 @@ export function CharacterClusterViz({
                   </div>
                 </div>
               </details>
-
-              <div className={styles.simHint}>
-                The score uses all 27 next‑character probabilities. The plot is just a postcard.
-              </div>
             </div>
           </>
         )}
-
-        <div className={styles.insight}>
-          <strong>The link:</strong> the histograms are the fingerprints. Training tries to give characters coordinates whose
-          similarities behave like fingerprint similarities.
-        </div>
       </div>
-    </div>
+    </VizCard>
   )
 }
