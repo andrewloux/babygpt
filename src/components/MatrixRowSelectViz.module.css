@@ -1,16 +1,29 @@
-.viewport {
-  margin: 1.75rem 0;
-  padding: 1.25rem 1.25rem 1.15rem 1.25rem;
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background:
-    radial-gradient(ellipse 70% 55% at 50% 0%, rgba(0, 217, 255, 0.08), transparent 60%),
-    rgba(0, 0, 0, 0.22);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
-    0 22px 50px -35px rgba(0, 0, 0, 0.85);
+.stageWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   font-family: var(--font-sans);
   color: rgba(255, 255, 255, 0.92);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.toolbarLabel {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.stage {
+  padding: 1.1rem;
 }
 
 .layout {
@@ -45,9 +58,12 @@
 
 .vectorFrame {
   border-radius: 0.9rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.18);
   overflow: hidden;
+}
+
+.matrixFrame {
+  padding: 0.65rem;
+  border-radius: 0.95rem;
 }
 
 .times {
@@ -136,10 +152,10 @@
 }
 
 .controls {
-  margin-top: 1.1rem;
   display: flex;
   justify-content: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .btn {
@@ -168,25 +184,29 @@
   box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.12);
 }
 
-.equationCard {
-  margin-top: 1.15rem;
-  padding: 0.95rem 0.95rem 0.85rem 0.95rem;
+.mathCard {
+  padding: 0.9rem 0.95rem;
   border-radius: 0.95rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
-  text-align: center;
 }
 
-.equationTitle {
+.mathTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.mathTitle {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 0.65rem;
 }
 
 .equationLine {
+  margin-top: 0.65rem;
   display: flex;
   justify-content: center;
   align-items: baseline;
@@ -211,33 +231,13 @@
   font-weight: 800;
 }
 
-.expandBtn {
-  margin-top: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.18);
-  color: rgba(255, 255, 255, 0.7);
-  border-radius: 999px;
-  padding: 0.35rem 0.65rem;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  cursor: pointer;
-  transition: border-color 120ms ease, background 120ms ease;
-}
-
-.expandBtn:hover {
-  border-color: rgba(255, 0, 110, 0.35);
-  background: rgba(255, 255, 255, 0.04);
-}
-
 .expansion {
   margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .expansionLine {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: baseline;
   gap: 0.6rem;
   flex-wrap: wrap;
@@ -262,8 +262,9 @@
 }
 
 .resultCard {
-  margin-top: 0.95rem;
   text-align: center;
+  padding: 0.85rem 0.95rem;
+  border-radius: 0.95rem;
 }
 
 .resultLabel {
@@ -301,11 +302,30 @@
   -webkit-overflow-scrolling: touch;
 }
 
-@media (max-width: 520px) {
-  .viewport {
-    padding: 1rem 1rem 0.95rem 1rem;
-  }
+.footerHint {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.45;
+}
 
+.footerLabel {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.footerVocab {
+  font-family: var(--font-mono);
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.footerNote {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+@media (max-width: 520px) {
   .cell {
     width: 48px;
   }
