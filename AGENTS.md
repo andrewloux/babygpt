@@ -331,6 +331,14 @@ Mathematical equations with optional explanation. Supports LaTeX-style subscript
 <MathBlock equation="P(A | B) = 0.75" />
 ```
 
+**LaTeX escaping (important)**
+
+- Prefer `String.raw` for equations that use LaTeX commands like `\frac`, `\log`, `\text`, etc.
+  - ✅ `equation={String.raw`\frac{1}{4}\times\frac{1}{2}=\frac{1}{8}`}`
+  - ❌ `equation={String.raw`\\frac{1}{4}`}` (because `\\` is a *line break* in LaTeX)
+- If you’re not using `String.raw` (plain strings/template literals), you must escape backslashes:
+  - ✅ ``equation={`\\frac{1}{4}`}`` (runtime string becomes `\frac{1}{4}`)
+
 #### `CodeBlock`
 Syntax-highlighted code blocks (uses Shiki).
 
