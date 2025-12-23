@@ -468,3 +468,36 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-left: 3px solid color-mix(in oklab, var(--panel-accent) 65%, rgba(255, 255, 255, 0.1));
 }
+
+@media (max-width: 520px) {
+  .container {
+    padding: 1.25rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .vizGrid {
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+    align-items: center;
+  }
+
+  .eqSymbol {
+    display: none;
+  }
+
+  .formula {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 0.74rem;
+  }
+
+  .beaker {
+    width: 4.25rem;
+    height: 8.25rem;
+  }
+}
