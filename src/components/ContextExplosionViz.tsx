@@ -74,14 +74,13 @@ export function ContextExplosionViz() {
           </div>
         </div>
 
-        {/* The punchline */}
-        <div className={styles.insight}>
-          <div className={styles.insightIcon} aria-hidden="true">i</div>
-          <div className={styles.insightText}>
-            <strong>T is the context length.</strong> A lookup table needs a row for every possible length‑T context — that’s
+        <details className={`collapsible ${styles.whatIsT}`}>
+          <summary>What is T?</summary>
+          <div className={styles.whatIsTBody}>
+            <strong>T is the context length.</strong> A lookup table needs a row for every possible length‑T context — that’s{' '}
             VocabularySize<sup>T</sup> rows. An embedding table stays one row per token, so T never shows up.
           </div>
-        </div>
+        </details>
 
         {/* Visual scale comparison */}
         <div className={styles.scale}>
