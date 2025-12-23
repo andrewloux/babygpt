@@ -1289,7 +1289,7 @@ score = float(np.dot(a, b))`}</CodeBlock>
           </Paragraph>
           <MathBlock equation={String.raw`H = \frac{1}{N}\bigl(\text{surprise}_1 + \text{surprise}_2 + \cdots + \text{surprise}_N\bigr)`} />
           <Paragraph>
-            That's the cross-entropy. Lower is better. A perfect predictor has H=0 (no surprise at all).
+            That's the cross-entropy.<Cite n={13} /> Lower is better. A perfect predictor has H=0 (no surprise at all).
           </Paragraph>
         </Callout>
 
@@ -1305,7 +1305,7 @@ score = float(np.dot(a, b))`}</CodeBlock>
             There's also a training reason: accuracy is a step function (right/wrong), so its gradient is zero almost everywhere. Cross-entropy is smooth — it still gives a learning signal when you're barely right or confidently wrong.
           </Paragraph>
           <Paragraph>
-            Shannon's move was to treat <Term>-log(p)</Term> as "how surprised you should be" when something happens. He wanted three properties:
+            Shannon's move was to treat <Term>-log(p)</Term> as "how surprised you should be" when something happens.<Cite n={12} /> He wanted three properties:
           </Paragraph>
           <ol>
             <li>Surprise = 0 when <Term>p=1</Term> (certain events aren't surprising)</li>
@@ -1322,10 +1322,10 @@ score = float(np.dot(a, b))`}</CodeBlock>
         </details>
 
         <Paragraph>
-          Shannon's insight was operational: information is surprise. We'll measure that surprise as <Term>surprise(p) = -log₂(p)</Term>. If you have a good model of English, it assigns high probability to what actually comes next, so it isn't surprised very often. If you have a terrible model, every prediction is a shock.
+          Shannon's insight was operational: information is surprise.<Cite n={12} /> We'll measure that surprise as <Term>surprise(p) = -log₂(p)</Term>. If you have a good model of English, it assigns high probability to what actually comes next, so it isn't surprised very often. If you have a terrible model, every prediction is a shock.
         </Paragraph>
         <Paragraph>
-          <strong>Cross-entropy is average surprise.</strong> Walk left‑to‑right. At each step, look at the probability the model gave to what actually happened next, take <Term>-log₂</Term>, and average. Lower means fewer shocks.
+          <strong>Cross-entropy is average surprise.</strong> Walk left‑to‑right. At each step, look at the probability the model gave to what actually happened next, take <Term>-log₂</Term>, and average. Lower means fewer shocks.<Cite n={13} />
         </Paragraph>
 
         <Callout variant="info" title="Concrete numbers">
@@ -1470,7 +1470,7 @@ score = float(np.dot(a, b))`}</CodeBlock>
         <details className="collapsible">
           <summary>Derive it line by line (optional)</summary>
           <Paragraph>
-            Softmax + cross-entropy has a famous gradient:
+            Softmax + cross-entropy has a famous gradient:<Cite n={14} />
           </Paragraph>
           <MathBlock
             equation={String.raw`\frac{\partial L}{\partial \text{score}_j} = p_j - \mathbf{1}_{j=\text{actual}}`}
@@ -1827,7 +1827,7 @@ print(f"  cos(t, a) = {cosine_sim(embeddings[t_idx], embeddings[a_idx]):.3f}  (d
             To keep it browser‑friendly, the replay uses a fixed random seed and (for long corpora) a capped number of training pairs. The goal is to make the update rule visible, not to match anyone's exact run.
           </Paragraph>
           <Paragraph>
-            It also shows <Term>perplexity</Term>, which is the same score with the log undone:
+            It also shows <Term>perplexity</Term>, which is the same score with the log undone:<Cite n={13} />
           </Paragraph>
           <MathBlock
             equation={String.raw`\text{perplexity} = 2^{H}`}
@@ -2376,6 +2376,21 @@ p \cdot p &= \sum_i p_i^2 \\
               n: 11,
               href: 'https://wwwusers.ts.infn.it/~milotti/Didattica/Bayes/pdfs/Jaynes_1957a.pdf',
               label: 'Jaynes, E. T. (1957). Information theory and statistical mechanics. Physical Review. (PDF).',
+            },
+            {
+              n: 12,
+              href: 'https://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf',
+              label: 'Shannon, C. E. (1948). A Mathematical Theory of Communication. Bell System Technical Journal. (PDF).',
+            },
+            {
+              n: 13,
+              href: 'https://web.stanford.edu/~cover/it.html',
+              label: 'Cover, T. M., & Thomas, J. A. Elements of Information Theory (cross-entropy, entropy, perplexity connections).',
+            },
+            {
+              n: 14,
+              href: 'https://www.deeplearningbook.org/',
+              label: 'Goodfellow, I., Bengio, Y., & Courville, A. (2016). Deep Learning (softmax, cross-entropy, and gradients).',
             },
           ]}
         />
