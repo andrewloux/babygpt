@@ -10,7 +10,7 @@ export function Highlight({ children }: TextProps) {
 }
 
 export function Term({ children }: TextProps) {
-  return <span className={styles.term}>{children}</span>
+  return <code className={styles.term}>{children}</code>
 }
 
 export function Paragraph({ children }: TextProps) {
