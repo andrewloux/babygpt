@@ -1027,38 +1027,80 @@ score = float(np.dot(a, b))`}</CodeBlock>
         </WorkedExample>
 
         <Paragraph>
-          If the word <Term>temperature</Term> feels oddly physical here, that’s because it is. Long before language models, people had the same problem in another domain: “I have a set of states with scores (energies). How should probability mass spread across them?”
+          If the word <Term>temperature</Term> feels oddly physical here, that’s because it is. The “divide by <Term>T</Term>, exponentiate, normalize” move shows up in statistical physics too — it’s the <Term>Boltzmann distribution</Term>.<Cite n={7} />
         </Paragraph>
         <Paragraph>
-          The labels are different (<Term>logit</Term> vs <Term>energy</Term>), but the job is the same: take raw, unnormalized numbers and turn them into a distribution that (1) stays positive, (2) sums to 1, and (3) changes smoothly when you nudge the scores.
+          Physics version: you have many possible configurations of a system (they call them <em>states</em>), and each state has an energy <Term>E</Term>. The question is operational: at temperature <Term>T</Term>, how much probability mass should each state get?<Cite n={7} />
+        </Paragraph>
+        <Paragraph>
+          A “state” here means one microscopic arrangement of the system — which is why the whole story historically ran head‑to‑head with the atom question. If matter is continuous, what are we “counting”? If matter is made of discrete parts, then “number of possible arrangements” becomes a real thing you can reason about.
         </Paragraph>
         <Paragraph>
           Picture a marble rolling around in a bumpy bowl. Leave it alone, and it settles at the bottom — the low‑energy spot. Heat the bowl, and the marble starts bouncing. The hotter you make it, the more it visits places it would never reach when cold.
         </Paragraph>
         <Paragraph>
-          In 1877, Ludwig Boltzmann wrote down a rule for how probability mass spreads across energy levels in a gas. (He was trying to explain pressure without being able to watch atoms directly.)
+          Boltzmann’s 1877 move was simple: turn energy into a positive <em>weight</em>, then normalize weights into probabilities.<Cite n={8} />
         </Paragraph>
+
+        <ol>
+          <li>
+            <strong>Give every state a positive weight.</strong> Lower energy should mean higher weight.
+          </li>
+          <li>
+            <strong>Make independent pieces multiply.</strong> If two independent parts have energies that add, the joint weight should factor into a product.
+          </li>
+        </ol>
+
+        <Paragraph>
+          That second rule is the sneaky one. Independent parts satisfy <MathInline equation={String.raw`E(a,b)=E(a)+E(b)`} />, but independent probabilities multiply. So we want a positive function <Term>f</Term> that turns sums into products:
+          <MathInline equation={String.raw`f(E_1+E_2)=f(E_1)\,f(E_2)`} />. The exponential is the clean bridge between those worlds:
+          <MathInline equation={String.raw`e^{-(E_1+E_2)/kT}=e^{-E_1/kT}\,e^{-E_2/kT}`} />.
+        </Paragraph>
+
+        <WorkedExample title="Two states, one temperature (by hand)">
+          <WorkedStep n="1">
+            <Paragraph>
+              Suppose we have two states. State A has energy <MathInline equation={String.raw`E_A=0`} />. State B has energy <MathInline equation={String.raw`E_B=2`} />. To keep the arithmetic clean, set <MathInline equation={String.raw`k=1`} /> and start with <MathInline equation={String.raw`T=1`} />.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="2">
+            <Paragraph>
+              Weights: <MathInline equation={String.raw`w_A=e^{0}=1`} /> and <MathInline equation={String.raw`w_B=e^{-2}\approx 0.135`} />.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="3" final>
+            <Paragraph>
+              Normalize by the sum <MathInline equation={String.raw`S=1+0.135=1.135`} />:
+              <MathInline equation={String.raw`p_A\approx 0.881`} />, <MathInline equation={String.raw`p_B\approx 0.119`} />.
+            </Paragraph>
+            <WorkedNote>
+              Now heat it up: at <MathInline equation={String.raw`T=2`} />, the gap matters less, so <MathInline equation={String.raw`w_B=e^{-2/2}=e^{-1}\approx 0.367`} /> and the distribution flattens.
+            </WorkedNote>
+          </WorkedStep>
+        </WorkedExample>
+
         <MathBlock
-          equation={String.raw`P(\text{state}) = \frac{1}{Z} e^{-E/kT}`}
-          explanation="Boltzmann distribution (Z normalizes to sum to 1; T controls how spread out it is)."
+          equation={String.raw`w(\text{state}) = e^{-E/kT}`}
+          explanation="Unnormalized weight. E = energy (lower → larger weight). T = temperature (higher spreads mass). k just converts units."
+        />
+        <MathBlock
+          equation={String.raw`P(\text{state}) = \frac{w(\text{state})}{\sum_{\text{states}} w(\text{state})} = \frac{1}{Z} e^{-E/kT}`}
+          explanation="Z is the normalization constant (“partition function”): Z = Σ_states exp(−E/kT). It exists only so probabilities sum to 1."
         />
         <Paragraph>
-          The historical punchline is that this wasn’t immediately accepted — Ernst Mach was skeptical of atoms as a concept — and it took decades of evidence (including Einstein’s work on Brownian motion) for the “atom story” to become standard physics. The equation outlived the arguments.
+          The historical punchline is that Boltzmann was doing this before anyone could watch atoms directly. Ernst Mach was skeptical of atom‑talk; Boltzmann argued you could infer the invisible from the statistics. Einstein’s 1905 Brownian‑motion analysis helped settle the debate: the jitter matched what you’d expect if matter is made of atoms.<Cite n={9} /><Cite n={10} />
         </Paragraph>
         <Paragraph>
-          Softmax is the same shape. If you treat <Term>score</Term> like “negative energy”, divide by <Term>T</Term>, exponentiate, and normalize, you get a distribution that gets sharper when cold and flatter when hot.
+          Now swap labels. In ML we don’t talk about “energy”; we talk about “score”. High score should mean high probability, so it plays the role of <Term>-E</Term>. Drop the unit constant <Term>k</Term>, divide by <Term>T</Term>, exponentiate, normalize — and you’re back at softmax.
         </Paragraph>
         <Paragraph>
-          To make the geometry visible, we’ll temporarily shrink the universe to three options. The simplex is the set of all valid 3‑way probability distributions. Temperature controls how aggressively the point moves toward a corner (certainty) versus staying nearer the middle (uncertainty).
+          To make this geometry visible, we’ll temporarily shrink the universe to three options. The set of all valid 3‑way probability distributions is a triangle called the <Term>probability simplex</Term>: corners are certainty, the center is uniform. Softmax moves you around inside this triangle as you change logits and temperature.
         </Paragraph>
 
         <SoftmaxSimplexViz />
 
         <Paragraph>
-          The triangle above is called the <Term>probability simplex</Term>. Every point inside represents a valid probability distribution over three options. The corners are certainty (100% on one choice). The center is complete uncertainty (uniform distribution).
-        </Paragraph>
-        <Paragraph>
-          Watch how temperature pulls the point around: low temperature drives toward corners, high temperature drifts toward center. Same logits, different confidence levels.
+          Watch how temperature pulls the point around: low <Term>T</Term> drives toward corners (certainty), high <Term>T</Term> drifts toward the center (uncertainty). Same logits, different confidence.
         </Paragraph>
 
         <Paragraph>
@@ -1089,6 +1131,7 @@ score = float(np.dot(a, b))`}</CodeBlock>
           <Paragraph>
             The honest version of the claim is: <em>if</em> you want the <strong>maximum‑entropy</strong> distribution subject to a constraint, you get an exponential family.
             It’s not “the only possible mapping from scores to probabilities” in general — it’s the unique solution to a specific optimization problem.
+            <Cite n={11} />
           </Paragraph>
           <Paragraph>
             Setup: you have outcomes <Term>i</Term> and you want probabilities <Term>p_i</Term>. You require:
@@ -2309,6 +2352,31 @@ p \cdot p &= \sum_i p_i^2 \\
               n: 6,
               href: 'https://arxiv.org/abs/1301.3781',
               label: 'Mikolov, T., Chen, K., Corrado, G., & Dean, J. (2013). Efficient estimation of word representations in vector space. arXiv preprint arXiv:1301.3781.',
+            },
+            {
+              n: 7,
+              href: 'https://plato.stanford.edu/entries/statphys-statmech/',
+              label: 'Stanford Encyclopedia of Philosophy — Statistical mechanics (Boltzmann distribution, partition function, temperature).',
+            },
+            {
+              n: 8,
+              href: 'https://www.britannica.com/biography/Ludwig-Boltzmann',
+              label: 'Encyclopaedia Britannica — Ludwig Boltzmann (biography + statistical mechanics context).',
+            },
+            {
+              n: 9,
+              href: 'https://plato.stanford.edu/entries/ernst-mach/',
+              label: 'Stanford Encyclopedia of Philosophy — Ernst Mach (positivism; skepticism about atoms).',
+            },
+            {
+              n: 10,
+              href: 'https://www2.math.uconn.edu/~gordina/Einstein_Brownian1905.pdf',
+              label: 'Einstein (1905) — Brownian motion paper (PDF translation).',
+            },
+            {
+              n: 11,
+              href: 'https://wwwusers.ts.infn.it/~milotti/Didattica/Bayes/pdfs/Jaynes_1957a.pdf',
+              label: 'Jaynes, E. T. (1957). Information theory and statistical mechanics. Physical Review. (PDF).',
             },
           ]}
         />
