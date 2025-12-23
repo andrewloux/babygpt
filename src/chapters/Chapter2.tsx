@@ -228,6 +228,22 @@ export function Chapter2() {
           One important clarification before we get carried away: the character <Term>'q'</Term> isn't "a vector." It's still just a
           symbol. The vector is the little bundle of numbers we decide to represent it with.
         </Paragraph>
+        <Paragraph>
+          We'll use one piece of notation throughout the chapter:
+        </Paragraph>
+        <ul>
+          <li>
+            <strong><Term>E</Term>:</strong> the embedding table (a matrix). One row per token/character, each row containing <Term>D</Term>{' '}
+            learned numbers.
+          </li>
+          <li>
+            <strong><Term>E[c]</Term>:</strong> “row lookup” — grab the row for token <Term>c</Term>.
+          </li>
+          <li>
+            <strong><Term>e_c</Term>:</strong> shorthand for that row: <Term>e_c = E[c]</Term>.
+          </li>
+        </ul>
+        <MathBlock equation={String.raw`e_q = E['q'] \qquad e_u = E['u']`} explanation="Example: the learned coordinates we assign to 'q' and 'u'." />
         <Callout variant="info" title="What actually lives in the space?">
           <ol>
             <li>
@@ -248,6 +264,11 @@ export function Chapter2() {
           When we blend things in the demo, we're blending <em>coordinates</em>, not identities. "Half red + half blue" makes sense
           because redness is an attribute. Same move here: a blend of <Term>e_q</Term> and <Term>e_u</Term> is just "somewhere between
           their learned attributes."
+        </Paragraph>
+        <Paragraph>
+          And we can already say something concrete about what training will try to do. In English text, <Term>'q'</Term> is usually followed by{' '}
+          <Term>'u'</Term>. That means the model will repeatedly see contexts where “the <Term>q</Term> row should score the <Term>u</Term> row
+          highly,” and the learned coordinates tend to move so that <Term>e_q</Term> and <Term>e_u</Term> play nicely together.
         </Paragraph>
         <Paragraph>
           And this is where the "continuous" part starts to matter. Integer IDs can only jump: 17 → 18. There's no "a tiny bit more
