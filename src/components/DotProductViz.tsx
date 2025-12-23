@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Slider } from './Slider'
+import { VizCard } from './VizCard'
 import styles from './DotProductViz.module.css'
 
 const VOCAB = [
@@ -90,15 +90,6 @@ function dot(a: number[], b: number[]): number {
   let s = 0
   for (let i = 0; i < a.length; i++) s += a[i] * b[i]
   return s
-}
-
-function l2Distance(a: number[], b: number[]): number {
-  let s = 0
-  for (let i = 0; i < a.length; i++) {
-    const d = a[i] - b[i]
-    s += d * d
-  }
-  return Math.sqrt(s)
 }
 
 function buildNextCharDistributions(text: string): {
@@ -250,8 +241,7 @@ export function DotProductViz({
   const pa = nextProbs[aIdx]
   const pb = nextProbs[bIdx]
 
-  const score = dot(pa, pb)
-  const l2 = useMemo(() => l2Distance(pa, pb), [pa, pb])
+  const matchProb = dot(pa, pb)
   const { top, rest } = useMemo(
     () => topContributions(pa, pb, VOCAB, 8),
     [pa, pb],
@@ -264,15 +254,13 @@ export function DotProductViz({
   const countB = charCounts[bIdx]
 
   const baseline = 1 / VOCAB.length
-  const scaleMax = Math.max(baseline * 4, score * 1.15)
-  const fillPercent = Math.min(100, (score / scaleMax) * 100)
+  const scaleMax = Math.max(baseline * 4, matchProb * 1.15)
+  const fillPercent = Math.min(100, (matchProb / scaleMax) * 100)
   const baselinePercent = Math.min(100, (baseline / scaleMax) * 100)
-  const ratio = score / baseline
-  const scoreSafe = Math.max(1e-12, score)
+  const ratio = matchProb / baseline
+  const scoreSafe = Math.max(1e-12, matchProb)
   const defaultDemoChar = top[0]?.char ?? ' '
   const [demoChar, setDemoChar] = useState(() => defaultDemoChar)
-  const [metric, setMetric] = useState<'dot' | 'euclidean'>('dot')
-  const [toyScale, setToyScale] = useState(4)
 
   useEffect(() => {
     setDemoChar(defaultDemoChar)
@@ -284,24 +272,15 @@ export function DotProductViz({
   const demoContrib = demoPa * demoPb
   const demoShare = demoContrib / scoreSafe
 
-  const l2Max = Math.SQRT2
-  const l2FillPercent = Math.min(100, (l2 / l2Max) * 100)
-
-  const isDot = metric === 'dot'
-  const scoreTitle = isDot ? 'P(match)' : 'L2 distance'
-  const scoreValue = isDot ? score.toFixed(4) : l2.toFixed(4)
-
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <span className={styles.title}>Dot Product: Overlap</span>
-        <span className={styles.subtitle}>
-          Draw one next-character from A and one from B. <strong>dot(A, B)</strong> is <strong>P(match)</strong>.
-        </span>
-      </div>
+    <VizCard
+      title="Dot Product: Overlap"
+      subtitle="Imagine drawing one next character from A and one from B. How often do they land on the same character?"
+    >
+      <div className={styles.inner}>
 
       {showCorpusEditor && (
-        <div className={styles.corpusSection}>
+        <div className={`${styles.corpusSection} panel-dark inset-box`}>
           <div className={styles.corpusTopRow}>
             <span className={styles.corpusLabel}>Corpus</span>
             <span className={styles.corpusStats}>{normalized.length.toLocaleString()} chars</span>
@@ -353,7 +332,7 @@ export function DotProductViz({
         </div>
 
         <div className={styles.presets}>
-          <span className={styles.presetsLabel}>Try:</span>
+          <span className={styles.presetsLabel}>Presets:</span>
           {PRESETS.map(p => (
             <button
               key={p.label}
@@ -370,15 +349,14 @@ export function DotProductViz({
       </div>
 
       <div className={styles.summary}>
-        <div className={styles.summaryLeft}>
+        <div className={`${styles.summaryLeft} panel-dark inset-box`}>
           <div className={styles.pairLine}>
             <span className={`${styles.badge} ${styles.badgeA}`}>{prettyChar(charA)}</span>
             <span className={styles.symbol}>·</span>
             <span className={`${styles.badge} ${styles.badgeB}`}>{prettyChar(charB)}</span>
           </div>
           <div className={styles.detailLine}>
-            Pair counts: {prettyChar(charA)}→* = {countA.toLocaleString()}× · {prettyChar(charB)}→* ={' '}
-            {countB.toLocaleString()}×
+            Pairs seen: {prettyChar(charA)}→* = {countA.toLocaleString()} · {prettyChar(charB)}→* = {countB.toLocaleString()}
           </div>
           <div className={styles.topNextRow}>
             <span className={`${styles.topNextLabel} ${styles.topNextLabelA}`}>
@@ -397,10 +375,6 @@ export function DotProductViz({
               )}
             </div>
           </div>
-          <div className={styles.note}>
-            Tip: spaces are often the most common “next character.” That’s real — but for the chips we usually show letters
-            so you can see the language patterns.
-          </div>
           <div className={styles.topNextRow}>
             <span className={`${styles.topNextLabel} ${styles.topNextLabelB}`}>
               Top next after {prettyChar(charB)}
@@ -418,110 +392,59 @@ export function DotProductViz({
               )}
             </div>
           </div>
+          <div className={styles.note}>
+            Space (<code>␣</code>) is a real token in this tiny vocabulary, and it often wins. Some presets avoid it so you can see
+            letter patterns more clearly.
+          </div>
         </div>
 
-        <div className={styles.summaryRight}>
-          <div className={styles.metricSwitch}>
-            <button
-              type="button"
-              className={`${styles.metricBtn} ${isDot ? styles.metricBtnActive : ''}`}
-              onClick={() => setMetric('dot')}
-            >
-              dot
-            </button>
-            <button
-              type="button"
-              className={`${styles.metricBtn} ${!isDot ? styles.metricBtnActive : ''}`}
-              onClick={() => setMetric('euclidean')}
-            >
-              euclidean
-            </button>
-          </div>
+        <div className={`${styles.summaryRight} panel-dark inset-box`}>
           <div className={styles.scoreLabel}>
-            <strong>{scoreTitle}</strong> {isDot ? '= dot(A, B)' : ''}
+            <strong>P(match)</strong>
             <div className={styles.scoreSublabel}>
-              {isDot ? (
-                <>
-                  = Σ p<sub>i</sub>(A) · p<sub>i</sub>(B)
-                </>
-              ) : (
-                '= ||A − B||₂ (lower is closer)'
-              )}
+              Σ p<sub>i</sub>(A) · p<sub>i</sub>(B)
             </div>
           </div>
-          <div className={styles.scoreValue}>{scoreValue}</div>
+          <div className={styles.scoreValue}>{matchProb.toFixed(4)}</div>
           <div className={styles.gauge}>
             <div className={styles.gaugeTrack}>
-              <div
-                className={styles.gaugeFill}
-                style={{ width: `${isDot ? fillPercent : l2FillPercent}%` }}
-              />
-              {isDot && (
-                <div className={styles.gaugeBaseline} style={{ left: `${baselinePercent}%` }} />
-              )}
+              <div className={styles.gaugeFill} style={{ width: `${fillPercent}%` }} />
+              <div className={styles.gaugeBaseline} style={{ left: `${baselinePercent}%` }} />
             </div>
             <div className={styles.gaugeMeta}>
               <span className={styles.gaugeLeft}>0</span>
               <span className={styles.gaugeMid}>
-                {isDot ? `baseline = 1/V (${baseline.toFixed(3)})` : `max ≈ √2 (${l2Max.toFixed(3)})`}
+                baseline = 1/V ({baseline.toFixed(3)})
               </span>
-              <span className={styles.gaugeRight}>≈ {isDot ? scaleMax.toFixed(3) : l2Max.toFixed(3)}</span>
+              <span className={styles.gaugeRight}>≈ {scaleMax.toFixed(3)}</span>
             </div>
           </div>
           <div className={styles.scoreHint}>
-            {isDot ? (
-              <>Higher means “more likely to match” (≈ {ratio.toFixed(1)}× uniform).</>
-            ) : (
-              <>Lower means “more similar” (0 would be identical fingerprints).</>
-            )}
+            ≈ {ratio.toFixed(1)}× uniform. Higher means A and B tend to agree on what’s next.
             <div className={styles.scoreSubhint}>
-              {isDot
-                ? 'This is the “two weighted dice” view: one roll from A, one roll from B.'
-                : 'Distance is a different question: how far apart are the two distributions, coordinate by coordinate?'}
+              This score rewards shared probability mass — even if the top-1 next character differs.
             </div>
           </div>
-
-          {!isDot && (
-            <div className={styles.metricToy}>
-              <div className={styles.metricToyTitle}>Counterexample (embeddings): same direction, different length</div>
-              <div className={styles.metricToySliderRow}>
-                <span className={styles.metricToyLabel}>scale</span>
-                <Slider
-                  wrap={false}
-                  min={0.5}
-                  max={6}
-                  step={0.1}
-                  value={toyScale}
-                  onValueChange={setToyScale}
-                  ariaLabel="Scale factor"
-                />
-                <span className={styles.metricToyValue}>{toyScale.toFixed(1)}×</span>
-              </div>
-              <div className={styles.metricToyGrid}>
-                <div className={styles.metricToyCell}>
-                  u = <code>[0.6, 0.8]</code>
-                </div>
-                <div className={styles.metricToyCell}>
-                  v = <code>{toyScale.toFixed(1)}×u</code>
-                </div>
-                <div className={styles.metricToyCell}>
-                  dot(u, v) = <strong>{toyScale.toFixed(2)}</strong>
-                </div>
-                <div className={styles.metricToyCell}>
-                  ||u − v||₂ = <strong>{Math.abs(toyScale - 1).toFixed(2)}</strong>
-                </div>
-              </div>
-              <div className={styles.metricToyNote}>
-                u and v point the same way. Euclidean grows with the length mismatch. Dot stays large because the alignment is perfect.
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
       <details className="collapsible">
-        <summary>Optional: how dot(A, B) becomes a probability</summary>
+        <summary>Optional: why the dot product is a probability</summary>
         <div className={styles.breakdown}>
+          <div className={styles.breakdownIntro}>
+            <div className={styles.breakdownTitle}>Build it from one question</div>
+            <div className={styles.breakdownNote}>
+              You’re drawing twice: once from A, once from B. A “match” has to happen on some character.
+            </div>
+            <ol className={styles.breakdownSteps}>
+              <li>Pick a character <code>i</code>.</li>
+              <li>Chance A draws <code>i</code> is <code>p_i(A)</code>.</li>
+              <li>Chance B draws <code>i</code> is <code>p_i(B)</code>.</li>
+              <li>
+                Chance they both draw <code>i</code> is <code>p_i(A)·p_i(B)</code>. Add over all <code>i</code>.
+              </li>
+            </ol>
+          </div>
           <div className={styles.termDemo}>
             <div className={styles.termDemoHeader}>
               <div className={styles.termDemoTitle}>One way to match</div>
@@ -722,11 +645,7 @@ export function DotProductViz({
           </details>
         </div>
       </details>
-
-      <div className={styles.footer}>
-        <strong>Interpretation:</strong> imagine rolling two weighted dice. Die A rolls using “what follows '{prettyChar(charA)}'”.
-        Die B rolls using “what follows '{prettyChar(charB)}'”. The dot product is the probability they land on the same character.
       </div>
-    </div>
+    </VizCard>
   )
 }

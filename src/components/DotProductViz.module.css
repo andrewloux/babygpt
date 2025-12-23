@@ -1,45 +1,11 @@
-.container {
+.inner {
   --text-muted: rgba(255, 255, 255, 0.52);
-  margin: 2rem 0;
-  background:
-    radial-gradient(900px 500px at 25% 0%, rgba(0, 217, 255, 0.08), transparent 55%),
-    radial-gradient(800px 450px at 90% 30%, rgba(255, 0, 110, 0.06), transparent 60%),
-    rgba(0, 0, 0, 0.3);
-  border-radius: 12px;
-  padding: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow:
-    0 0 0 1px rgba(0, 217, 255, 0.05) inset,
-    0 20px 60px rgba(0, 0, 0, 0.35);
-}
-
-.header {
-  text-align: center;
-  margin-bottom: 1.25rem;
-}
-
-.title {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: 0.05em;
-}
-
-.subtitle {
-  display: block;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin-top: 0.25rem;
 }
 
 /* Corpus */
 .corpusSection {
-  background: var(--code-bg);
   border-radius: 10px;
   padding: 1rem;
-  border: 1px solid var(--border-color);
   margin-bottom: 1.25rem;
 }
 
@@ -267,9 +233,6 @@
 }
 
 .summaryLeft {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
   padding: 1rem;
 }
 
@@ -389,50 +352,11 @@
 }
 
 .summaryRight {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   text-align: center;
-}
-
-.metricSwitch {
-  display: inline-flex;
-  align-self: center;
-  gap: 0.35rem;
-  margin-bottom: 0.65rem;
-  padding: 0.25rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.18);
-}
-
-.metricBtn {
-  cursor: pointer;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  padding: 0.35rem 0.7rem;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.65);
-  background: transparent;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.metricBtn:hover {
-  color: rgba(255, 255, 255, 0.86);
-  border-color: rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.metricBtnActive {
-  color: rgba(0, 0, 0, 0.9);
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(255, 255, 255, 0.25);
 }
 
 .scoreLabel {
@@ -497,93 +421,6 @@
   color: var(--text-muted);
 }
 
-.metricToy {
-  margin-top: 0.9rem;
-  padding: 0.85rem 0.85rem 0.75rem 0.85rem;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background:
-    radial-gradient(ellipse 70% 70% at 20% 0%, rgba(255, 0, 110, 0.08), transparent 55%),
-    rgba(0, 0, 0, 0.18);
-}
-
-.metricToyTitle {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.metricToySliderRow {
-  margin-top: 0.65rem;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.metricToyLabel {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.55);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.metricToySlider {
-  width: 100%;
-  height: 6px;
-  -webkit-appearance: none;
-  appearance: none;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 999px;
-  outline: none;
-  cursor: pointer;
-}
-
-.metricToySlider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
-  border: 2px solid rgba(255, 0, 110, 0.25);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
-}
-
-.metricToyValue {
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.78);
-  width: 3.8ch;
-  text-align: right;
-}
-
-.metricToyGrid {
-  margin-top: 0.65rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
-}
-
-.metricToyCell {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.75);
-  padding: 0.55rem 0.6rem;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.metricToyNote {
-  margin-top: 0.65rem;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.55);
-  line-height: 1.45;
-}
-
 .gaugeLeft,
 .gaugeRight {
   white-space: nowrap;
@@ -613,6 +450,25 @@
 /* One-term demo */
 .breakdown {
   margin-top: 0.9rem;
+}
+
+.breakdownIntro {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.breakdownSteps {
+  margin: 0.75rem 0 0 0;
+  padding-left: 1.25rem;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.4;
+}
+
+.breakdownSteps li {
+  margin: 0.25rem 0;
 }
 
 .termDemo {
