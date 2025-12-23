@@ -41,8 +41,8 @@ const stations: Station[] = [
     label: 'Structure',
     sublabel: 'Linguistic Patterns',
     icon: '🔤',
-    example: '"cat" → "cats"',
-    description: 'Language has regularities you can observe: what follows what, what substitutes for what, what clusters together.'
+    example: `"q" → "u" (often)`,
+    description: 'Language has measurable regularities: what tends to follow what, which contexts behave similarly, which substitutions preserve meaning.'
   },
   {
     id: 'embeddings',
@@ -59,8 +59,9 @@ export const AbstractionChainViz: React.FC = () => {
   const [hoveredStation, setHoveredStation] = useState<string | null>(null)
 
   const displayStation = activeStation || hoveredStation
-  const railMarginPct = 10
-  const railMarginPx = 100
+  // Keep stations safely inside the card, even when hover/glow effects expand.
+  const railMarginPct = 13
+  const railMarginPx = 140
 
   return (
     <div className={styles.noSelect}>
@@ -159,9 +160,10 @@ export const AbstractionChainViz: React.FC = () => {
 
         <div className={styles.footer}>
           <p className={styles.footerText}>
-            The same mathematical machinery (<span className={styles.highlightAlgebra}>vectors + algebra</span>)
-            works at both ends of the chain. Color mixing shows how something can become coordinates; embeddings do the same
-            for symbols, using <span className={styles.highlightPattern}>statistics</span> instead of wavelengths.
+            The same mathematical machinery (<span className={styles.highlightAlgebra}>vectors + algebra</span>) works at both
+            ends of the chain. Color mixing is a clean case where the coordinates come from a physical measurement. Embeddings
+            use the same operations, but the coordinates are learned from{' '}
+            <span className={styles.highlightPattern}>text statistics</span>.
           </p>
         </div>
       </VizCard>

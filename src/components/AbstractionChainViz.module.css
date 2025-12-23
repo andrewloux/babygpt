@@ -8,6 +8,8 @@
     height: 250px;
     display: flex;
     align-items: center;
+    padding: 0 1.25rem;
+    overflow: hidden;
 }
 
 @media (max-width: 768px) {
@@ -91,13 +93,13 @@
 }
 
 .station:hover {
-    transform: scale(1.15);
+    transform: scale(1.1);
     border-color: rgba(255, 255, 255, 0.4);
     box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
 }
 
 .stationActive {
-    transform: scale(1.15);
+    transform: scale(1.1);
     border-color: rgba(59, 130, 246, 0.8);
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2), 0 8px 24px rgba(59, 130, 246, 0.4);
 }
@@ -150,7 +152,7 @@
         opacity: 1;
     }
     100% {
-        transform: translate(-50%, -50%) scale(1.8);
+        transform: translate(-50%, -50%) scale(1.55);
         opacity: 0;
     }
 }

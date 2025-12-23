@@ -340,7 +340,7 @@ export function Chapter1() {
               Where does this huge number come from? It's the number of options multiplied across each position:
             </Paragraph>
             <MathBlock
-              equation="\underbrace{27}_{\text{char 1}} \times \underbrace{27}_{\text{char 2}} \times \dots \times \underbrace{27}_{\text{char 100}} = 27^{100}"
+              equation={String.raw`\underbrace{27}_{\text{char 1}} \times \underbrace{27}_{\text{char 2}} \times \dots \times \underbrace{27}_{\text{char 100}} = 27^{100}`}
               explanation="For a paragraph of 100 characters, you have 27 choices at every single step. Multiplication, not addition — because each choice at position 1 can pair with any of 27 at position 2."
             />
             <Paragraph>
