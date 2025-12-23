@@ -1188,8 +1188,7 @@ score = float(np.dot(a, b))`}</CodeBlock>
         </Paragraph>
         <ol>
           <li>
-            <strong>Foundation (2.1):</strong> Grassmann showed that abstract things can be coordinates. We need that “permission slip”
-            before treating characters like points in space.
+            <strong>Foundation (2.1):</strong> Grassmann showed that if an object supports consistent mixing and scaling, you can represent it with coordinates and do geometry on it. We borrow that move: represent each token with a vector so “near/far” and interpolation mean something precise. (The symbol isn’t a vector; the embedding is the coordinate representation.)
           </li>
           <li>
             <strong>Problem (2.2):</strong> The <Term>(vocab_size)<sup>T</sup></Term> scaling limit. This pressure is why we need sharing: one
