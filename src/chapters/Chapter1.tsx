@@ -1888,6 +1888,10 @@ print(f"First Y: {Y[0]}")               # [2, 4, 4, 5] ("ello")`}</CodeBlock>
           <strong>Something that can scale.</strong> Even a simple model becomes expensive when you repeat it billions of
           times. Chapter 3 is about making that practical.
         </Paragraph>
+        <Paragraph>
+          One last thing to hold onto before we practice: exact-match models love to declare perfectly reasonable continuations <Term>impossible</Term> just because that exact key wasn’t in the training set.
+        </Paragraph>
+        <GeneralizationGapViz />
       </Section>
 
       {/* Section 1.8: Exercises */}
@@ -1903,12 +1907,6 @@ print(f"First Y: {Y[0]}")               # [2, 4, 4, 5] ("ello")`}</CodeBlock>
           <li><strong>Handle tokenization edge cases:</strong> decide what “unknown token” means in code.</li>
           <li><strong>Count the data you’re creating:</strong> understand how the sliding window turns one string into many training pairs.</li>
         </ul>
-        <Paragraph>
-          Before you start, here’s the core pain that pushes us beyond “just count it”: exact-match models love to declare
-          perfectly reasonable continuations <Term>impossible</Term> because they weren’t in the training set.
-        </Paragraph>
-        <GeneralizationGapViz />
-
         <Exercise
           number="1.1"
           title="Chain Rule by Hand"
