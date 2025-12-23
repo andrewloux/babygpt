@@ -1260,13 +1260,22 @@ score = float(np.dot(a, b))`}</CodeBlock>
           So we have a scoreboard (<Term>loss</Term>). Now we need a steering wheel: a rule that says how to change the numbers to make that score go down.
         </Paragraph>
         <Paragraph>
-          In 1D, you call it <em>slope</em>: if a function rises when you step to the right, you should step left to go downhill. In many dimensions, you have a slope for every knob you can turn. That whole collection of “which way is uphill?” slopes is the <strong>gradient</strong>.
+          Start in one dimension, where you can actually picture it. Suppose the loss is a simple curve like <MathInline equation={String.raw`L(x)=x^2`} />. If you're at <MathInline equation={String.raw`x=2`} />, moving right makes <MathInline equation={String.raw`L`} /> bigger and moving left makes it smaller. That “which direction makes the loss go up if I nudge the knob?” fact is the <em>slope</em>.
         </Paragraph>
         <Paragraph>
-          To reduce loss, we step in the opposite direction. The learning rate <MathInline equation={String.raw`\eta`} /> is just “how big a step do we dare take?”
+          Now give yourself two knobs instead of one: <MathInline equation={String.raw`x`} /> and <MathInline equation={String.raw`y`} />. There’s a slope in the <MathInline equation={String.raw`x`} /> direction and a slope in the <MathInline equation={String.raw`y`} /> direction. Put those together and you get an arrow that points “most uphill” in the plane. That arrow is the <strong>gradient</strong>.
+        </Paragraph>
+        <Paragraph>
+          A real model has millions of knobs, so we can’t draw the arrow — but the idea is the same. The gradient is “for every knob, how much would the loss increase if I nudged it upward?” If we want the loss to go down, we step in the opposite direction.
+        </Paragraph>
+        <Paragraph>
+          One more ingredient: the learning rate <MathInline equation={String.raw`\eta`} />. It’s the step size — how far we dare to move each update. Too small and training crawls. Too big and you bounce past good solutions.
+        </Paragraph>
+        <Paragraph>
+          In symbols, we write “the gradient of the loss” as <MathInline equation={String.raw`\nabla\text{loss}`} />. The update rule is just “step downhill”:
         </Paragraph>
         <MathBlock
-          equation={String.raw`\text{parameters} \leftarrow \text{parameters} - \eta \cdot \text{gradient}`}
+          equation={String.raw`\text{parameters} \leftarrow \text{parameters} - \eta \cdot \nabla \text{loss}`}
           explanation="Gradient descent: move downhill on the loss."
         />
 
