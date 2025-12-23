@@ -18,7 +18,7 @@ const stations: Station[] = [
     sublabel: 'Physical Reality',
     icon: '🎨',
     example: 'RGB(255, 128, 64)',
-    description: 'Physical wavelengths of light hitting your retina. Concrete, measurable, but not yet mathematical.'
+    description: 'A real, measurable thing in the world (light hitting your eye). Concrete, but not yet in a coordinate system.'
   },
   {
     id: 'coords1',
@@ -26,7 +26,7 @@ const stations: Station[] = [
     sublabel: 'Measurement',
     icon: '📊',
     example: '[255, 128, 64]',
-    description: 'Numbers that measure the physical reality. Now we have a vector in R³.'
+    description: 'A measurement becomes a list of numbers. Now we can treat the thing as a vector in ℝ³.'
   },
   {
     id: 'algebra',
@@ -42,15 +42,15 @@ const stations: Station[] = [
     sublabel: 'Linguistic Patterns',
     icon: '🔤',
     example: '"cat" → "cats"',
-    description: 'Language has patterns like colors had wavelengths. Plural, tense, meaning relationships.'
+    description: 'Language has regularities you can observe: what follows what, what substitutes for what, what clusters together.'
   },
   {
-    id: 'coords2',
-    label: 'Coordinates',
-    sublabel: 'Embeddings',
+    id: 'embeddings',
+    label: 'Embeddings',
+    sublabel: 'Learned Coordinates',
     icon: '🎯',
     example: '[0.2, -0.5, ..., 0.8]',
-    description: 'Vectors in Rᵈ that capture linguistic structure. Same algebra, different domain.'
+    description: 'Vectors in ℝᵈ that are learned from text. Same algebra as before, but the coordinates come from statistics, not a ruler.'
   }
 ]
 
@@ -59,6 +59,8 @@ export const AbstractionChainViz: React.FC = () => {
   const [hoveredStation, setHoveredStation] = useState<string | null>(null)
 
   const displayStation = activeStation || hoveredStation
+  const railMarginPct = 10
+  const railMarginPx = 100
 
   return (
     <div className={styles.noSelect}>
@@ -67,9 +69,9 @@ export const AbstractionChainViz: React.FC = () => {
           <svg className={styles.rail} viewBox="0 0 1000 100" preserveAspectRatio="none">
             {/* Main rail line */}
             <line
-              x1="50"
+              x1={railMarginPx}
               y1="50"
-              x2="950"
+              x2={1000 - railMarginPx}
               y2="50"
               stroke="url(#railGradient)"
               strokeWidth="4"
@@ -92,7 +94,9 @@ export const AbstractionChainViz: React.FC = () => {
             {stations.map((station, index) => {
               const isActive = activeStation === station.id
               const isHovered = hoveredStation === station.id
-              const isFinal = station.id === 'coords2'
+              const isFinal = station.id === 'embeddings'
+              const t = stations.length === 1 ? 0 : index / (stations.length - 1)
+              const leftPct = railMarginPct + t * (100 - 2 * railMarginPct)
 
               return (
                 <div
@@ -100,7 +104,7 @@ export const AbstractionChainViz: React.FC = () => {
                   className={`${styles.stationWrapper} ${
                     isFinal ? styles.finalStation : ''
                   }`}
-                  style={{ left: `${(index / (stations.length - 1)) * 100}%` }}
+                  style={{ left: `${leftPct}%` }}
                 >
                   <button
                     className={`${styles.station} ${
@@ -156,8 +160,8 @@ export const AbstractionChainViz: React.FC = () => {
         <div className={styles.footer}>
           <p className={styles.footerText}>
             The same mathematical machinery (<span className={styles.highlightAlgebra}>vectors + algebra</span>)
-            works at both ends of the chain. Color mixing taught us the{' '}
-            <span className={styles.highlightPattern}>pattern</span>, embeddings apply it to language.
+            works at both ends of the chain. Color mixing shows how something can become coordinates; embeddings do the same
+            for symbols, using <span className={styles.highlightPattern}>statistics</span> instead of wavelengths.
           </p>
         </div>
       </VizCard>
