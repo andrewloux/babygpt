@@ -1084,27 +1084,22 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
         <Paragraph>
           This is the <Term>Sparsity Problem</Term>. Language is combinatorial; you will never see every valid two-word combination, no matter how much text you read.
         </Paragraph>
-        <Callout variant="info" title="The Zero-Probability Problem">
+        <Callout variant="warning" title="Sparsity → Zeros (and Zeros Break the Score)">
           <Paragraph>
-            <strong>The problem:</strong> In a pure counting model, an unseen next token gets probability 0. That sounds fine until you remember the cross-entropy formula:
+            In a pure counting model, an unseen next token gets probability 0. That sounds fine until you remember the cross‑entropy formula:
           </Paragraph>
           <MathBlock equation={String.raw`H = -\frac{1}{N} \sum \log_2 P(x_i)`} />
           <Paragraph>
-            The moment <em>any</em> <Term>P(xᵢ) = 0</Term>, you're computing <Term>-log(0) = ∞</Term>. One unseen bigram and your entire score explodes. That's not a useful metric.
+            The moment <em>any</em> <Term>P(xᵢ) = 0</Term>, you're computing <Term>-log(0) = ∞</Term>. One unseen bigram and your entire score explodes. That’s not a useful metric.
           </Paragraph>
           <Paragraph>
-            <strong>The fix:</strong> <Term>Add-k smoothing</Term> pretends you saw every possible next token <Term>k</Term> extra times. It keeps the score finite—though it doesn't make the model any smarter about what it hasn't seen.
-          </Paragraph>
-        </Callout>
-        <Callout variant="warning" title="When Memorization Fails: A Concrete Example">
-          <Paragraph>
-            Imagine training on 1 million sentences. Sounds huge—but English has roughly 170,000 common words. The number of possible two-word combinations is 170,000 × 170,000 = 29 billion. Your 1 million training sentences contain maybe 10 million bigrams. That's 10 million / 29 billion ≈ 0.03% coverage.
+            Now zoom out. Imagine training on 1 million sentences. Sounds huge — but English has roughly 170,000 common words. The number of possible two‑word combinations is 170,000 × 170,000 = 29 billion. Your 1 million training sentences contain maybe 10 million bigrams. That’s 10 million / 29 billion ≈ 0.03% coverage.
           </Paragraph>
           <Paragraph>
-            Here's what this means concretely. Suppose "dog" appears 5,000 times in your corpus. You'd expect it to pair with roughly 5,000 / 170,000 ≈ 3% of the vocabulary. So for most words—97% of them—P(word | "dog") = 0. Not "low probability." <strong>Zero</strong>. The model literally cannot generate "dog frisbee" or "dog veterinarian" if those exact pairs never appeared, even though they're perfectly valid English.
+            Concretely: suppose <Term>"dog"</Term> appears 5,000 times. You’d expect it to pair with roughly <Term>5,000 / 170,000 ≈ 3%</Term> of the vocabulary. So for most words — 97% of them — <Term>P(word | "dog")</Term> is 0. Not “low.” Zero. The model literally can’t generate <Term>"dog veterinarian"</Term> if that exact pair never appeared, even though it’s perfectly valid English.
           </Paragraph>
           <Paragraph>
-            This isn't a minor smoothing issue. It's a fundamental failure mode: <strong>memorization doesn't generalize</strong>. The fix requires something that can share information between similar contexts—which is exactly what embeddings do in Chapter 2.
+            Smoothing keeps the score finite. It doesn’t solve the deeper problem: <strong>memorization doesn’t generalize</strong>. The fix requires sharing information between similar contexts — which is what embeddings give us in Chapter 2.
           </Paragraph>
         </Callout>
         <Exercise
@@ -1251,14 +1246,24 @@ P(b|a) = (1 + 1) / 3 = 2/3`}</CodeBlock>
           explanation="There's a 17% chance of generating 'cat' if we sampled from this model."
         />
         <Callout variant="insight" title="This Becomes the Training Objective">
-          <p>This formula <em>is</em> the training objective. When we train a language model, we're minimizing cross-entropy—which is just minimizing average surprise.</p>
-          <p>The loop is: predict, measure surprise, adjust the model so the next time it assigns more probability to what actually happens.</p>
-          <p>For our character-level model with 27 possible characters, random guessing gives <Term>log₂(27) ≈ 4.75 bits</Term> per character. That's the baseline—pure ignorance. A trained model should do better.</p>
-        </Callout>
-        <Callout variant="info" title="The Training Objective">
-          <p>This is the core intuition. The model's job is to <Highlight>assign high probability to the correct next token</Highlight>.</p>
-          <p>If the real text is "cat", the model sees "c" and should put most of its probability mass on "a". Then it sees "ca" and should put most of the mass on "t".</p>
-          <p>By maximizing the probability of the <em>correct</em> token at every step, the model implicitly maximizes the probability of the entire real sequence. This is why training looks like "next token prediction"—and in stats terms, it's maximum likelihood.</p>
+          <Paragraph>
+            This formula is the training objective. The model’s job is to <Highlight>assign high probability to the correct next token</Highlight>.
+          </Paragraph>
+          <Paragraph>
+            If the real text is <Term>"cat"</Term>, the model sees <Term>"c"</Term> and should put most of its probability mass on <Term>"a"</Term>.
+            Then it sees <Term>"ca"</Term> and should put most of the mass on <Term>"t"</Term>.
+          </Paragraph>
+          <Paragraph>
+            By maximizing the probability of the correct token at every step, the model implicitly maximizes the probability of the whole sequence.
+            That’s why training looks like “next token prediction” — and in stats terms, it’s maximum likelihood.
+          </Paragraph>
+          <Paragraph>
+            The loop is: predict → measure surprise → adjust the model so next time it assigns more probability to what actually happens.
+          </Paragraph>
+          <Paragraph>
+            For our character-level world with 27 possible characters, random guessing gives <Term>log₂(27) ≈ 4.75 bits</Term> per character.
+            That’s the baseline — pure ignorance. A trained model should do better.
+          </Paragraph>
         </Callout>
       </Section>
 
@@ -1451,19 +1456,12 @@ itos = {i: ch for ch, i in stoi.items()}
         <Paragraph>
           The <Term>context length</Term> (also called <Term>block size</Term>) is that finite window—how far back the model can look. Everything outside that window doesn't exist to the model. context_length = 3 means: see 3 tokens, predict the 4th, forget everything older.
         </Paragraph>
-        <Callout variant="insight" title="The Context Window Is The Universe">
-          <Paragraph>
-            When the context length is 4, the model's "world" is the last 4 characters. Everything before that is gone. That's why n-grams can feel eerily competent locally and still fall apart globally. They're great at tiny neighborhoods.
-          </Paragraph>
-        </Callout>
-        <Callout variant="insight" title="Sampling: Let It Talk">
-          <Paragraph>
-            Scoring is one side of the coin. The other side is <strong>generation</strong>: pick a starting context, sample a next character, slide the window, repeat.
-          </Paragraph>
-          <Paragraph>
-            That's all this demo is doing under the hood: counts → probabilities → random choice.
-          </Paragraph>
-        </Callout>
+        <Paragraph>
+          <strong>The context window is the model’s whole world.</strong> When the context length is 4, the model’s “world” is the last 4 characters. Everything before that is gone. That’s why n‑grams can feel eerily competent locally and still fall apart globally.
+        </Paragraph>
+        <Paragraph>
+          Scoring is one side of the coin. The other side is <strong>generation</strong>: pick a starting context, sample a next character, slide the window, repeat. That’s all the demo is doing under the hood: counts → probabilities → random choice.
+        </Paragraph>
         <Callout variant="info" title="A concrete benchmark">
           <Paragraph>
             With the default training text and <Term>n = 2</Term> (a character bigram model), we get perplexity around <Term>8–12</Term>. Uniform random guessing over 27 characters is perplexity 27.
