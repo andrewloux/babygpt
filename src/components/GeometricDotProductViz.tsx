@@ -359,57 +359,60 @@ export function GeometricDotProductViz() {
               </div>
             </div>
 
-            <div className={styles.breakdown}>
-              <div className={styles.breakdownRow}>
-                <span className={styles.breakdownLabel}>|A|</span>
-                <span className={styles.breakdownValue}>{computed.magA.toFixed(2)}</span>
+            <div className={`inset-box ${styles.detailsCard}`}>
+              <div className={styles.breakdown}>
+                <div className={styles.breakdownRow}>
+                  <span className={styles.breakdownLabel}>|A|</span>
+                  <span className={styles.breakdownValue}>{computed.magA.toFixed(2)}</span>
+                </div>
+                <div className={styles.breakdownRow}>
+                  <span className={styles.breakdownLabel}>|B|</span>
+                  <span className={styles.breakdownValue}>{computed.magB.toFixed(2)}</span>
+                </div>
+                <div className={styles.breakdownRow}>
+                  <span className={styles.breakdownLabel}>Angle</span>
+                  <span className={styles.breakdownValue}>{computed.angleDeg.toFixed(0)}°</span>
+                </div>
+                <div className={styles.breakdownRow}>
+                  <span className={styles.breakdownLabel}>Projection A → B</span>
+                  <span className={styles.breakdownValue}>{computed.projLength.toFixed(2)}</span>
+                </div>
               </div>
-              <div className={styles.breakdownRow}>
-                <span className={styles.breakdownLabel}>|B|</span>
-                <span className={styles.breakdownValue}>{computed.magB.toFixed(2)}</span>
-              </div>
-              <div className={styles.breakdownRow}>
-                <span className={styles.breakdownLabel}>Angle</span>
-                <span className={styles.breakdownValue}>{computed.angleDeg.toFixed(0)}°</span>
-              </div>
-              <div className={styles.breakdownRow}>
-                <span className={styles.breakdownLabel}>Projection of A onto B</span>
-                <span className={styles.breakdownValue}>{computed.projLength.toFixed(2)}</span>
-              </div>
-            </div>
 
-            <div className={styles.formula}>
-              A · B = |A| × |B| × cos(θ)
-              <br />
-              <span className={styles.formulaValues}>
-                {computed.dot.toFixed(2)} = {computed.magA.toFixed(2)} × {computed.magB.toFixed(2)} ×{' '}
-                {Math.cos((computed.angleDeg * Math.PI) / 180).toFixed(2)}
-              </span>
-            </div>
+              <div className={styles.detailsDivider} aria-hidden="true" />
 
-            <label className={styles.toggle} htmlFor="show-projection-toggle">
-              <input
-                id="show-projection-toggle"
-                type="checkbox"
-                checked={showProjection}
-                onChange={(e) => setShowProjection(e.target.checked)}
-                aria-label="Toggle projection visualization"
-              />
-              <span>Show projection (shadow)</span>
-            </label>
+              <div className={styles.formula}>
+                <div className={styles.formulaLine}>A · B = |A| × |B| × cos(θ)</div>
+                <div className={styles.formulaValues}>
+                  {computed.dot.toFixed(2)} = {computed.magA.toFixed(2)} × {computed.magB.toFixed(2)} ×{' '}
+                  {Math.cos((computed.angleDeg * Math.PI) / 180).toFixed(2)}
+                </div>
+              </div>
 
-            <div className={styles.insight}>
-              {isPositive ? (
-                <>
-                  <span className={styles.insightIcon}>↗</span>
-                  <span>Vectors point in similar directions (angle &lt; 90°)</span>
-                </>
-              ) : (
-                <>
-                  <span className={styles.insightIcon}>↙</span>
-                  <span>Vectors point in opposite directions (angle &gt; 90°)</span>
-                </>
-              )}
+              <label className={styles.toggle} htmlFor="show-projection-toggle">
+                <input
+                  id="show-projection-toggle"
+                  type="checkbox"
+                  checked={showProjection}
+                  onChange={(e) => setShowProjection(e.target.checked)}
+                  aria-label="Toggle projection visualization"
+                />
+                <span>Show projection (shadow)</span>
+              </label>
+
+              <div className={styles.insight}>
+                {isPositive ? (
+                  <>
+                    <span className={styles.insightIcon}>↗</span>
+                    <span>Vectors point in similar directions (angle &lt; 90°)</span>
+                  </>
+                ) : (
+                  <>
+                    <span className={styles.insightIcon}>↙</span>
+                    <span>Vectors point in opposite directions (angle &gt; 90°)</span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>

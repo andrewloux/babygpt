@@ -1,6 +1,6 @@
 .content {
   display: grid;
-  grid-template-columns: 1fr 280px;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
   gap: 1.25rem;
 }
 
@@ -209,7 +209,8 @@
 .infoPanel {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  min-width: 0;
 }
 
 .resultBox {
@@ -221,6 +222,18 @@
   padding: 1rem;
   text-align: center;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+}
+
+.detailsCard {
+  padding: 0.9rem 0.95rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.detailsDivider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .resultLabel {
@@ -253,8 +266,10 @@
 }
 
 .breakdownRow {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 0.75rem;
   font-size: 0.85rem;
 }
 
@@ -268,22 +283,21 @@
 }
 
 .formula {
-  background:
-    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(255, 255, 255, 0.03), transparent 60%),
-    rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 0.95rem;
-  padding: 0.75rem;
   font-family: var(--font-mono);
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.55;
+}
+
+.formulaLine {
   text-align: center;
-  line-height: 1.6;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .formulaValues {
-  color: rgba(255, 255, 255, 0.75);
+  margin-top: 0.35rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.78);
   font-size: 0.75rem;
 }
 
@@ -294,16 +308,12 @@
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.55);
   cursor: pointer;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.18);
+  padding: 0.35rem 0.25rem;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .toggle:hover {
-  background: rgba(0, 0, 0, 0.28);
-  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .toggle input {
@@ -322,15 +332,8 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background:
-    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(255, 255, 255, 0.03), transparent 60%),
-    rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 0.95rem;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.55);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
 }
 
 .insightIcon {
