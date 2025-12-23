@@ -17,7 +17,7 @@ const stations: Station[] = [
     label: 'Colors',
     sublabel: 'Physical Reality',
     icon: '🎨',
-    example: 'RGB(255, 128, 64)',
+    example: 'Red → RGB(255, 0, 0)',
     description: 'A real, measurable thing in the world (light hitting your eye). Concrete, but not yet in a coordinate system.'
   },
   {

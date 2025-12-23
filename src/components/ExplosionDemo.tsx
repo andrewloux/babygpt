@@ -111,7 +111,10 @@ export function ExplosionDemo() {
         <div className={styles.right}>
           <div className={styles.barLabels}>
             <span>Oversaturated</span>
-            <span className={styles.crossover}>1× crossover</span>
+            <span className={styles.crossover}>
+              <span className={styles.crossoverLabel}>Crossover</span>
+              <span className={styles.crossoverHint}>ratio = 1</span>
+            </span>
             <span>Sparse</span>
           </div>
           <div className={styles.barTrack} aria-hidden="true">
