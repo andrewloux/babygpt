@@ -20,7 +20,7 @@ High-level rules (the spec is the source of truth):
 - Prefer a small **surface palette**:
   - “Figure” vizzes use `VizCard` (`ambient-glow` + `card-glass`).
   - Nested content uses `.panel-dark` / `.inset-box`.
-  - “Terminal/window” look should be intentional (use `--code-bg` only when it’s explicitly an app/demo surface).
+  - “Terminal/window” look should be intentional (copy the header motif from `src/components/CorridorDemo.module.css`; use `--code-bg` only when it’s explicitly an app/demo surface).
 - Use tokenized radii/spacing (`--radius-*`, `--space-*`) and shared interaction affordances (`.focus-glow`, `.hover-lift`).
 - Avoid “token drift”: don’t introduce new CSS vars unless they’re defined in `src/styles/global.css`.
 
