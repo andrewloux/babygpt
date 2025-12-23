@@ -1,0 +1,64 @@
+.row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  min-width: 0;
+}
+
+.value {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+}
+
+.sm .label {
+  font-size: 9px;
+}
+
+.sm .value {
+  font-size: 11px;
+}
+
+.md .label {
+  font-size: 10px;
+}
+
+.md .value {
+  font-size: 12px;
+}
+
+.default .value {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.cyan .value {
+  color: var(--accent-cyan);
+}
+
+.magenta .value {
+  color: var(--accent-magenta);
+}
+
+.yellow .value {
+  color: var(--accent-yellow);
+}
+
+.green .value {
+  color: var(--accent-green);
+}
+
+.red .value {
+  color: var(--accent-red);
+}
+

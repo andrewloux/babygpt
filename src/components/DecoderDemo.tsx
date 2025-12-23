@@ -1,5 +1,6 @@
 import { useMemo, useState, useRef, useEffect } from 'react'
 import { Slider } from './Slider'
+import { DataRow } from './DataRow'
 import styles from './DecoderDemo.module.css'
 
 // --- Data & Logic ---
@@ -192,10 +193,7 @@ export function DecoderDemo() {
 
       <div className={styles.controls}>
         <div className={styles.controlGroup}>
-          <div className={styles.label}>
-            <span>Beam Width (K)</span>
-            <span className={styles.value}>{beamWidth}</span>
-          </div>
+          <DataRow label="Beam Width (K)" value={beamWidth} tone="magenta" size="sm" />
           <Slider
             wrap={false}
             min={1}
@@ -207,10 +205,7 @@ export function DecoderDemo() {
           />
         </div>
         <div className={styles.controlGroup}>
-          <div className={styles.label}>
-            <span>LM Weight</span>
-            <span className={styles.value}>{lmWeight.toFixed(1)}</span>
-          </div>
+          <DataRow label="LM Weight" value={lmWeight.toFixed(1)} tone="magenta" size="sm" />
           <Slider
             wrap={false}
             min={0}

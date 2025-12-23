@@ -26,6 +26,7 @@ export { CodeChallenge } from './CodeChallenge'
 export { TrainingExamples } from './TrainingExamples'
 export { Invariants, InvariantItem } from './Invariants'
 export { Exercise } from './Exercise'
+export { DataRow } from './DataRow'
 
 // Visualization components
 export { VizCard } from './VizCard'
