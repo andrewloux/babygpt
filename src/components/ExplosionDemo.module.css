@@ -164,6 +164,10 @@
   overflow: hidden;
 }
 
+.barWrap {
+  position: relative;
+}
+
 .barFill {
   position: absolute;
   top: 0;
@@ -171,6 +175,86 @@
   height: 100%;
   border-radius: 999px;
   transition: width var(--transition-smooth), background var(--transition-smooth);
+}
+
+.marker {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.markerDot {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.55), 0 0 14px rgba(0, 0, 0, 0.35);
+}
+
+.markerLabel {
+  position: absolute;
+  left: 0;
+  top: -0.75rem;
+  transform: translate(-50%, -100%);
+  padding: 0.55rem 0.65rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  width: max-content;
+  max-width: 220px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
+}
+
+.markerLeft .markerLabel {
+  transform: translate(0, -100%);
+  margin-left: 10px;
+}
+
+.markerRight .markerLabel {
+  transform: translate(-100%, -100%);
+  margin-left: -10px;
+}
+
+.markerLabelTitle {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.markerLabelLine {
+  margin-top: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.78);
+  white-space: nowrap;
+}
+
+.marker.oversaturated .markerLabelLine {
+  color: color-mix(in srgb, var(--accent-green) 70%, rgba(255, 255, 255, 0.92));
+}
+
+.marker.covered .markerLabelLine {
+  color: color-mix(in srgb, var(--accent-green) 55%, rgba(255, 255, 255, 0.92));
+}
+
+.marker.sparse .markerLabelLine {
+  color: color-mix(in srgb, var(--accent-yellow) 70%, rgba(255, 255, 255, 0.92));
+}
+
+.marker.critical .markerLabelLine,
+.marker.void .markerLabelLine {
+  color: color-mix(in srgb, var(--accent-red) 75%, rgba(255, 255, 255, 0.92));
 }
 
 .barFill.oversaturated {

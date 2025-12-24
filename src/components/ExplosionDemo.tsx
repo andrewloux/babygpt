@@ -42,6 +42,15 @@ export function ExplosionDemo() {
     return `${(ratio * 100).toExponential(1)}`
   }
 
+  const formatRatio = (ratio: number) => {
+    if (ratio === 0) return '0'
+    if (ratio >= 1000) return ratio.toFixed(0)
+    if (ratio >= 10) return ratio.toFixed(1)
+    if (ratio >= 1) return ratio.toFixed(2)
+    if (ratio >= 0.01) return ratio.toFixed(3)
+    return ratio.toExponential(1)
+  }
+
   const getState = (ratio: number) => {
     if (ratio >= 10) return { state: 'oversaturated', label: 'OVERSATURATED', desc: 'More data than possibilities' }
     if (ratio >= 1) return { state: 'covered', label: 'FULL COVERAGE', desc: 'Data covers all possibilities' }
@@ -53,6 +62,7 @@ export function ExplosionDemo() {
   const { state, label, desc } = getState(data.ratio)
 
   const exponentChain = useMemo(() => Array(T).fill('27').join(' × '), [T])
+  const markerAlign = data.barPosition < 12 ? 'markerLeft' : data.barPosition > 88 ? 'markerRight' : 'markerCenter'
 
   const footer =
     T >= 6 ? (
@@ -117,9 +127,19 @@ export function ExplosionDemo() {
             </span>
             <span>Sparse</span>
           </div>
-          <div className={styles.barTrack} aria-hidden="true">
-            <div className={`${styles.barFill} ${styles[state]}`} style={{ width: `${data.barPosition}%` }} />
-            <div className={styles.crossoverLine} />
+          <div className={styles.barWrap} aria-hidden="true">
+            <div className={styles.barTrack}>
+              <div className={`${styles.barFill} ${styles[state]}`} style={{ width: `${data.barPosition}%` }} />
+              <div className={styles.crossoverLine} />
+            </div>
+            <div className={`${styles.marker} ${styles[state]} ${styles[markerAlign]}`} style={{ left: `${data.barPosition}%` }}>
+              <div className={styles.markerDot} />
+              <div className={styles.markerLabel}>
+                <div className={styles.markerLabelTitle}>Current</div>
+                <div className={styles.markerLabelLine}>ratio = {formatRatio(data.ratio)}</div>
+                <div className={styles.markerLabelLine}>coverage = {formatCoverage(data.ratio)}</div>
+              </div>
+            </div>
           </div>
           <div className={styles.barScale}>
             <span>1000×</span>

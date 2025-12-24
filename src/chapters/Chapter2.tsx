@@ -2426,7 +2426,10 @@ p \cdot p &= \sum_i p_i^2 \\
         />
       </Section>
 
-      <ChapterNav prev={{ href: '/', label: 'Chapter 1: The Meat Grinder' }} />
-    </Container >
+      <ChapterNav
+        prev={{ href: '/', label: 'Chapter 1: The Meat Grinder' }}
+        next={{ href: '/chapter-03', label: 'Chapter 3: The Engine Room' }}
+      />
+    </Container>
   )
 }
