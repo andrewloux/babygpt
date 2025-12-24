@@ -963,21 +963,31 @@ score = float(np.dot(a, b))`}</CodeBlock>
           explanation="Take each score x_i and turn it into a positive weight with e^{x_i}. Then divide by the total weight so everything sums to 1. (Weights → probabilities.)"
         />
 
+        <Paragraph>
+          One important detail, because it shows up in both the math and the code: softmax only cares about <em>differences</em>. If you add the same constant to every logit, the probabilities stay exactly the same.
+        </Paragraph>
+        <Paragraph>
+          That gives us permission to pick a convenient constant. In code, we almost always subtract the max logit so the largest exponent is <MathInline equation={String.raw`e^{0}=1`} /> and nothing overflows.
+        </Paragraph>
+
+        <details className="collapsible">
+          <summary>Why adding a constant doesn’t change softmax (optional algebra)</summary>
+          <div className="collapsibleContent">
+            <MathBlock
+              equation={String.raw`\text{Softmax}(x_i + c) = \frac{e^{x_i + c}}{\sum_j e^{x_j + c}} = \frac{e^c e^{x_i}}{e^c \sum_j e^{x_j}} = \text{Softmax}(x_i)`}
+              explanation="The same exp(c) factor appears in every term, so it cancels."
+            />
+            <MathBlock
+              equation={String.raw`\text{Softmax}(x_i) = \frac{e^{x_i - m}}{\sum_{j} e^{x_j - m}} \quad \text{where } m = \max_j x_j`}
+              explanation="Same probabilities, but now every exponent is ≤ 1."
+            />
+          </div>
+        </details>
+
         <Callout variant="info" title="Softmax only cares about differences (and that's a lifesaver)">
           <Paragraph>
-            Softmax has a quiet superpower: if you add the same constant to every logit, the probabilities don't change. It's blind to absolute level — it only sees gaps.
+            If you remember one implementation detail: always compute softmax with max-subtraction for numerical stability.
           </Paragraph>
-          <MathBlock
-            equation={String.raw`\text{Softmax}(x_i + c) = \frac{e^{x_i + c}}{\sum_j e^{x_j + c}} = \frac{e^c e^{x_i}}{e^c \sum_j e^{x_j}} = \text{Softmax}(x_i)`}
-            explanation="The same exp(c) factor appears in every term, so it cancels."
-          />
-          <Paragraph>
-            That means we can pick a convenient constant. In code, we almost always subtract the max logit so the largest exponent is <MathInline equation={String.raw`e^{0}=1`} /> and nothing overflows.
-          </Paragraph>
-          <MathBlock
-            equation={String.raw`\text{Softmax}(x_i) = \frac{e^{x_i - m}}{\sum_{j} e^{x_j - m}} \quad \text{where } m = \max_j x_j`}
-            explanation="Same probabilities, but now every exponent is ≤ 1."
-          />
         </Callout>
 
         <WorkedExample title="Softmax by hand (3 logits)">
