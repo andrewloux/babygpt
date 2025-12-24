@@ -248,7 +248,7 @@ export function SoftmaxLandscapeViz() {
     setIsDragging(false)
   }, [])
 
-  const planePoints = useMemo(() => {
+  const plane = useMemo(() => {
     const x0 = ORIGIN_X
     const y0 = ORIGIN_Y
     const x1 = ORIGIN_X + rowWidth
@@ -258,7 +258,17 @@ export function SoftmaxLandscapeViz() {
     const x3 = ORIGIN_X + (GRID - 1) * rowShiftX
     const y3 = ORIGIN_Y - (GRID - 1) * rowShiftY
 
-    return `${x0},${y0} ${x1},${y1} ${x2},${y2} ${x3},${y3}`
+    return {
+      points: `${x0},${y0} ${x1},${y1} ${x2},${y2} ${x3},${y3}`,
+      x0,
+      y0,
+      x1,
+      y1,
+      x2,
+      y2,
+      x3,
+      y3,
+    }
   }, [GRID, ORIGIN_X, ORIGIN_Y, rowShiftX, rowShiftY, rowWidth])
 
   const svgStyle = useMemo(() => ({ ['--bar-rgb' as any]: token.rgb }), [token.rgb])
@@ -327,78 +337,98 @@ export function SoftmaxLandscapeViz() {
           >
             Reset view
           </button>
-
-          <div className={styles.readout} aria-live="polite">
-            <div className={styles.readoutTitle}>Inspecting</div>
-            <div className={styles.readoutMono}>
-              Δℓ(e)=<span className={styles.readoutAccentCyan}>{formatSigned(focus?.a ?? 0)}</span>{' '}
-              Δℓ(a)=<span className={styles.readoutAccentMagenta}>{formatSigned(focus?.b ?? 0)}</span>{' '}
-              ℓ(i)=<span className={styles.readoutMuted}>0.0</span>
-            </div>
-            <div className={styles.readoutRows}>
-              <div className={styles.readoutRow}>
-                <span className={styles.readoutKey} style={{ color: 'var(--accent-cyan)' }}>
-                  P('e')
-                </span>
-                <span className={styles.readoutVal}>{(focus?.probs[0] ?? 0).toFixed(3)}</span>
-              </div>
-              <div className={styles.readoutRow}>
-                <span className={styles.readoutKey} style={{ color: 'var(--accent-magenta)' }}>
-                  P('a')
-                </span>
-                <span className={styles.readoutVal}>{(focus?.probs[1] ?? 0).toFixed(3)}</span>
-              </div>
-              <div className={styles.readoutRow}>
-                <span className={styles.readoutKey} style={{ color: 'var(--accent-yellow)' }}>
-                  P('i')
-                </span>
-                <span className={styles.readoutVal}>{(focus?.probs[2] ?? 0).toFixed(3)}</span>
-              </div>
-            </div>
-            <div className={styles.readoutHint}>
-              Drag to rotate. <span className={styles.readoutHintMuted}>Click a pillar to pin a point.</span>
-            </div>
-          </div>
         </div>
 
         <div className={styles.chartPanel}>
-          <div className={styles.chartHeader}>
-            <div className={styles.axisHint}>
-              Left→right: Δℓ(e). Front→back: Δℓ(a). Height: <span className={styles.axisEmph}>P('{token.label}')</span>.
+          <div className={`${styles.chartFrame} panel-dark inset-box`}>
+            <div className={`${styles.overlay} panel-dark inset-box`} aria-live="polite">
+              <div className={styles.overlayTitle}>Reading the plot</div>
+              <div className={styles.overlayLine}>
+                <span className={styles.overlayKey}>Base</span> score gaps: Δℓ(e), Δℓ(a) (relative to ℓ(i)=0).
+              </div>
+              <div className={styles.overlayLine}>
+                <span className={styles.overlayKey}>Height</span> <span className={styles.overlayEmph}>P('{token.label}')</span>.
+              </div>
+              <div className={styles.overlayLine}>
+                <span className={styles.overlayKey}>T</span> reshapes the same landscape.
+              </div>
+              <div className={styles.overlayDivider} />
+              <div className={styles.overlayTitle}>Focused pillar</div>
+              <div className={styles.overlayMono}>
+                Δℓ(e)=<span className={styles.overlayAccentCyan}>{formatSigned(focus?.a ?? 0)}</span>{' '}
+                Δℓ(a)=<span className={styles.overlayAccentMagenta}>{formatSigned(focus?.b ?? 0)}</span>
+              </div>
+              <div className={styles.overlayValue}>
+                P('{token.label}') = <span className={styles.overlayEmph}>{(focus?.probs[selectedIndex] ?? 0).toFixed(3)}</span>
+              </div>
+              <div className={styles.overlayHint}>Drag to rotate · click to pin</div>
             </div>
-          </div>
 
-          <svg
-            viewBox={`0 0 ${viewW} ${viewH}`}
-            className={styles.svg}
-            style={svgStyle}
-            role="img"
-            aria-label="Softmax landscape showing probability as a function of logit differences and temperature"
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={endDrag}
-            onPointerCancel={endDrag}
-          >
-            <defs>
-              <filter id="barGlow" x="-40%" y="-40%" width="180%" height="180%">
-                <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="rgba(0, 217, 255, 0.45)" />
-                <feDropShadow dx="0" dy="0" stdDeviation="7" floodColor="rgba(255, 0, 170, 0.25)" />
-              </filter>
-            </defs>
-
-            <polygon className={styles.plane} points={planePoints} />
-
-            <text x={ORIGIN_X} y={ORIGIN_Y + 34} className={styles.axisLabel} textAnchor="start">
-              Δℓ(e): {RANGE_MIN} → {RANGE_MAX}
-            </text>
-            <text
-              x={ORIGIN_X + rowWidth + (GRID - 1) * rowShiftX + 16}
-              y={ORIGIN_Y - (GRID - 1) * rowShiftY + 6}
-              className={styles.axisLabel}
-              textAnchor="start"
+            <svg
+              viewBox={`0 0 ${viewW} ${viewH}`}
+              className={styles.svg}
+              style={svgStyle}
+              role="img"
+              aria-label="Softmax landscape showing probability as a function of logit differences and temperature"
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={endDrag}
+              onPointerCancel={endDrag}
             >
-              Δℓ(a): {RANGE_MIN} → {RANGE_MAX}
-            </text>
+              <defs>
+                <filter id="barGlow" x="-40%" y="-40%" width="180%" height="180%">
+                  <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="rgba(0, 217, 255, 0.45)" />
+                  <feDropShadow dx="0" dy="0" stdDeviation="7" floodColor="rgba(255, 0, 170, 0.25)" />
+                </filter>
+
+                <marker
+                  id="axisArrow"
+                  markerWidth="10"
+                  markerHeight="10"
+                  refX="6"
+                  refY="3"
+                  orient="auto"
+                  markerUnits="strokeWidth"
+                >
+                  <path d="M0,0 L6,3 L0,6 Z" fill="rgba(255,255,255,0.45)" />
+                </marker>
+              </defs>
+
+              <polygon className={styles.plane} points={plane.points} />
+
+              <line
+                className={styles.axisArrow}
+                x1={plane.x0}
+                y1={plane.y0}
+                x2={plane.x1}
+                y2={plane.y1}
+                markerEnd="url(#axisArrow)"
+              />
+              <line
+                className={styles.axisArrow}
+                x1={plane.x0}
+                y1={plane.y0}
+                x2={plane.x3}
+                y2={plane.y3}
+                markerEnd="url(#axisArrow)"
+              />
+
+              <text
+                x={plane.x1 + 12}
+                y={plane.y1 + 6}
+                className={styles.axisLabel}
+                textAnchor="start"
+              >
+                Δℓ(e)
+              </text>
+              <text
+                x={plane.x3 - 6}
+                y={plane.y3 - 10}
+                className={styles.axisLabel}
+                textAnchor="end"
+              >
+                Δℓ(a)
+              </text>
 
             {(() => {
               const nodes: React.ReactNode[] = []
@@ -455,7 +485,8 @@ export function SoftmaxLandscapeViz() {
 
               return nodes
             })()}
-          </svg>
+            </svg>
+          </div>
         </div>
       </div>
     </VizCard>
