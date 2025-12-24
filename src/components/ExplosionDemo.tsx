@@ -1,12 +1,35 @@
-import { useMemo, useState } from 'react'
-import { Slider } from './Slider'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { VizCard } from './VizCard'
 import styles from './ExplosionDemo.module.css'
 
 export function ExplosionDemo() {
   const [T, setT] = useState(3)
+  const barRef = useRef<HTMLDivElement | null>(null)
   const vocabSize = 27 // a-z + space
   const trainingDataSize = 1_000_000 // 1 million examples
+
+  const computeBarPosition = useCallback((contextLength: number) => {
+    const possibilities = Math.pow(vocabSize, contextLength)
+    const ratio = trainingDataSize / possibilities
+    const logRatio = Math.log10(ratio)
+    return Math.max(0, Math.min(100, 50 + logRatio * 8))
+  }, [trainingDataSize, vocabSize])
+
+  const snapTFromPercent = useCallback((percent: number) => {
+    const x = Math.max(0, Math.min(1, percent))
+    const pos = x * 100
+    let bestT = 1
+    let bestDist = Infinity
+    for (let candidateT = 1; candidateT <= 10; candidateT++) {
+      const candidatePos = computeBarPosition(candidateT)
+      const dist = Math.abs(candidatePos - pos)
+      if (dist < bestDist) {
+        bestDist = dist
+        bestT = candidateT
+      }
+    }
+    return bestT
+  }, [computeBarPosition])
 
   const data = useMemo(() => {
     const possibilities = Math.pow(vocabSize, T)
@@ -64,6 +87,46 @@ export function ExplosionDemo() {
   const exponentChain = useMemo(() => Array(T).fill('27').join(' × '), [T])
   const markerAlign = data.barPosition < 12 ? 'markerLeft' : data.barPosition > 88 ? 'markerRight' : 'markerCenter'
 
+  const handleBarPointer = useCallback((clientX: number) => {
+    const el = barRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    if (rect.width <= 0) return
+    const percent = (clientX - rect.left) / rect.width
+    setT(snapTFromPercent(percent))
+  }, [snapTFromPercent])
+
+  const handleBarPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return
+    e.preventDefault()
+    handleBarPointer(e.clientX)
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }, [handleBarPointer])
+
+  const handleBarPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.hasPointerCapture(e.pointerId)) return
+    handleBarPointer(e.clientX)
+  }, [handleBarPointer])
+
+  const handleBarKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+      e.preventDefault()
+      setT((prev) => Math.max(1, prev - 1))
+    }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+      e.preventDefault()
+      setT((prev) => Math.min(10, prev + 1))
+    }
+    if (e.key === 'Home') {
+      e.preventDefault()
+      setT(1)
+    }
+    if (e.key === 'End') {
+      e.preventDefault()
+      setT(10)
+    }
+  }, [])
+
   const footer =
     T >= 6 ? (
       <div className={styles.footer}>
@@ -77,22 +140,6 @@ export function ExplosionDemo() {
     <VizCard title="The Generalization Wall" subtitle="Why counting doesn't scale" footer={footer}>
       <div className={styles.grid}>
         <div className={styles.left}>
-          <div className={styles.sliderSection}>
-            <div className={styles.sliderHeader}>
-              <span className={styles.sliderLabel}>Context length (T)</span>
-              <span className={styles.lengthValue}>T = {T}</span>
-            </div>
-            <Slider
-              wrap={false}
-              min={1}
-              max={10}
-              step={1}
-              value={T}
-              onValueChange={(v) => setT(Math.round(v))}
-              ariaLabel="Context length (T)"
-            />
-          </div>
-
           <div className={styles.numbers}>
             <div className={styles.numberRow}>
               <div className={styles.numberLabel}>Possibilities</div>
@@ -119,6 +166,10 @@ export function ExplosionDemo() {
         </div>
 
         <div className={styles.right}>
+          <div className={styles.controlHeader}>
+            <span className={styles.sliderLabel}>Context length (T)</span>
+            <span className={styles.lengthValue}>T = {T}</span>
+          </div>
           <div className={styles.barLabels}>
             <span>Oversaturated</span>
             <span className={styles.crossover}>
@@ -127,8 +178,21 @@ export function ExplosionDemo() {
             </span>
             <span>Sparse</span>
           </div>
-          <div className={styles.barWrap} aria-hidden="true">
-            <div className={styles.barTrack}>
+          <div className={styles.barWrap}>
+            <div
+              ref={barRef}
+              className={styles.barTrack}
+              role="slider"
+              tabIndex={0}
+              aria-label="Context length (T)"
+              aria-valuemin={1}
+              aria-valuemax={10}
+              aria-valuenow={T}
+              aria-valuetext={`T = ${T}`}
+              onPointerDown={handleBarPointerDown}
+              onPointerMove={handleBarPointerMove}
+              onKeyDown={handleBarKeyDown}
+            >
               <div className={`${styles.barFill} ${styles[state]}`} style={{ width: `${data.barPosition}%` }} />
               <div className={styles.crossoverLine} />
             </div>
