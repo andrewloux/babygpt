@@ -12,9 +12,9 @@ interface VizCardProps {
 export function VizCard({ title, figNum, subtitle, footer, children }: VizCardProps) {
   return (
     <div className={styles.container}>
-      <div className={`ambient-glow ${styles.ambientGlow}`} />
-
       <div className={`card-glass ${styles.card}`}>
+        <div className={`ambient-glow ${styles.ambientGlow}`} />
+
         <div className={styles.header}>
           <div className={styles.headerText}>
             <h3 className={styles.title}>{title}</h3>
@@ -31,4 +31,3 @@ export function VizCard({ title, figNum, subtitle, footer, children }: VizCardPr
     </div>
   )
 }
-

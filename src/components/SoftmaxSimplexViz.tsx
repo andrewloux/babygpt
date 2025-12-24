@@ -167,103 +167,132 @@ export function SoftmaxSimplexViz() {
       figNum="Fig. 2.5"
     >
       <div className={styles.content}>
-        <div className={styles.sliderPanel}>
+        <div className={`${styles.sliderPanel} panel-dark inset-box`}>
           <div className={styles.scenario}>
-            After seeing <strong>"th"</strong>, the model predicts...
+            <span className={styles.scenarioLabel}>Context</span>
+            <span className={styles.scenarioValue}>
+              after <strong>"th"</strong>
+            </span>
           </div>
 
-          <div className={styles.sliderGroup}>
-            <label className={styles.sliderLabel} htmlFor="logitA">
-              <span className={styles.logitName} style={{ color: 'var(--accent-cyan)' }}>
-                score('{CHARS[0]}')
-              </span>
-              <span className={styles.logitValue}>{logitA.toFixed(1)}</span>
-            </label>
-            <Slider
-              id="logitA"
-              wrap={false}
-              min={-10}
-              max={10}
-              step={0.1}
-              value={logitA}
-              onValueChange={setLogitA}
-              ariaLabel={`Score for character ${CHARS[0]}`}
-            />
-          </div>
+          <div className={styles.section}>
+            <div className={styles.sectionTitle}>Scores (logits)</div>
 
-          <div className={styles.sliderGroup}>
-            <label className={styles.sliderLabel} htmlFor="logitB">
-              <span className={styles.logitName} style={{ color: 'var(--accent-magenta)' }}>
-                score('{CHARS[1]}')
-              </span>
-              <span className={styles.logitValue}>{logitB.toFixed(1)}</span>
-            </label>
-            <Slider
-              id="logitB"
-              wrap={false}
-              min={-10}
-              max={10}
-              step={0.1}
-              value={logitB}
-              onValueChange={setLogitB}
-              ariaLabel={`Score for character ${CHARS[1]}`}
-            />
-          </div>
-
-          <div className={styles.sliderGroup}>
-            <label className={styles.sliderLabel} htmlFor="logitC">
-              <span className={styles.logitName} style={{ color: 'var(--accent-yellow)' }}>
-                score('{CHARS[2]}')
-              </span>
-              <span className={styles.logitValue}>{logitC.toFixed(1)}</span>
-            </label>
-            <Slider
-              id="logitC"
-              wrap={false}
-              min={-10}
-              max={10}
-              step={0.1}
-              value={logitC}
-              onValueChange={setLogitC}
-              ariaLabel={`Score for character ${CHARS[2]}`}
-            />
-          </div>
-
-          <div className={styles.sliderGroup}>
-            <label className={styles.sliderLabel} htmlFor="temperature">
-              <span className={styles.logitName}>Temperature</span>
-              <span className={styles.logitValue}>{temperature.toFixed(1)}</span>
-            </label>
-            <Slider
-              id="temperature"
-              wrap={false}
-              min={0.1}
-              max={5}
-              step={0.1}
-              value={temperature}
-              onValueChange={setTemperature}
-              ariaLabel="Temperature parameter"
-            />
-          </div>
-
-          <div className={styles.probDisplay}>
-            <div className={styles.probRow}>
-              <span style={{ color: 'var(--accent-cyan)' }}>P('{CHARS[0]}')</span>
-              <span>{(probs[0] * 100).toFixed(1)}%</span>
+            <div className={styles.sliderGroup}>
+              <label className={styles.sliderLabel} htmlFor="logitA">
+                <span className={styles.logitName} style={{ color: 'var(--accent-cyan)' }}>
+                  '{CHARS[0]}' score
+                </span>
+                <span className={styles.logitValue}>{logitA.toFixed(1)}</span>
+              </label>
+              <Slider
+                id="logitA"
+                wrap={false}
+                min={-10}
+                max={10}
+                step={0.1}
+                value={logitA}
+                onValueChange={setLogitA}
+                ariaLabel={`Score for character ${CHARS[0]}`}
+              />
             </div>
-            <div className={styles.probRow}>
-              <span style={{ color: 'var(--accent-magenta)' }}>P('{CHARS[1]}')</span>
-              <span>{(probs[1] * 100).toFixed(1)}%</span>
+
+            <div className={styles.sliderGroup}>
+              <label className={styles.sliderLabel} htmlFor="logitB">
+                <span className={styles.logitName} style={{ color: 'var(--accent-magenta)' }}>
+                  '{CHARS[1]}' score
+                </span>
+                <span className={styles.logitValue}>{logitB.toFixed(1)}</span>
+              </label>
+              <Slider
+                id="logitB"
+                wrap={false}
+                min={-10}
+                max={10}
+                step={0.1}
+                value={logitB}
+                onValueChange={setLogitB}
+                ariaLabel={`Score for character ${CHARS[1]}`}
+              />
             </div>
-            <div className={styles.probRow}>
-              <span style={{ color: 'var(--accent-yellow)' }}>P('{CHARS[2]}')</span>
-              <span>{(probs[2] * 100).toFixed(1)}%</span>
+
+            <div className={styles.sliderGroup}>
+              <label className={styles.sliderLabel} htmlFor="logitC">
+                <span className={styles.logitName} style={{ color: 'var(--accent-yellow)' }}>
+                  '{CHARS[2]}' score
+                </span>
+                <span className={styles.logitValue}>{logitC.toFixed(1)}</span>
+              </label>
+              <Slider
+                id="logitC"
+                wrap={false}
+                min={-10}
+                max={10}
+                step={0.1}
+                value={logitC}
+                onValueChange={setLogitC}
+                ariaLabel={`Score for character ${CHARS[2]}`}
+              />
             </div>
           </div>
 
-          <button className={styles.clearBtn} type="button" onClick={() => setTrail([point])} aria-label="Clear trail">
-            Clear trail
-          </button>
+          <div className={styles.section}>
+            <div className={styles.sectionTitle}>Temperature</div>
+            <div className={styles.sliderGroup}>
+              <label className={styles.sliderLabel} htmlFor="temperature">
+                <span className={styles.logitName}>T</span>
+                <span className={styles.logitValue}>{temperature.toFixed(1)}</span>
+              </label>
+              <Slider
+                id="temperature"
+                wrap={false}
+                min={0.1}
+                max={5}
+                step={0.1}
+                value={temperature}
+                onValueChange={setTemperature}
+                ariaLabel="Temperature parameter"
+              />
+            </div>
+          </div>
+
+          <div className={`${styles.probDisplay} inset-box`}>
+            <div className={styles.probTitle}>Probabilities</div>
+            <div className={styles.probRow}>
+              <span className={styles.probKey} style={{ color: 'var(--accent-cyan)' }}>
+                '{CHARS[0]}'
+              </span>
+              <div className={styles.probBarTrack}>
+                <div className={styles.probBarA} style={{ width: `${Math.min(100, probs[0] * 100)}%` }} />
+              </div>
+              <span className={styles.probVal}>{(probs[0] * 100).toFixed(1)}%</span>
+            </div>
+            <div className={styles.probRow}>
+              <span className={styles.probKey} style={{ color: 'var(--accent-magenta)' }}>
+                '{CHARS[1]}'
+              </span>
+              <div className={styles.probBarTrack}>
+                <div className={styles.probBarB} style={{ width: `${Math.min(100, probs[1] * 100)}%` }} />
+              </div>
+              <span className={styles.probVal}>{(probs[1] * 100).toFixed(1)}%</span>
+            </div>
+            <div className={styles.probRow}>
+              <span className={styles.probKey} style={{ color: 'var(--accent-yellow)' }}>
+                '{CHARS[2]}'
+              </span>
+              <div className={styles.probBarTrack}>
+                <div className={styles.probBarC} style={{ width: `${Math.min(100, probs[2] * 100)}%` }} />
+              </div>
+              <span className={styles.probVal}>{(probs[2] * 100).toFixed(1)}%</span>
+            </div>
+          </div>
+
+          <div className={styles.actionRow}>
+            <button className={styles.clearBtn} type="button" onClick={() => setTrail([point])} aria-label="Clear trail">
+              Clear trail
+            </button>
+            <span className={styles.hint}>Drag the dot in the triangle.</span>
+          </div>
         </div>
 
         <div className={styles.vizPanel}>
@@ -348,17 +377,17 @@ export function SoftmaxSimplexViz() {
       <div className={styles.explanation}>
         {temperature < 0.5 && (
           <>
-            <strong>Cold model (T={temperature.toFixed(1)}):</strong> Probability mass concentrates on the highest-scoring token.
+            <strong>Cold (T={temperature.toFixed(1)}):</strong> almost all probability piles onto the winner.
           </>
         )}
         {temperature >= 0.5 && temperature <= 2 && (
           <>
-            <strong>Normal temperature (T={temperature.toFixed(1)}):</strong> The distribution reflects the score differences.
+            <strong>Medium (T={temperature.toFixed(1)}):</strong> probabilities track score gaps.
           </>
         )}
         {temperature > 2 && (
           <>
-            <strong>Hot model (T={temperature.toFixed(1)}):</strong> Probability spreads toward uniform.
+            <strong>Hot (T={temperature.toFixed(1)}):</strong> the distribution relaxes toward uniform.
           </>
         )}
       </div>
