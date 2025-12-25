@@ -49,6 +49,7 @@ import {
   DerivativeViz,
   GradientStepViz,
   SoftmaxNudgeViz,
+  ChainOfBlameViz,
 } from '../components'
 
 const DEFAULT_SHARED_CORPUS = `It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.
@@ -1355,6 +1356,11 @@ score = float(np.dot(a, b))`}</CodeBlock>
           The widget below builds that up by measurement: nudge one score by <Term>ε</Term> and watch the loss respond.
         </Paragraph>
         <SoftmaxNudgeViz />
+        <Paragraph>
+          That tells us the “blame signal” for the logits. Next question: how does that blame reach the actual parameters —
+          the embedding row and the weights — so they move in the right direction?
+        </Paragraph>
+        <ChainOfBlameViz />
         <Paragraph>
           In symbols, we write “the gradient of the loss” as <MathInline equation={String.raw`\nabla\text{loss}`} />. The update rule is just “step downhill”:
         </Paragraph>
