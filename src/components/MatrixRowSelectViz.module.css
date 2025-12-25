@@ -6,6 +6,122 @@
   color: rgba(255, 255, 255, 0.92);
 }
 
+.prediction {
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  background: rgba(0, 0, 0, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.predictionPrompt {
+  font-size: 0.98rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 70ch;
+}
+
+.predictionControls {
+  margin-top: 0.85rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.predictionChoices {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.guessBtn {
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.16);
+  color: rgba(255, 255, 255, 0.72);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.82rem;
+  padding: 0.55rem 0.7rem;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.guessBtn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 217, 255, 0.28);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.guessBtnSelected {
+  color: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 217, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.12);
+}
+
+.guessBtnLocked {
+  box-shadow: 0 0 0 4px rgba(255, 214, 0, 0.12);
+}
+
+.predictionActions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.lockBtn,
+.revealBtn {
+  border-radius: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.18);
+  color: rgba(255, 255, 255, 0.78);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.82rem;
+  padding: 0.6rem 0.8rem;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.revealBtn {
+  border-color: rgba(0, 217, 255, 0.24);
+}
+
+.lockBtn:hover,
+.revealBtn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.lockBtn:disabled,
+.revealBtn:disabled,
+.guessBtn:disabled {
+  cursor: default;
+  opacity: 0.55;
+  transform: none;
+}
+
+.predictionFeedback {
+  margin-top: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.good {
+  color: rgba(76, 217, 153, 0.9);
+}
+
+.bad {
+  color: rgba(255, 214, 0, 0.9);
+}
+
+.neutral {
+  color: rgba(255, 255, 255, 0.55);
+}
+
 .toolbar {
   display: flex;
   align-items: center;
@@ -137,10 +253,18 @@
   text-shadow: 0 0 10px rgba(0, 217, 255, 0.18);
 }
 
+.vectorCellPulse {
+  box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.18);
+}
+
 .cellActive {
   color: rgba(255, 255, 255, 0.9);
   border-color: rgba(0, 217, 255, 0.32);
   background: rgba(0, 217, 255, 0.06);
+}
+
+.cellPulse {
+  box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.12);
 }
 
 .labelCellActive {
@@ -229,6 +353,20 @@
   font-family: var(--font-mono);
   color: var(--accent-cyan);
   font-weight: 800;
+}
+
+.hidden {
+  opacity: 0.2;
+  filter: blur(3px);
+}
+
+.blurred {
+  filter: blur(6px);
+  opacity: 0.55;
+}
+
+.resultPulse {
+  box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.12);
 }
 
 .expansion {
