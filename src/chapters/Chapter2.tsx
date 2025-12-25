@@ -140,6 +140,31 @@ export function Chapter2() {
           What we need is a representation where tokens aren't just labels — they're <strong>locations</strong>. Where <Term>'cat'</Term> and <Term>'dog'</Term> being nearby isn't a metaphor but a geometric fact. Where learning about one automatically teaches you something about
           its neighbors. That's the shift from memorization to generalization: from a lookup table to a map.
         </Paragraph>
+        <Callout variant="insight" title="The machine we’re building (preview)">
+          <Paragraph>
+            Here’s the smallest “embedding language model” you can build. It’s just a few boxes wired together:
+          </Paragraph>
+          <ol>
+            <li>
+              <strong>Start with an ID:</strong> a token <Term>x</Term> has an integer index <Term>ix</Term>.
+            </li>
+            <li>
+              <strong>Lookup coordinates:</strong> grab a row from the embedding table: <Term>e_x = E[ix]</Term>.
+            </li>
+            <li>
+              <strong>Make a guess:</strong> turn that vector into scores for the next token (logits).
+            </li>
+            <li>
+              <strong>Normalize:</strong> convert logits into probabilities with <Term>softmax</Term>.
+            </li>
+            <li>
+              <strong>Train:</strong> nudge <Term>E</Term> (and the output weights) so the true next token gets more probability next time.
+            </li>
+          </ol>
+          <Paragraph>
+            The rest of the chapter is just making each arrow feel inevitable.
+          </Paragraph>
+        </Callout>
         <Paragraph>
           Under the hood, this is also a scaling limit: the number of possible contexts explodes exponentially. We can't store them all. We need a way to <strong>compress</strong> infinite variations of language into something finite.
         </Paragraph>
