@@ -19,6 +19,87 @@
   padding: 1rem;
 }
 
+.challenge {
+  border-radius: 12px;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.challengeTitle {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.challengeText {
+  margin-top: 0.55rem;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.challengeActions {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.lockBtn,
+.resetBtn {
+  border-radius: 0.7rem;
+  padding: 0.6rem 0.9rem;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.lockBtn:hover,
+.resetBtn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 217, 255, 0.28);
+  box-shadow: 0 10px 24px rgba(0, 217, 255, 0.1);
+}
+
+.lockBtn:disabled {
+  cursor: default;
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+}
+
+.challengeFeedback {
+  margin-top: 0.65rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.35;
+}
+
+.good {
+  color: rgba(76, 217, 153, 0.9);
+}
+
+.bad {
+  color: rgba(255, 214, 0, 0.9);
+}
+
+.neutral {
+  color: rgba(255, 255, 255, 0.55);
+}
+
 .scenario {
   display: flex;
   align-items: baseline;
@@ -249,6 +330,12 @@
   opacity: 0.85;
   font-weight: 500;
   letter-spacing: 0.05em;
+}
+
+.centerDot {
+  fill: rgba(255, 255, 255, 0.22);
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1.5;
 }
 
 .trail {

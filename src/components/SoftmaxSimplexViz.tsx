@@ -80,6 +80,7 @@ export function SoftmaxSimplexViz() {
   const [temperature, setTemperature] = useState(1.0)
   const [trail, setTrail] = useState<{ x: number; y: number }[]>([])
   const [isDragging, setIsDragging] = useState(false)
+  const [attemptLocked, setAttemptLocked] = useState(false)
   const svgRef = useRef<SVGSVGElement | null>(null)
   const isDraggingRef = useRef(false)
   const pointRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
@@ -90,6 +91,14 @@ export function SoftmaxSimplexViz() {
   )
 
   const point = useMemo(() => toCartesian(probs), [probs])
+  const ratioEI = probs[0] / Math.max(1e-12, probs[2])
+  const challengeSuccess =
+    attemptLocked &&
+    probs[1] < 0.05 &&
+    probs[0] > 0.2 &&
+    probs[2] > 0.2 &&
+    ratioEI >= 0.7 &&
+    ratioEI <= 1.3
 
   useEffect(() => {
     const last = pointRef.current
@@ -164,10 +173,53 @@ export function SoftmaxSimplexViz() {
     <VizCard
       title="The Probability Simplex"
       subtitle="Visualizing the space of probability distributions"
-      figNum="Fig. 2.5"
+      figNum="Fig. 2.5b"
     >
       <div className={styles.content}>
         <div className={`${styles.sliderPanel} panel-dark inset-box`}>
+          <div className={styles.challenge}>
+            <div className={styles.challengeTitle}>Challenge</div>
+            <div className={styles.challengeText}>
+              Find a setting where <span className={styles.mono}>'a'</span> is almost impossible, but <span className={styles.mono}>'e'</span> and{' '}
+              <span className={styles.mono}>'i'</span> still compete.
+            </div>
+            <div className={styles.challengeActions}>
+              <button
+                type="button"
+                className={styles.lockBtn}
+                onClick={() => setAttemptLocked(true)}
+                disabled={attemptLocked}
+              >
+                {attemptLocked ? 'Attempt locked' : 'Lock attempt'}
+              </button>
+              <button
+                type="button"
+                className={styles.resetBtn}
+                onClick={() => {
+                  setAttemptLocked(false)
+                  setLogitA(1.5)
+                  setLogitB(0.5)
+                  setLogitC(-0.5)
+                  setTemperature(1.0)
+                  setTrail([point])
+                }}
+              >
+                Reset
+              </button>
+            </div>
+            <div className={styles.challengeFeedback} aria-live="polite">
+              {attemptLocked ? (
+                challengeSuccess ? (
+                  <span className={styles.good}>Nice. You killed 'a' without collapsing into a corner.</span>
+                ) : (
+                  <span className={styles.bad}>Not quite — try pushing 'a' down while keeping 'e' and 'i' close.</span>
+                )
+              ) : (
+                <span className={styles.neutral}>When it looks right, lock your attempt.</span>
+              )}
+            </div>
+          </div>
+
           <div className={styles.scenario}>
             <span className={styles.scenarioLabel}>Context</span>
             <span className={styles.scenarioValue}>
@@ -193,6 +245,7 @@ export function SoftmaxSimplexViz() {
                 step={0.1}
                 value={logitA}
                 onValueChange={setLogitA}
+                disabled={attemptLocked}
                 ariaLabel={`Score for character ${CHARS[0]}`}
               />
             </div>
@@ -212,6 +265,7 @@ export function SoftmaxSimplexViz() {
                 step={0.1}
                 value={logitB}
                 onValueChange={setLogitB}
+                disabled={attemptLocked}
                 ariaLabel={`Score for character ${CHARS[1]}`}
               />
             </div>
@@ -231,6 +285,7 @@ export function SoftmaxSimplexViz() {
                 step={0.1}
                 value={logitC}
                 onValueChange={setLogitC}
+                disabled={attemptLocked}
                 ariaLabel={`Score for character ${CHARS[2]}`}
               />
             </div>
@@ -251,6 +306,7 @@ export function SoftmaxSimplexViz() {
                 step={0.1}
                 value={temperature}
                 onValueChange={setTemperature}
+                disabled={attemptLocked}
                 ariaLabel="Temperature parameter"
               />
             </div>
@@ -338,7 +394,7 @@ export function SoftmaxSimplexViz() {
               className={styles.vertexLabel}
               style={{ fill: 'var(--accent-cyan)' }}
             >
-              100% '{CHARS[0]}'
+              '{CHARS[0]}'
             </text>
             <text
               x={VERTICES.B.x - 40}
@@ -346,7 +402,7 @@ export function SoftmaxSimplexViz() {
               className={styles.vertexLabel}
               style={{ fill: 'var(--accent-magenta)' }}
             >
-              100% '{CHARS[1]}'
+              '{CHARS[1]}'
             </text>
             <text
               x={VERTICES.C.x + 40}
@@ -354,10 +410,11 @@ export function SoftmaxSimplexViz() {
               className={styles.vertexLabel}
               style={{ fill: 'var(--accent-yellow)' }}
             >
-              100% '{CHARS[2]}'
+              '{CHARS[2]}'
             </text>
 
             {/* Center label */}
+            <circle cx={CENTER_X} cy={CENTER_Y} r="6" className={styles.centerDot} />
             <text x={CENTER_X} y={CENTER_Y + 5} className={styles.centerLabel}>
               uniform
             </text>
