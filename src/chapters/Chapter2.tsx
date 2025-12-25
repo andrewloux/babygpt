@@ -47,6 +47,7 @@ import {
   OneHotViz,
   NeuralTrainingDemo,
   DerivativeViz,
+  GradientStepViz,
 } from '../components'
 
 const DEFAULT_SHARED_CORPUS = `It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.
@@ -1334,6 +1335,10 @@ score = float(np.dot(a, b))`}</CodeBlock>
           Start in one dimension, where you can actually picture it. Suppose the loss is a simple curve like <MathInline equation={String.raw`L(x)=x^2`} />. If you're at <MathInline equation={String.raw`x=2`} />, moving right makes <MathInline equation={String.raw`L`} /> bigger and moving left makes it smaller. That “which direction makes the loss go up if I nudge the knob?” fact is the <em>slope</em>.
         </Paragraph>
         <DerivativeViz />
+        <Paragraph>
+          Now take that slope idea and apply it to one of the model’s real knobs: a score for the true token. The widget below holds everything else fixed so you can feel what “one gradient step” is trying to do.
+        </Paragraph>
+        <GradientStepViz />
         <Paragraph>
           Now give yourself two knobs instead of one: <MathInline equation={String.raw`x`} /> and <MathInline equation={String.raw`y`} />. There’s a slope in the <MathInline equation={String.raw`x`} /> direction and a slope in the <MathInline equation={String.raw`y`} /> direction. Put those together and you get an arrow that points “most uphill” in the plane. That arrow is the <strong>gradient</strong>.
         </Paragraph>

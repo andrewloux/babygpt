@@ -1,0 +1,228 @@
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  padding: 1rem;
+  border-radius: 12px;
+}
+
+.chart {
+  padding: 1rem;
+  border-radius: 12px;
+}
+
+.promptTitle,
+.sectionTitle {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 0.65rem;
+}
+
+.promptText {
+  font-size: 0.98rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 70ch;
+}
+
+.promptRow {
+  margin-top: 0.85rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.choiceRow {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.choiceBtn {
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.16);
+  color: rgba(255, 255, 255, 0.72);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.82rem;
+  padding: 0.55rem 0.75rem;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.choiceBtn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 217, 255, 0.28);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.choiceBtnSelected {
+  color: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 217, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.12);
+}
+
+.actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.lockBtn,
+.revealBtn {
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.18);
+  color: rgba(255, 255, 255, 0.78);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.82rem;
+  padding: 0.55rem 0.8rem;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.revealBtn {
+  border-color: rgba(0, 217, 255, 0.24);
+}
+
+.lockBtn:hover,
+.revealBtn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.lockBtn:disabled,
+.revealBtn:disabled,
+.choiceBtn:disabled {
+  cursor: default;
+  opacity: 0.55;
+  transform: none;
+}
+
+.feedback {
+  margin-top: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.good {
+  color: rgba(76, 217, 153, 0.9);
+}
+
+.bad {
+  color: rgba(255, 214, 0, 0.9);
+}
+
+.neutral {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.72);
+  margin-top: 0.65rem;
+}
+
+.key {
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+}
+
+.val {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.valEmph {
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 800;
+}
+
+.valHidden {
+  opacity: 0.2;
+  filter: blur(3px);
+}
+
+.valReveal {
+  opacity: 1;
+  filter: none;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.hint {
+  margin-top: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.35;
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.axis {
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 1.25;
+}
+
+.curve {
+  fill: none;
+  stroke: rgba(0, 217, 255, 0.55);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 10px rgba(0, 217, 255, 0.18));
+}
+
+.tangent {
+  stroke: rgba(255, 214, 0, 0.55);
+  stroke-width: 2;
+  stroke-dasharray: 6 6;
+}
+
+.tangentHidden {
+  opacity: 0;
+}
+
+.point {
+  fill: rgba(255, 255, 255, 0.92);
+  stroke: rgba(0, 0, 0, 0.55);
+  stroke-width: 2;
+}
+
+.footer {
+  max-width: 72ch;
+}
+
