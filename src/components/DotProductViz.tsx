@@ -272,12 +272,97 @@ export function DotProductViz({
   const demoContrib = demoPa * demoPb
   const demoShare = demoContrib / scoreSafe
 
+  const [guess, setGuess] = useState<'high' | 'low' | null>(null)
+  const [guessLocked, setGuessLocked] = useState(false)
+  const [revealed, setRevealed] = useState(false)
+
+  useEffect(() => {
+    setGuess(null)
+    setGuessLocked(false)
+    setRevealed(false)
+  }, [charA, charB, rawCorpus])
+
+  const isHigh = ratio >= 1.5
+  const guessCorrect = revealed && ((guess === 'high' && isHigh) || (guess === 'low' && !isHigh))
+
+  const alignedChars = useMemo(() => {
+    const set = new Set<string>()
+    top.forEach((x) => set.add(x.char))
+    topNextA.forEach((x) => set.add(x.char))
+    topNextB.forEach((x) => set.add(x.char))
+    const list = Array.from(set)
+    list.sort((u, v) => {
+      const ui = vocabIndex[u] ?? 0
+      const vi = vocabIndex[v] ?? 0
+      const cu = (pa[ui] ?? 0) * (pb[ui] ?? 0)
+      const cv = (pa[vi] ?? 0) * (pb[vi] ?? 0)
+      return cv - cu
+    })
+    return list.slice(0, 8)
+  }, [pa, pb, top, topNextA, topNextB, vocabIndex])
+
   return (
     <VizCard
       title="Dot Product: Overlap"
       subtitle="Imagine drawing one next character from A and one from B. How often do they land on the same character?"
     >
       <div className={styles.inner}>
+        <div className={`${styles.prediction} panel-dark inset-box`}>
+          <div className={styles.predictionPrompt}>Pick A and B. Predict: will overlap be high or low?</div>
+          <div className={styles.predictionRow}>
+            <div className={styles.predictionChoices} role="radiogroup" aria-label="Overlap guess">
+              <button
+                type="button"
+                className={`${styles.predBtn} ${guess === 'high' ? styles.predBtnSelected : ''}`}
+                onClick={() => setGuess('high')}
+                aria-pressed={guess === 'high'}
+                disabled={guessLocked}
+              >
+                High overlap
+              </button>
+              <button
+                type="button"
+                className={`${styles.predBtn} ${guess === 'low' ? styles.predBtnSelected : ''}`}
+                onClick={() => setGuess('low')}
+                aria-pressed={guess === 'low'}
+                disabled={guessLocked}
+              >
+                Low overlap
+              </button>
+            </div>
+            <div className={styles.predictionActions}>
+              <button
+                type="button"
+                className={styles.lockBtn}
+                onClick={() => guess !== null && setGuessLocked(true)}
+                disabled={guessLocked || guess === null}
+              >
+                {guessLocked ? 'Guess locked' : 'Lock guess'}
+              </button>
+              <button
+                type="button"
+                className={styles.revealBtn}
+                onClick={() => guessLocked && setRevealed(true)}
+                disabled={!guessLocked}
+              >
+                Reveal
+              </button>
+            </div>
+          </div>
+          <div className={styles.predictionFeedback} aria-live="polite">
+            {revealed ? (
+              guessCorrect ? (
+                <span className={styles.good}>Yep. These two contexts tend to agree more than uniform.</span>
+              ) : (
+                <span className={styles.bad}>Close — the overlap goes the other way for this pair.</span>
+              )
+            ) : guessLocked ? (
+              <span className={styles.neutral}>Okay. Now reveal the score.</span>
+            ) : (
+              <span className={styles.neutral}>Pick a guess, lock it, then reveal.</span>
+            )}
+          </div>
+        </div>
 
       {showCorpusEditor && (
         <div className={`${styles.corpusSection} panel-dark inset-box`}>
@@ -348,6 +433,60 @@ export function DotProductViz({
         </div>
       </div>
 
+      <div className={`${styles.aligned} panel-dark inset-box`}>
+        <div className={styles.alignedHeader}>
+          <div className={styles.alignedTitle}>Aligned bins (same characters)</div>
+          <div className={styles.alignedLegend}>
+            <span className={styles.legendA}>A</span>
+            <span className={styles.legendB}>B</span>
+            <span className={styles.legendProd}>A×B</span>
+          </div>
+        </div>
+        <div className={styles.alignedRows} role="list" aria-label="Aligned histogram bins">
+          {alignedChars.map((ch) => {
+            const idx = vocabIndex[ch] ?? 0
+            const pA = pa[idx] ?? 0
+            const pB = pb[idx] ?? 0
+            const prod = pA * pB
+            const isActive = demoChar === ch
+            return (
+              <button
+                key={ch}
+                type="button"
+                className={`${styles.binRow} ${isActive ? styles.binRowActive : ''}`}
+                onMouseEnter={() => setDemoChar(ch)}
+                onFocus={() => setDemoChar(ch)}
+                onClick={() => setDemoChar(ch)}
+              >
+                <span className={styles.binChar}>{prettyChar(ch)}</span>
+                <span className={styles.binTrack} aria-hidden="true">
+                  <span className={styles.binBarA} style={{ width: `${Math.min(100, pA * 100)}%` }} />
+                  <span className={styles.binBarB} style={{ width: `${Math.min(100, pB * 100)}%` }} />
+                  <span className={styles.binBarProd} style={{ width: `${Math.min(100, (prod / scoreSafe) * 100)}%` }} />
+                </span>
+                <span className={styles.binNums}>
+                  <span className={styles.probA}>{pA.toFixed(3)}</span>
+                  <span className={styles.times}>×</span>
+                  <span className={styles.probB}>{pB.toFixed(3)}</span>
+                  <span className={styles.equals}>=</span>
+                  <span className={styles.contribValue}>{prod.toFixed(4)}</span>
+                </span>
+              </button>
+            )
+          })}
+        </div>
+        <div className={styles.topContribs}>
+          <div className={styles.topContribsLabel}>Top contributors</div>
+          <div className={styles.topContribsChips}>
+            {top.slice(0, 3).map((x) => (
+              <button key={x.char} type="button" className={styles.topChip} onClick={() => setDemoChar(x.char)}>
+                {prettyChar(x.char)}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <div className={styles.summary}>
         <div className={`${styles.summaryLeft} panel-dark inset-box`}>
           <div className={styles.pairLine}>
@@ -405,7 +544,7 @@ export function DotProductViz({
               Σ p<sub>i</sub>(A) · p<sub>i</sub>(B)
             </div>
           </div>
-          <div className={styles.scoreValue}>{matchProb.toFixed(4)}</div>
+          <div className={styles.scoreValue}>{revealed ? matchProb.toFixed(4) : '—'}</div>
           <div className={styles.gauge}>
             <div className={styles.gaugeTrack}>
               <div className={styles.gaugeFill} style={{ width: `${fillPercent}%` }} />
@@ -420,7 +559,11 @@ export function DotProductViz({
             </div>
           </div>
           <div className={styles.scoreHint}>
-            ≈ {ratio.toFixed(1)}× uniform. Higher means A and B tend to agree on what’s next.
+            {revealed ? (
+              <>≈ {ratio.toFixed(1)}× uniform. Higher means A and B tend to agree on what’s next.</>
+            ) : (
+              <>Lock a guess, then reveal.</>
+            )}
             <div className={styles.scoreSubhint}>
               This score rewards shared probability mass — even if the top-1 next character differs.
             </div>
