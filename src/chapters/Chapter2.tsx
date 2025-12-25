@@ -48,6 +48,7 @@ import {
   NeuralTrainingDemo,
   DerivativeViz,
   GradientStepViz,
+  SoftmaxNudgeViz,
 } from '../components'
 
 const DEFAULT_SHARED_CORPUS = `It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.
@@ -1348,6 +1349,12 @@ score = float(np.dot(a, b))`}</CodeBlock>
         <Paragraph>
           One more ingredient: the learning rate <MathInline equation={String.raw`\eta`} />. It’s the step size — how far we dare to move each update. Too small and training crawls. Too big and you bounce past good solutions.
         </Paragraph>
+        <Paragraph>
+          There’s one last bridge we need before this becomes a working training loop: a concrete gradient for the model’s
+          real knobs. For logits (the scores before softmax), that gradient has a famously simple shape: <Term>p − y</Term>.
+          The widget below builds that up by measurement: nudge one score by <Term>ε</Term> and watch the loss respond.
+        </Paragraph>
+        <SoftmaxNudgeViz />
         <Paragraph>
           In symbols, we write “the gradient of the loss” as <MathInline equation={String.raw`\nabla\text{loss}`} />. The update rule is just “step downhill”:
         </Paragraph>
