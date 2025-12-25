@@ -196,6 +196,9 @@ export function Chapter2() {
           both signals at once and reads the combination as white.
         </Paragraph>
         <Paragraph>
+          (Guardrail: this is the “additive primaries” story — in an RGB-style model, yellow is roughly red+green, so adding blue can look white. Real spectra are messier, but the geometric point survives.)
+        </Paragraph>
+        <Paragraph>
           He wasn't guessing. He derived the laws of colorimetry we still use today — proving that the messy, subjective experience of "seeing color" maps cleanly onto a 3‑dimensional vector space.
         </Paragraph>
         <Paragraph>
