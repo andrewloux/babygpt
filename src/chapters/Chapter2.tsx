@@ -1362,7 +1362,7 @@ score = float(np.dot(a, b))`}</CodeBlock>
           </Paragraph>
           <MathBlock equation={String.raw`H = \frac{1}{N}\bigl(\text{surprise}_1 + \text{surprise}_2 + \cdots + \text{surprise}_N\bigr)`} />
           <Paragraph>
-            That's the cross-entropy.<Cite n={13} /> Lower is better. A perfect predictor has H=0 (no surprise at all).
+            That's the cross-entropy (also called NLL when you sum it up instead of averaging).<Cite n={13} /> We can’t compute the true entropy of English directly — what we can compute is: “how surprised was <em>our model</em> on held‑out text?”
           </Paragraph>
         </Callout>
 
