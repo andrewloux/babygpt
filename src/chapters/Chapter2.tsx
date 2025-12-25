@@ -50,6 +50,7 @@ import {
   GradientStepViz,
   SoftmaxNudgeViz,
   ChainOfBlameViz,
+  GradientAuditViz,
 } from '../components'
 
 const DEFAULT_SHARED_CORPUS = `It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.
@@ -1356,6 +1357,11 @@ score = float(np.dot(a, b))`}</CodeBlock>
           The widget below builds that up by measurement: nudge one score by <Term>ε</Term> and watch the loss respond.
         </Paragraph>
         <SoftmaxNudgeViz />
+        <Paragraph>
+          And because we don’t want to take anyone’s word for it (including mine), here’s the sanity check: compute the same gradient by
+          brute force and see if it matches <Term>p − y</Term>.
+        </Paragraph>
+        <GradientAuditViz />
         <Paragraph>
           That tells us the “blame signal” for the logits. Next question: how does that blame reach the actual parameters —
           the embedding row and the weights — so they move in the right direction?
