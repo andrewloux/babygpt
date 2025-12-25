@@ -36,6 +36,7 @@ import {
   DiscreteContinuousViz,
   EmbeddingInspector,
   SoftmaxWidget,
+  SoftmaxBarsViz,
   SoftmaxSimplexViz,
   SoftmaxLandscapeViz,
   GradientTraceDemo,
@@ -1156,6 +1157,13 @@ score = float(np.dot(a, b))`}</CodeBlock>
         <Paragraph>
           Now swap labels. In ML we don’t talk about “energy”; we talk about “score”. High score should mean high probability, so it plays the role of <Term>-E</Term>. Drop the unit constant <Term>k</Term>, divide by <Term>T</Term>, exponentiate, normalize — and you’re back at softmax.
         </Paragraph>
+        <Paragraph>
+          Before we jump into the triangle view, let’s make softmax feel mechanical: three scores in, three probabilities out.
+          Try the tiny challenge below — it forces you to think in ratios, not vibes.
+        </Paragraph>
+
+        <SoftmaxBarsViz />
+
         <Paragraph>
           To make this geometry visible, we’ll temporarily shrink the universe to three options. The set of all valid 3‑way probability distributions is a triangle called the <Term>probability simplex</Term>: corners are certainty, the center is uniform. Softmax moves you around inside this triangle as you change logits and temperature.
         </Paragraph>
