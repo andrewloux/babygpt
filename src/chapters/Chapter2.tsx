@@ -409,7 +409,10 @@ export function Chapter2() {
           The solution is to stop memorizing <em>contexts</em> and start modeling <em>tokens</em>. Instead of a giant table of answers for every possible situation, we store one shared vector per token.
         </Paragraph>
         <Paragraph>
-          Here's why this works. If <Term>'cat'</Term> and <Term>'dog'</Term> have similar embeddings, then <em>any context containing them produces similar predictions</em>. One learned embedding for <Term>'cat'</Term> serves <strong>all</strong> contexts containing <Term>'cat'</Term>: <Term>"the cat"</Term>, <Term>"a cat"</Term>, <Term>"fat cat"</Term>, etc. The same embedding gets reused everywhere.
+          Here’s what embeddings buy you — the honest win: <strong>shared memory</strong>. One learned vector for <Term>'cat'</Term> is reused everywhere <Term>'cat'</Term> appears: <Term>"the cat"</Term>, <Term>"a cat"</Term>, <Term>"fat cat"</Term>, etc. Every training example that touches <Term>'cat'</Term> pushes on the <em>same</em> few numbers.
+        </Paragraph>
+        <Paragraph>
+          If two tokens end up with similar vectors (say <Term>'cat'</Term> and <Term>'dog'</Term>), then any <em>model</em> that uses those vectors smoothly tends to treat them similarly. But a context is a <em>sequence</em>, not a token — so we still need a rule for how to combine multiple token vectors into one prediction. (That’s the next problem we’ll solve.)
         </Paragraph>
         <Paragraph>
           The compression is direct:
