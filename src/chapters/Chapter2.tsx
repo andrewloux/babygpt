@@ -15,6 +15,8 @@ import {
   Cite,
   Citations,
   CodeBlock,
+  CodeWalkthrough,
+  Step,
   CodeChallenge,
   WorkedExample,
   WorkedStep,
@@ -1374,6 +1376,37 @@ score = float(np.dot(a, b))`}</CodeBlock>
           equation={String.raw`\text{parameters} \leftarrow \text{parameters} - \eta \cdot \nabla \text{loss}`}
           explanation="Gradient descent: move downhill on the loss."
         />
+
+        <Paragraph>
+          If you want the “minimum viable language model” in code, it’s basically this. One embedding lookup, one linear layer, one softmax,
+          one loss, one update:
+        </Paragraph>
+        <CodeWalkthrough filename="tiny_embedding_lm.py" lang="python">
+          <Step code="import numpy as np">
+            We’ll use NumPy just to avoid writing loops. The math is the same either way.
+          </Step>
+          <Step code="vocab = ['e', 'a', 'i']\nstoi = {ch: i for i, ch in enumerate(vocab)}\nV, D = len(vocab), 4">
+            A tiny vocabulary and a tiny embedding dimension so you can see the shapes.
+          </Step>
+          <Step code="rng = np.random.default_rng(0)\nE = 0.01 * rng.standard_normal((V, D))      # token → vector\nWout = 0.01 * rng.standard_normal((D, V))  # vector → logits\nb = np.zeros(V)">
+            Two learned tables: <code>E</code> (the embedding table) and <code>Wout</code> (the output weights). Plus a bias.
+          </Step>
+          <Step code="def softmax(z):\n    z = z - z.max()            # stability\n    e = np.exp(z)\n    return e / e.sum()">
+            Softmax turns logits into probabilities. We subtract the max so <code>exp</code> doesn’t blow up.
+          </Step>
+          <Step code="x, y = 'e', 'a'\nix, iy = stoi[x], stoi[y]">
+            One training example: after <code>x</code>, the true next token is <code>y</code>.
+          </Step>
+          <Step code="e_x = E[ix]                 # lookup: pick one row\nlogits = e_x @ Wout + b       # scores for next token\np = softmax(logits)           # probabilities\nloss = -np.log(p[iy])         # NLL / cross-entropy">
+            That’s the forward pass: ID → vector → logits → probabilities → loss.
+          </Step>
+          <Step code="dlogits = p.copy()\ndlogits[iy] -= 1              # p − y\n\ndWout = np.outer(e_x, dlogits)\ndb = dlogits\ndEix = dlogits @ Wout.T">
+            Backward pass: the “blame signal” at the logits is <code>p − y</code>, and it flows back into the parameters.
+          </Step>
+          <Step code="lr = 0.1\nWout -= lr * dWout\nb -= lr * db\nE[ix] -= lr * dEix">
+            The key detail: only <code>E[ix]</code> moves — the one row we actually looked up.
+          </Step>
+        </CodeWalkthrough>
 
         <Callout variant="info" title="How Do We Measure Quality?">
           <Paragraph>
