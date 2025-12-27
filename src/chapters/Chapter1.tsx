@@ -746,10 +746,7 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
       {/* Section 1.2.1 */}
       <Section number="1.2.1" title="Building Probabilities From a Corpus">
         <Paragraph>
-          Okay, but where do these probabilities actually <em>come from</em>? We build them by counting—count how often sequences appear, divide by totals. Let's work through it.
-        </Paragraph>
-        <Paragraph>
-          Imagine our entire training dataset is just these four sentences:
+          Let's work through an example. Imagine our entire training dataset is just these four sentences:
         </Paragraph>
         <CorpusDisplay sentences={['"cat sat"', '"dog ran"', '"a can"', '"a cat"']} />
         <Paragraph>
@@ -1625,6 +1622,17 @@ print(f"First Y: {Y[0]}")               # [2, 4, 4, 5] ("ello")`}</CodeBlock>
         <Paragraph>
           So characters are less sparse than words — but that just means the wall is farther away, not gone.
         </Paragraph>
+        <Callout variant="info" title="Overlap vs. Understanding">
+          <Paragraph>
+            This is a double-edged sword. Character models are robust—they never say probability zero—but they are also hallucination machines. A character model might happily generate "dogs meow" just because the spellings overlap, not because it understands biology.
+          </Paragraph>
+          <Paragraph>
+            <CorpusDisplay sentences={['"cats meow"', '"dogs bark"']} />
+          </Paragraph>
+          <Paragraph>
+            That's transfer through <Highlight>overlap</Highlight>. Semantic similarity is the stronger thing: "cat" and "dog" should behave similarly in many contexts even when they share almost no spelling. Getting that kind of reuse is what Chapter 2 is about.
+          </Paragraph>
+        </Callout>
         <Callout variant="warning" title="The Real Problem Is Sparsity">
           <p>Even if you <em>could</em> build a hard drive the size of the universe, it would mostly be empty.</p>
           <p>
@@ -1727,7 +1735,7 @@ print(f"First Y: {Y[0]}")               # [2, 4, 4, 5] ("ello")`}</CodeBlock>
           <li><strong>See smoothing in action:</strong> understand how add-1 smoothing keeps perplexity finite.</li>
         </ul>
         <Exercise
-          number="1.0"
+          number="1.1"
           title="Perplexity + Smoothing by Hand"
           hint={
             <>
@@ -1791,7 +1799,7 @@ P(b|a) = (1 + 1) / 3 = 2/3`}</CodeBlock>
           </ol>
         </Exercise>
         <Exercise
-          number="1.1"
+          number="1.2"
           title="Chain Rule by Hand"
           solution={
             <>
@@ -1833,7 +1841,7 @@ This is a limitation of sentence-level models.`}</CodeBlock>
         </Exercise>
 
         <Exercise
-          number="1.2"
+          number="1.3"
           title="Vocabulary Edge Cases"
           hint={
             <>
@@ -1872,7 +1880,7 @@ encode_safe("goodbye", stoi, unk_token='<UNK>')  # Works!`}</CodeBlock>
         </Exercise>
 
         <Exercise
-          number="1.3"
+          number="1.4"
           title="Counting Training Examples"
           solution={
             <>
