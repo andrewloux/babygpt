@@ -151,31 +151,26 @@ export function Chapter2() {
           What we need is a representation where tokens aren't just labels — they're <strong>locations</strong>. Where <Term>'cat'</Term> and <Term>'dog'</Term> being nearby isn't a metaphor but a geometric fact. Where learning about one automatically teaches you something about
           its neighbors. That's the shift from memorization to generalization: from a lookup table to a map.
         </Paragraph>
-        <Callout variant="insight" title="The machine we’re building (preview)">
-          <Paragraph>
-            Here’s the smallest “embedding language model” you can build. It’s just a few boxes wired together:
-          </Paragraph>
-          <ol>
-            <li>
-              <strong>Start with an ID:</strong> a token <Term>x</Term> has an integer index <Term>ix</Term>.
-            </li>
-            <li>
-              <strong>Lookup coordinates:</strong> grab a row from the embedding table: <Term>e_x = E[ix]</Term>.
-            </li>
-            <li>
-              <strong>Make a guess:</strong> turn that vector into scores for the next token (logits).
-            </li>
-            <li>
-              <strong>Normalize:</strong> convert logits into probabilities with <Term>softmax</Term>.
-            </li>
-            <li>
-              <strong>Train:</strong> nudge <Term>E</Term> (and the output weights) so the true next token gets more probability next time.
-            </li>
-          </ol>
-          <Paragraph>
-            The rest of the chapter is just making each arrow feel inevitable.
-          </Paragraph>
-        </Callout>
+        <Paragraph>
+          Here's the smallest "embedding language model" you can build. It's just a few boxes wired together:
+        </Paragraph>
+        <ol>
+          <li>
+            <strong>Start with an ID:</strong> a token <Term>x</Term> has an integer index <Term>ix</Term>.
+          </li>
+          <li>
+            <strong>Lookup coordinates:</strong> grab a row from the embedding table: <Term>e_x = E[ix]</Term>.
+          </li>
+          <li>
+            <strong>Make a guess:</strong> turn that vector into scores for the next token (logits).
+          </li>
+          <li>
+            <strong>Normalize:</strong> convert logits into probabilities with <Term>softmax</Term>.
+          </li>
+          <li>
+            <strong>Train:</strong> nudge <Term>E</Term> (and the output weights) so the true next token gets more probability next time.
+          </li>
+        </ol>
         <Paragraph>
           Under the hood, this is also a scaling limit: the number of possible contexts explodes exponentially. We can't store them all. We need a way to <strong>compress</strong> infinite variations of language into something finite.
         </Paragraph>
@@ -205,9 +200,6 @@ export function Chapter2() {
         <Paragraph>
           Mixing light is <strong>construction</strong>. Light is waves, and waves are additive — they superpose. Yellow and blue wavelengths coexist in the same space. Both hit the retina simultaneously: yellow triggers one set of receptors, blue triggers another. The brain receives
           both signals at once and reads the combination as white.
-        </Paragraph>
-        <Paragraph>
-          (Guardrail: this is the “additive primaries” story — in an RGB-style model, yellow is roughly red+green, so adding blue can look white. Real spectra are messier, but the geometric point survives.)
         </Paragraph>
         <Paragraph>
           He wasn't guessing. He derived the laws of colorimetry we still use today — proving that the messy, subjective experience of "seeing color" maps cleanly onto a 3‑dimensional vector space.
@@ -1000,6 +992,12 @@ score = float(np.dot(a, b))`}</CodeBlock>
           The exponential does exactly that. It turns any real number into a positive number, and it turns score differences into odds:
           <Term>{' '}exp(a) / exp(b) = exp(a − b)</Term>. A small gap becomes a multiplicative ratio.
         </Paragraph>
+        <Paragraph>
+          There's a deeper reason why the exponential is the right choice. When two events are independent, their probabilities multiply: <Term>P(A and B) = P(A) × P(B)</Term>. But their scores add: <Term>score(A and B) = score(A) + score(B)</Term>. We need a function that turns sums into products — that is, <Term>f(x + y) = f(x) · f(y)</Term>.
+        </Paragraph>
+        <Paragraph>
+          There's exactly one well-behaved function with this property: the exponential. This isn't a design choice — it's the unique bridge between additive scores and multiplicative probabilities.
+        </Paragraph>
 
         <MathBlock
           equation={String.raw`\text{Softmax}(x_i) = \frac{e^{x_i}}{\sum_{j} e^{x_j}}`}
@@ -1137,71 +1135,10 @@ def log_softmax(z):
         </WorkedExample>
 
         <Paragraph>
-          If the word <Term>temperature</Term> feels oddly physical here, that’s because it is. The “divide by <Term>T</Term>, exponentiate, normalize” move shows up in statistical physics too — it’s the <Term>Boltzmann distribution</Term>.<Cite n={7} />
+          If the word <Term>temperature</Term> feels oddly physical here, that's because it is. Boltzmann discovered this same "exponentiate and normalize" pattern in 1877 when modeling how particles distribute across energy states.<Cite n={7} /><Cite n={8} /> The connection runs deep: in physics, low energy means high probability; in ML, high score means high probability. Swap the sign and you get the same formula.
         </Paragraph>
         <Paragraph>
-          Physics version: you have many possible configurations of a system (they call them <em>states</em>), and each state has an energy <Term>E</Term>. The question is operational: at temperature <Term>T</Term>, how much probability mass should each state get?<Cite n={7} />
-        </Paragraph>
-        <Paragraph>
-          A “state” here means one microscopic arrangement of the system — which is why the whole story historically ran head‑to‑head with the atom question. If matter is continuous, what are we “counting”? If matter is made of discrete parts, then “number of possible arrangements” becomes a real thing you can reason about.
-        </Paragraph>
-        <Paragraph>
-          Picture a marble rolling around in a bumpy bowl. Leave it alone, and it settles at the bottom — the low‑energy spot. Heat the bowl, and the marble starts bouncing. The hotter you make it, the more it visits places it would never reach when cold.
-        </Paragraph>
-        <Paragraph>
-          Boltzmann’s 1877 move was simple: turn energy into a positive <em>weight</em>, then normalize weights into probabilities.<Cite n={8} />
-        </Paragraph>
-
-        <ol>
-          <li>
-            <strong>Give every state a positive weight.</strong> Lower energy should mean higher weight.
-          </li>
-          <li>
-            <strong>Make independent pieces multiply.</strong> If two independent parts have energies that add, the joint weight should factor into a product.
-          </li>
-        </ol>
-
-        <Paragraph>
-          That second rule is the sneaky one. Independent parts satisfy <MathInline equation={String.raw`E(a,b)=E(a)+E(b)`} />, but independent probabilities multiply. So we want a positive function <Term>f</Term> that turns sums into products:
-          <MathInline equation={String.raw`f(E_1+E_2)=f(E_1)\,f(E_2)`} />. The exponential is the clean bridge between those worlds:
-          <MathInline equation={String.raw`e^{-(E_1+E_2)/kT}=e^{-E_1/kT}\,e^{-E_2/kT}`} />.
-        </Paragraph>
-
-        <WorkedExample title="Two states, one temperature (by hand)">
-          <WorkedStep n="1">
-            <Paragraph>
-              Suppose we have two states. State A has energy <MathInline equation={String.raw`E_A=0`} />. State B has energy <MathInline equation={String.raw`E_B=2`} />. To keep the arithmetic clean, set <MathInline equation={String.raw`k=1`} /> and start with <MathInline equation={String.raw`T=1`} />.
-            </Paragraph>
-          </WorkedStep>
-          <WorkedStep n="2">
-            <Paragraph>
-              Weights: <MathInline equation={String.raw`w_A=e^{0}=1`} /> and <MathInline equation={String.raw`w_B=e^{-2}\approx 0.135`} />.
-            </Paragraph>
-          </WorkedStep>
-          <WorkedStep n="3" final>
-            <Paragraph>
-              Normalize by the sum <MathInline equation={String.raw`S=1+0.135=1.135`} />:
-              <MathInline equation={String.raw`p_A\approx 0.881`} />, <MathInline equation={String.raw`p_B\approx 0.119`} />.
-            </Paragraph>
-            <WorkedNote>
-              Now heat it up: at <MathInline equation={String.raw`T=2`} />, the gap matters less, so <MathInline equation={String.raw`w_B=e^{-2/2}=e^{-1}\approx 0.367`} /> and the distribution flattens.
-            </WorkedNote>
-          </WorkedStep>
-        </WorkedExample>
-
-        <MathBlock
-          equation={String.raw`w(\text{state}) = e^{-E/kT}`}
-          explanation="Unnormalized weight. E = energy (lower → larger weight). T = temperature (higher spreads mass). k just converts units."
-        />
-        <MathBlock
-          equation={String.raw`P(\text{state}) = \frac{w(\text{state})}{\sum_{\text{states}} w(\text{state})} = \frac{1}{Z} e^{-E/kT}`}
-          explanation="Z is the normalization constant (“partition function”): Z = Σ_states exp(−E/kT). It exists only so probabilities sum to 1."
-        />
-        <Paragraph>
-          The historical punchline is that Boltzmann was doing this before anyone could watch atoms directly. Ernst Mach was skeptical of atom‑talk; Boltzmann argued you could infer the invisible from the statistics. Einstein’s 1905 Brownian‑motion analysis helped settle the debate: the jitter matched what you’d expect if matter is made of atoms.<Cite n={9} /><Cite n={10} />
-        </Paragraph>
-        <Paragraph>
-          Now swap labels. In ML we don’t talk about “energy”; we talk about “score”. High score should mean high probability, so it plays the role of <Term>-E</Term>. Drop the unit constant <Term>k</Term>, divide by <Term>T</Term>, exponentiate, normalize — and you’re back at softmax.
+          Boltzmann was doing this before anyone could watch atoms directly — he argued you could infer the invisible from statistics.<Cite n={9} /> Einstein's 1905 Brownian-motion analysis helped prove him right.<Cite n={10} /> The mathematics outlived the controversy.
         </Paragraph>
         <Paragraph>
           Before we jump into the triangle view, let’s make softmax feel mechanical: three scores in, three probabilities out.
@@ -1270,9 +1207,13 @@ def log_softmax(z):
             explanation="An exponential family. β is an inverse-temperature-like scale (β = 1/T under a common convention)."
           />
           <Paragraph>
-            That’s the rigorous reason “exp + normalize” shows up in statistical physics and in models that need a smooth, normalized way to turn scores into probabilities.
+            That's the rigorous reason "exp + normalize" shows up in statistical physics and in models that need a smooth, normalized way to turn scores into probabilities.
           </Paragraph>
         </details>
+
+        <Paragraph>
+          We've been working with single examples: one context, one prediction, one loss. Real training runs batches — many examples at once. Before we get to training, let's set up the notation for that.
+        </Paragraph>
       </Section>
 
       <Section number="2.8" title="Tensors: Batching Patterns">
@@ -1297,10 +1238,19 @@ def log_softmax(z):
             Mechanically, it's the exact same lookup you already understand — just applied to every cell at once:{' '}
             <Term>X_emb = E[X]</Term>.
           </Paragraph>
-          <Paragraph>
-            From here on, we'll keep seeing these three letters: <Term>B</Term> (how many examples), <Term>T</Term> (context length), and <Term>D</Term> (features per token).
-          </Paragraph>
         </details>
+        <Paragraph>
+          Why do we care about batching? Two reasons: <strong>speed</strong> and <strong>stability</strong>.
+        </Paragraph>
+        <Paragraph>
+          Speed: GPUs are designed for parallel operations on large arrays. Processing 64 examples at once is barely slower than processing 1 — but you get 64× more learning signal per forward pass. Without batching, training would take weeks instead of hours.
+        </Paragraph>
+        <Paragraph>
+          Stability: each training example pulls the parameters in a slightly different direction. If you update after every single example, the path is noisy — you zigzag toward the goal. Averaging gradients over a batch smooths the signal. The update points more consistently downhill.
+        </Paragraph>
+        <Paragraph>
+          From here on, we'll keep seeing these three letters: <Term>B</Term> (how many examples), <Term>T</Term> (context length), and <Term>D</Term> (features per token). They're the shape of everything that flows through the model.
+        </Paragraph>
       </Section>
 
       <Section number="2.9" title="Synthesis: From Counts to Coordinates">
@@ -1358,7 +1308,7 @@ def log_softmax(z):
             </Paragraph>
       </Section>
 
-      <Section number="2.10" title="The Nudge">
+      <Section number="2.10" title="How Training Works">
         <Paragraph>
           Right now, <Term>E</Term> is random. Here's what happens when we train:
         </Paragraph>
@@ -1380,6 +1330,9 @@ def log_softmax(z):
         <Paragraph>
           So we have a scoreboard (<Term>loss</Term>). Now we need a steering wheel: a rule that says how to change the numbers to make that score go down.
         </Paragraph>
+      </Section>
+
+      <Section number="2.11" title="The Steering Wheel (Gradients)">
         <Paragraph>
           Start in one dimension, where you can actually picture it. Suppose the loss is a simple curve like <MathInline equation={String.raw`L(x)=x^2`} />. If you're at <MathInline equation={String.raw`x=2`} />, moving right makes <MathInline equation={String.raw`L`} /> bigger and moving left makes it smaller. That “which direction makes the loss go up if I nudge the knob?” fact is the <em>slope</em>.
         </Paragraph>
@@ -1451,7 +1404,9 @@ def log_softmax(z):
             The key detail: only <code>E[ix]</code> moves — the one row we actually looked up.
           </Step>
         </CodeWalkthrough>
+      </Section>
 
+      <Section number="2.12" title="The Scoreboard (Cross-Entropy)">
         <Callout variant="info" title="How Do We Measure Quality?">
           <Paragraph>
             Now that we can assign probabilities, we get something rare in ML: a clean score.
@@ -1569,7 +1524,9 @@ def log_softmax(z):
         </Paragraph>
 
         <CrossEntropyViz />
+      </Section>
 
+      <Section number="2.13" title="The Training Loop">
         <Paragraph>
           Cross-entropy consumes a probability and spits out a score. But where does the probability come from? It's manufactured by a <strong>forward pass</strong>: the chain of operations that turns "I just saw <Term>q</Term>" into "here are my 27 bets on what's next."
           The simplest version:
@@ -1741,7 +1698,7 @@ def log_softmax(z):
           </Paragraph>
         </details>
 
-        <CodeChallenge phase="2.10.1" title="Compute the gradient by hand">
+        <CodeChallenge phase="2.13.1" title="Compute the gradient by hand">
           <CodeChallenge.Setup>
             <CodeBlock filename="gradient_challenge.py">{`import numpy as np
 
@@ -1893,7 +1850,7 @@ print(f"Gradient magnitude: {np.linalg.norm(gradient):.3f}")
           We've computed one gradient by hand. We've seen the visualization. Now: <strong>type the loop and watch it work.</strong>
         </Paragraph>
 
-        <CodeChallenge phase="2.10.2" title="Train a 1-layer bigram model">
+        <CodeChallenge phase="2.13.2" title="Train a 1-layer bigram model">
           <CodeChallenge.Setup>
             <CodeBlock filename="train_bigram.py">{`import numpy as np
 
@@ -2068,7 +2025,7 @@ print(f"  cos(t, a) = {cosine_sim(embeddings[t_idx], embeddings[a_idx]):.3f}  (d
           </Paragraph>
         </details>
 
-        <CodeChallenge phase="2.10.3" title="Bonus: Verify Your Gradient Numerically">
+        <CodeChallenge phase="2.13.3" title="Bonus: Verify Your Gradient Numerically">
           <CodeChallenge.Prompt>
             <Paragraph>
               You derived the gradient. You typed it. Now <strong>prove it's correct</strong> by comparing to numerical approximation using finite differences.
@@ -2140,7 +2097,9 @@ print("\\nGradient check:", "PASS ✓" if np.abs(analytical_grad - numerical_gra
         <Paragraph>
           Training is the loop: initialize random coordinates, compute gradients, nudge embeddings downhill, repeat. Bigger models add more machinery, but the core loop — predict, score, update — stays the same.
         </Paragraph>
+      </Section>
 
+      <Section number="2.14" title="What Training Discovers">
         <Paragraph>
           And this brings us back to the schoolteacher from Stettin.
         </Paragraph>
@@ -2197,7 +2156,7 @@ print("\\nGradient check:", "PASS ✓" if np.abs(analytical_grad - numerical_gra
         </Paragraph>
       </Section>
 
-      <Section number="2.11" title="Exercises">
+      <Section number="2.15" title="Exercises">
         <Paragraph>
           These exercises are where you make the chapter concrete. The goal isn’t to be clever — it’s to get comfortable with the exact
           objects the model manipulates.
@@ -2567,7 +2526,7 @@ p \cdot p &= \sum_i p_i^2 \\
         </Exercise>
       </Section>
 
-      <Section number="2.12" title="References">
+      <Section number="2.16" title="References">
         <Citations
           title="Academic references"
           items={[
