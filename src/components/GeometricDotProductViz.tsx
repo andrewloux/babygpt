@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { ExplorableEssay } from './ExplorableEssay'
 import { VizCard } from './VizCard'
 import styles from './GeometricDotProductViz.module.css'
 
@@ -179,7 +180,115 @@ export function GeometricDotProductViz() {
 
   return (
     <VizCard title="Dot Product: The Geometric View" figNum="Fig. 2.4">
-      <div className={styles.content}>
+      <ExplorableEssay
+        title="Drag the vectors. Watch the dot product change."
+        steps={[
+          {
+            label: 'Alignment',
+            body: (
+              <>
+                <p className={styles.p}>
+                  The dot product is a single number that measures <strong>alignment</strong>. If A points roughly in the same direction as B,
+                  the dot is positive.
+                </p>
+                <div className={styles.resultBox}>
+                  <div className={styles.resultLabel}>Dot Product</div>
+                  <div className={`${styles.resultValue} ${isPositive ? styles.positive : styles.negative}`}>{computed.dot.toFixed(2)}</div>
+                </div>
+                <div className={`inset-box ${styles.detailsCard}`}>
+                  <div className={styles.breakdown}>
+                    <div className={styles.breakdownRow}>
+                      <span className={styles.breakdownLabel}>|A|</span>
+                      <span className={styles.breakdownValue}>{computed.magA.toFixed(2)}</span>
+                    </div>
+                    <div className={styles.breakdownRow}>
+                      <span className={styles.breakdownLabel}>|B|</span>
+                      <span className={styles.breakdownValue}>{computed.magB.toFixed(2)}</span>
+                    </div>
+                    <div className={styles.breakdownRow}>
+                      <span className={styles.breakdownLabel}>Angle</span>
+                      <span className={styles.breakdownValue}>{computed.angleDeg.toFixed(0)}°</span>
+                    </div>
+                    <div className={styles.breakdownRow}>
+                      <span className={styles.breakdownLabel}>Projection A → B</span>
+                      <span className={styles.breakdownValue}>{computed.projLength.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ),
+            hint: <p className={styles.p}>Try moving A and B so the angle shrinks. The dot grows as they line up.</p>,
+          },
+          {
+            label: 'Perpendicular',
+            body: (
+              <>
+                <p className={styles.p}>
+                  When A is <strong>perpendicular</strong> to B, the dot product is zero. It’s “no overlap in direction”.
+                </p>
+                <p className={styles.p}>
+                  Drag until the angle reads <code>90°</code> and watch the dot hover near <code>0</code>.
+                </p>
+              </>
+            ),
+          },
+          {
+            label: 'Opposite',
+            body: (
+              <>
+                <p className={styles.p}>
+                  If the vectors point in opposite directions, the dot product becomes <strong>negative</strong>. It’s not “small” — it’s
+                  actively pointing the wrong way.
+                </p>
+                <p className={styles.p}>
+                  This is how learned embeddings can represent agreement vs conflict: the score can cancel out.
+                </p>
+              </>
+            ),
+          },
+          {
+            label: 'Projection',
+            body: (
+              <>
+                <p className={styles.p}>
+                  The dot product is also a projection: “how much of A lands in B’s direction.” The yellow segment is A’s shadow on B.
+                </p>
+                <label className={styles.toggle} htmlFor="show-projection-toggle">
+                  <input
+                    id="show-projection-toggle"
+                    type="checkbox"
+                    checked={showProjection}
+                    onChange={(e) => setShowProjection(e.target.checked)}
+                    aria-label="Toggle projection visualization"
+                  />
+                  <span>Show projection (shadow)</span>
+                </label>
+              </>
+            ),
+          },
+        ]}
+        onStepChange={(i) => {
+          setDragging(null)
+          setKeyboardFocus(null)
+          if (i === 0) {
+            setVecA({ x: 2.5, y: 1.5 })
+            setVecB({ x: 3, y: -0.5 })
+            setShowProjection(true)
+          } else if (i === 1) {
+            setVecA({ x: 2.5, y: 0 })
+            setVecB({ x: 0, y: 2.5 })
+            setShowProjection(false)
+          } else if (i === 2) {
+            setVecA({ x: 2.8, y: 0.2 })
+            setVecB({ x: -2.6, y: -0.3 })
+            setShowProjection(false)
+          } else {
+            setVecA({ x: 2.5, y: 1.5 })
+            setVecB({ x: 3, y: -0.5 })
+            setShowProjection(true)
+          }
+        }}
+        renderViz={() => (
           <div className={styles.vizPanel}>
             <svg
               viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
@@ -208,110 +317,41 @@ export function GeometricDotProductViz() {
                   <stop offset="45%" stopColor="rgba(255,214,10,0.95)" />
                   <stop offset="100%" stopColor="rgba(255,214,10,0.35)" />
                 </linearGradient>
-                <marker
-                  id="arrowA"
-                  markerWidth="10"
-                  markerHeight="10"
-                  refX="9"
-                  refY="3"
-                  orient="auto"
-                  markerUnits="strokeWidth"
-                >
+                <marker id="arrowA" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
                   <path d="M0,0 L0,6 L9,3 z" fill="rgba(0,217,255,0.95)" />
                 </marker>
-                <marker
-                  id="arrowB"
-                  markerWidth="10"
-                  markerHeight="10"
-                  refX="9"
-                  refY="3"
-                  orient="auto"
-                  markerUnits="strokeWidth"
-                >
+                <marker id="arrowB" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
                   <path d="M0,0 L0,6 L9,3 z" fill="rgba(255,0,110,0.95)" />
                 </marker>
               </defs>
 
-              {/* Grid */}
               {[-3, -2, -1, 1, 2, 3].map((i) => (
                 <g key={i}>
-                  <line
-                    x1={CENTER_X + i * SCALE}
-                    y1={0}
-                    x2={CENTER_X + i * SCALE}
-                    y2={HEIGHT}
-                    className={styles.gridLine}
-                  />
-                  <line
-                    x1={0}
-                    y1={CENTER_Y + i * SCALE}
-                    x2={WIDTH}
-                    y2={CENTER_Y + i * SCALE}
-                    className={styles.gridLine}
-                  />
+                  <line x1={CENTER_X + i * SCALE} y1={0} x2={CENTER_X + i * SCALE} y2={HEIGHT} className={styles.gridLine} />
+                  <line x1={0} y1={CENTER_Y + i * SCALE} x2={WIDTH} y2={CENTER_Y + i * SCALE} className={styles.gridLine} />
                 </g>
               ))}
 
-              {/* Axes */}
               <line x1={0} y1={CENTER_Y} x2={WIDTH} y2={CENTER_Y} className={styles.axis} />
               <line x1={CENTER_X} y1={0} x2={CENTER_X} y2={HEIGHT} className={styles.axis} />
 
-              {/* Projection visualization */}
               {showProjection && (
                 <>
-                  {/* Projection line (shadow) on B */}
-                  <line
-                    x1={origin.x}
-                    y1={origin.y}
-                    x2={screenProj.x}
-                    y2={screenProj.y}
-                    className={styles.projectionLine}
-                    stroke="url(#projectionGradient)"
-                  />
-                  {/* Perpendicular dashed line from A to projection point */}
-                  <line
-                    x1={screenA.x}
-                    y1={screenA.y}
-                    x2={screenProj.x}
-                    y2={screenProj.y}
-                    className={styles.perpLine}
-                  />
-                  {/* Projection point glow */}
+                  <line x1={origin.x} y1={origin.y} x2={screenProj.x} y2={screenProj.y} className={styles.projectionLine} stroke="url(#projectionGradient)" />
+                  <line x1={screenA.x} y1={screenA.y} x2={screenProj.x} y2={screenProj.y} className={styles.perpLine} />
                   <circle cx={screenProj.x} cy={screenProj.y} r="12" className={styles.projPointGlow} />
-                  {/* Projection point */}
                   <circle cx={screenProj.x} cy={screenProj.y} r="5" className={styles.projPoint} />
                 </>
               )}
 
-              {/* Angle arc */}
               <path
                 d={`M ${arcStartX} ${arcStartY} A ${arcRadius} ${arcRadius} 0 ${largeArc} 1 ${arcEndX} ${arcEndY}`}
                 className={isPositive ? styles.arcPositive : styles.arcNegative}
               />
 
-              {/* Vector B (magenta) */}
-              <line
-                x1={origin.x}
-                y1={origin.y}
-                x2={screenB.x}
-                y2={screenB.y}
-                className={styles.vectorB}
-                stroke="url(#vectorBGradient)"
-                markerEnd="url(#arrowB)"
-              />
+              <line x1={origin.x} y1={origin.y} x2={screenB.x} y2={screenB.y} className={styles.vectorB} stroke="url(#vectorBGradient)" markerEnd="url(#arrowB)" />
+              <line x1={origin.x} y1={origin.y} x2={screenA.x} y2={screenA.y} className={styles.vectorA} stroke="url(#vectorAGradient)" markerEnd="url(#arrowA)" />
 
-              {/* Vector A (cyan) */}
-              <line
-                x1={origin.x}
-                y1={origin.y}
-                x2={screenA.x}
-                y2={screenA.y}
-                className={styles.vectorA}
-                stroke="url(#vectorAGradient)"
-                markerEnd="url(#arrowA)"
-              />
-
-              {/* Draggable handles */}
               <circle
                 cx={screenA.x}
                 cy={screenA.y}
@@ -341,7 +381,6 @@ export function GeometricDotProductViz() {
                 onBlur={() => setKeyboardFocus(null)}
               />
 
-              {/* Labels */}
               <text x={screenA.x + 15} y={screenA.y - 10} className={styles.labelA}>
                 A
               </text>
@@ -349,78 +388,13 @@ export function GeometricDotProductViz() {
                 B
               </text>
             </svg>
-          </div>
 
-          <div className={styles.infoPanel}>
-            <div className={styles.resultBox}>
-              <div className={styles.resultLabel}>Dot Product</div>
-              <div className={`${styles.resultValue} ${isPositive ? styles.positive : styles.negative}`}>
-                {computed.dot.toFixed(2)}
-              </div>
-            </div>
-
-            <div className={`inset-box ${styles.detailsCard}`}>
-              <div className={styles.breakdown}>
-                <div className={styles.breakdownRow}>
-                  <span className={styles.breakdownLabel}>|A|</span>
-                  <span className={styles.breakdownValue}>{computed.magA.toFixed(2)}</span>
-                </div>
-                <div className={styles.breakdownRow}>
-                  <span className={styles.breakdownLabel}>|B|</span>
-                  <span className={styles.breakdownValue}>{computed.magB.toFixed(2)}</span>
-                </div>
-                <div className={styles.breakdownRow}>
-                  <span className={styles.breakdownLabel}>Angle</span>
-                  <span className={styles.breakdownValue}>{computed.angleDeg.toFixed(0)}°</span>
-                </div>
-                <div className={styles.breakdownRow}>
-                  <span className={styles.breakdownLabel}>Projection A → B</span>
-                  <span className={styles.breakdownValue}>{computed.projLength.toFixed(2)}</span>
-                </div>
-              </div>
-
-              <div className={styles.detailsDivider} aria-hidden="true" />
-
-              <div className={styles.formula}>
-                <div className={styles.formulaLine}>A · B = |A| × |B| × cos(θ)</div>
-                <div className={styles.formulaValues}>
-                  {computed.dot.toFixed(2)} = {computed.magA.toFixed(2)} × {computed.magB.toFixed(2)} ×{' '}
-                  {Math.cos((computed.angleDeg * Math.PI) / 180).toFixed(2)}
-                </div>
-              </div>
-
-              <label className={styles.toggle} htmlFor="show-projection-toggle">
-                <input
-                  id="show-projection-toggle"
-                  type="checkbox"
-                  checked={showProjection}
-                  onChange={(e) => setShowProjection(e.target.checked)}
-                  aria-label="Toggle projection visualization"
-                />
-                <span>Show projection (shadow)</span>
-              </label>
-
-              <div className={styles.insight}>
-                {isPositive ? (
-                  <>
-                    <span className={styles.insightIcon}>↗</span>
-                    <span>Vectors point in similar directions (angle &lt; 90°)</span>
-                  </>
-                ) : (
-                  <>
-                    <span className={styles.insightIcon}>↙</span>
-                    <span>Vectors point in opposite directions (angle &gt; 90°)</span>
-                  </>
-                )}
-              </div>
+            <div className={styles.explanation}>
+              Drag the arrow tips to explore. The dot product measures <strong>alignment</strong>.
             </div>
           </div>
-        </div>
-
-        <div className={styles.explanation}>
-          Drag the arrow tips to explore. The dot product measures <strong>alignment</strong>: how much one vector
-          points in the direction of another.
-        </div>
+        )}
+      />
     </VizCard>
   )
 }

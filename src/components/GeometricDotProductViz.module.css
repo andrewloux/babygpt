@@ -46,8 +46,10 @@
 
 .vizPanel {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
   background:
     radial-gradient(ellipse 120% 75% at 50% 0%, rgba(255, 255, 255, 0.04), transparent 65%),
     rgba(0, 0, 0, 0.22);
@@ -68,6 +70,17 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+}
+
+.p {
+  margin: 0.5rem 0;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.5;
+  font-size: 0.98rem;
+}
+
+.p strong {
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .gridLine {
@@ -341,12 +354,14 @@
 }
 
 .explanation {
-  padding: 1rem 1.25rem;
+  width: 100%;
+  padding: 0.75rem 0.9rem;
   font-size: 0.85rem;
   font-family: var(--font-mono);
   color: rgba(255, 255, 255, 0.55);
   background: rgba(0, 0, 0, 0.18);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .explanation strong {
