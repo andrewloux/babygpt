@@ -21,6 +21,7 @@ import {
   WorkedExample,
   WorkedStep,
   WorkedNote,
+  WorkedValue,
   MatrixRowSelectViz,
   CharacterClusterViz,
   ContextExplosionViz,
@@ -67,6 +68,8 @@ export function Chapter2() {
   const [showEmbeddingInspector, setShowEmbeddingInspector] = useState(false)
   const [showTrainingReplay, setShowTrainingReplay] = useState(false)
   const [trainingReplayCorpus, setTrainingReplayCorpus] = useState(DEFAULT_SHARED_CORPUS)
+  const [pStep1, setPStep1] = useState(0.5)
+  const [pStep2, setPStep2] = useState(0.25)
 
   return (
     <Container>
@@ -1467,6 +1470,48 @@ def log_softmax(z):
             <strong>Step 2: Average over all predictions.</strong> We have N characters to predict. Sum up all the surprises and divide by N:
           </Paragraph>
           <MathBlock equation={String.raw`H = \frac{1}{N}\bigl(\text{surprise}_1 + \text{surprise}_2 + \cdots + \text{surprise}_N\bigr)`} />
+          <WorkedExample title="Two steps → average surprise (try your own numbers)">
+            <WorkedStep n="1">
+              <Paragraph>
+                Pick two “probability of the truth” values:{' '}
+                <WorkedValue
+                  ariaLabel="probability for step one"
+                  label="p₁"
+                  value={pStep1}
+                  min={0.01}
+                  max={0.99}
+                  step={0.05}
+                  format={(v) => v.toFixed(2)}
+                  onValueChange={setPStep1}
+                />
+                <WorkedValue
+                  ariaLabel="probability for step two"
+                  label="p₂"
+                  value={pStep2}
+                  min={0.01}
+                  max={0.99}
+                  step={0.05}
+                  format={(v) => v.toFixed(2)}
+                  onValueChange={setPStep2}
+                />
+              </Paragraph>
+            </WorkedStep>
+            <WorkedStep n="2" final>
+              <Paragraph>
+                Surprises (in bits):{' '}
+                <code>s₁ = −log₂(p₁) = {(-Math.log2(pStep1)).toFixed(2)}</code>,{' '}
+                <code>s₂ = −log₂(p₂) = {(-Math.log2(pStep2)).toFixed(2)}</code>.
+              </Paragraph>
+              <Paragraph>
+                Average surprise:{' '}
+                <code>H = (s₁ + s₂)/2 = {(((-Math.log2(pStep1)) + (-Math.log2(pStep2))) / 2).toFixed(2)} bits</code>.
+              </Paragraph>
+              <WorkedNote>
+                Perplexity is just <code>2^H</code>. Here that’s{' '}
+                <code>{Math.pow(2, (((-Math.log2(pStep1)) + (-Math.log2(pStep2))) / 2)).toFixed(2)}</code> “equally-likely choices” on average.
+              </WorkedNote>
+            </WorkedStep>
+          </WorkedExample>
           <Paragraph>
             That's the cross-entropy (also called NLL when you sum it up instead of averaging).<Cite n={13} /> We can’t compute the true entropy of English directly — what we can compute is: “how surprised was <em>our model</em> on held‑out text?”
           </Paragraph>
