@@ -1,6 +1,6 @@
 .content {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 0.95fr 1.05fr;
   gap: 1.25rem;
   align-items: start;
 }
@@ -12,8 +12,16 @@
 }
 
 .panel {
-  padding: 1rem;
+  padding: 0.9rem;
   border-radius: 12px;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .sectionTitle {
@@ -25,12 +33,45 @@
   margin: 0.25rem 0 0.65rem;
 }
 
+.tabRow {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.tabBtn {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.16);
+  color: rgba(255, 255, 255, 0.72);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.78rem;
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.tabBtn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 217, 255, 0.28);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tabBtnActive {
+  color: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 217, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.12);
+}
+
 .row {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 0.75rem;
-  margin-top: 0.65rem;
+  margin-top: 0.55rem;
 }
 
 .key {
@@ -75,7 +116,7 @@
 
 .promptText {
   margin-top: 0.25rem;
-  font-size: 0.98rem;
+  font-size: 0.95rem;
   line-height: 1.35;
   color: rgba(255, 255, 255, 0.85);
 }
@@ -208,8 +249,8 @@
 }
 
 .block {
-  margin-top: 1rem;
-  padding-top: 0.9rem;
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -387,4 +428,3 @@
 .footer {
   max-width: 72ch;
 }
-

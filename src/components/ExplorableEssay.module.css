@@ -84,7 +84,7 @@
 }
 
 .narrative {
-  padding: 1rem;
+  padding: 0.85rem;
   border-radius: 12px;
 }
 
@@ -114,8 +114,8 @@
 
 .narrativeBody {
   color: rgba(255, 255, 255, 0.82);
-  font-size: 0.98rem;
-  line-height: 1.5;
+  font-size: 0.95rem;
+  line-height: 1.45;
   max-width: 72ch;
 }
 
@@ -125,7 +125,7 @@
 }
 
 .actions {
-  margin-top: 0.95rem;
+  margin-top: 0.8rem;
   display: flex;
   justify-content: flex-end;
   gap: 0.6rem;
@@ -166,4 +166,3 @@
 .viz {
   min-width: 0;
 }
-

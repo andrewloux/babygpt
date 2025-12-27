@@ -1,5 +1,5 @@
 .container {
-  margin: 3rem 0;
+  margin: 2rem 0;
   position: relative;
   font-family: var(--font-sans);
 }
@@ -24,7 +24,7 @@
     linear-gradient(180deg, rgba(11, 12, 21, 1), rgba(15, 17, 28, 1));
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 1rem;
-  padding: 2rem;
+  padding: 1.5rem;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.02) inset,
     0 25px 50px -12px rgba(0, 0, 0, 0.55);
@@ -36,8 +36,8 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 1.25rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
+  margin-bottom: 1.1rem;
+  padding-bottom: 0.85rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -73,15 +73,15 @@
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.45);
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem;
+  margin-bottom: 1.1rem;
+  padding-bottom: 0.65rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .steps {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.25rem;
 }
 
 .step {
@@ -98,8 +98,8 @@
   font-weight: 600;
   color: rgba(0, 0, 0, 0.9);
   background: var(--accent-cyan);
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.55rem;
+  height: 1.55rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -118,9 +118,9 @@
 /* Explanation text - right column, top */
 .explanation {
   font-family: var(--font-serif);
-  font-size: 1rem;
+  font-size: 0.98rem;
   color: rgba(255, 255, 255, 0.88);
-  line-height: 1.6;
+  line-height: 1.55;
 }
 
 .explanation code {
@@ -145,7 +145,7 @@
     0 0 0 1px rgba(255, 255, 255, 0.02) inset,
     0 10px 24px -12px rgba(0, 0, 0, 0.5);
   overflow: hidden;
-  margin-top: 0.5rem;
+  margin-top: 0.35rem;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -157,11 +157,11 @@
 }
 
 .codeContent {
-  padding: 0.75rem 1rem;
+  padding: 0.6rem 0.85rem;
   overflow-x: auto;
   font-family: var(--font-code);
   font-size: 0.85rem;
-  line-height: 1.6;
+  line-height: 1.45;
   font-feature-settings: "liga" 1, "calt" 1;
 }
 
@@ -214,13 +214,13 @@
   display: inline-block;
   width: 100%;
   box-sizing: border-box;
-  padding: 0.08rem 0.5rem 0.08rem 0.65rem;
+  padding: 0.06rem 0.4rem 0.06rem 0.55rem;
 }
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .walkthrough {
-    padding: 1.5rem;
+    padding: 1.15rem;
   }
 
   .header {
@@ -256,7 +256,7 @@
   }
 
   .codeContent {
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 0.65rem;
     font-size: 0.8rem;
   }
 }

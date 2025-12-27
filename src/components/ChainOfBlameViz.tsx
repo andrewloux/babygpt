@@ -54,6 +54,7 @@ function vecMat(v: number[], W: number[][]) {
 export function ChainOfBlameViz() {
   const [xTok, setXTok] = useState<InputTok>('l')
   const [yTok, setYTok] = useState<OutTok>('e')
+  const [panel, setPanel] = useState<'forward' | 'backward'>('forward')
 
   const [guess, setGuess] = useState<'one' | 'all' | null>(null)
   const [guessLocked, setGuessLocked] = useState(false)
@@ -222,114 +223,137 @@ export function ChainOfBlameViz() {
         </div>
 
         <div className={`${styles.panel} panel-dark inset-box`}>
-          <div className={styles.sectionTitle}>Forward pass (what the model does)</div>
-
-          <div className={styles.block}>
-            <div className={styles.blockTitle}>1) Embedding lookup</div>
-            <div className={styles.smallNote}>
-              <span className={styles.mono}>x = {xTok}</span> selects one row: <span className={styles.mono}>e_x = E[x]</span>
-            </div>
-            <div className={styles.vec}>
-              {xVec.map((v, i) => (
-                <span key={i} className={`${styles.cell} ${styles.cellCyan}`}>
-                  {v.toFixed(1)}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.block}>
-            <div className={styles.blockTitle}>2) Logits</div>
-            <div className={styles.smallNote}>
-              <span className={styles.mono}>z = e_xᵀ W_out</span>
-            </div>
-            <div className={styles.row3}>
-              {OUT_VOCAB.map((c, j) => (
-                <div key={c} className={styles.kv}>
-                  <div className={styles.k}>{c}</div>
-                  <div className={styles.v}>{(logits[j] ?? 0).toFixed(2)}</div>
-                </div>
-              ))}
+          <div className={styles.panelHeader}>
+            <div className={styles.sectionTitle}>Follow the blame</div>
+            <div className={styles.tabRow} role="tablist" aria-label="Choose which pass to view">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={panel === 'forward'}
+                className={`${styles.tabBtn} ${panel === 'forward' ? styles.tabBtnActive : ''}`}
+                onClick={() => setPanel('forward')}
+              >
+                Forward
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={panel === 'backward'}
+                className={`${styles.tabBtn} ${panel === 'backward' ? styles.tabBtnActive : ''}`}
+                onClick={() => setPanel('backward')}
+              >
+                Backward
+              </button>
             </div>
           </div>
 
-          <div className={styles.block}>
-            <div className={styles.blockTitle}>3) Probabilities</div>
-            {OUT_VOCAB.map((c, j) => (
-              <div key={c} className={styles.probRow}>
-                <span className={styles.probKey}>{c}</span>
-                <div className={styles.track}>
-                  <div className={styles.bar} style={{ width: `${Math.min(100, (probs[j] ?? 0) * 100)}%` }} />
+          {panel === 'forward' ? (
+            <>
+              <div className={styles.block}>
+                <div className={styles.blockTitle}>1) Embedding lookup</div>
+                <div className={styles.smallNote}>
+                  <span className={styles.mono}>x = {xTok}</span> selects one row: <span className={styles.mono}>e_x = E[x]</span>
                 </div>
-                <span className={styles.probVal}>{(probs[j] ?? 0).toFixed(3)}</span>
+                <div className={styles.vec}>
+                  {xVec.map((v, i) => (
+                    <span key={i} className={`${styles.cell} ${styles.cellCyan}`}>
+                      {v.toFixed(1)}
+                    </span>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
 
-          <div className={styles.block}>
-            <div className={styles.blockTitle}>4) Loss</div>
-            <div className={styles.smallNote}>
-              <span className={styles.mono}>L = −log p(true)</span> for <span className={styles.mono}>y={yTok}</span>
-            </div>
-            <div className={styles.lossVal}>{loss.toFixed(3)}</div>
-          </div>
-        </div>
-
-        <div className={`${styles.panel} panel-dark inset-box`}>
-          <div className={styles.sectionTitle}>Backward pass (the blame)</div>
-
-          <div className={styles.block}>
-            <div className={styles.blockTitle}>A) Logit blame: p − y</div>
-            <div className={styles.smallNote}>
-              Positive means “push that logit down”. Negative means “push that logit up”.
-            </div>
-            <div className={styles.row3}>
-              {OUT_VOCAB.map((c, j) => {
-                const g = dL_dz[j] ?? 0
-                const cls = g >= 0 ? styles.cellMagenta : styles.cellCyan
-                return (
-                  <div key={c} className={styles.kv}>
-                    <div className={styles.k}>{c}</div>
-                    <div className={`${styles.v} ${revealed ? cls : styles.hidden}`}>{g.toFixed(3)}</div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
-          <div className={styles.block}>
-            <div className={styles.blockTitle}>B) Embedding blame: dL/de_x</div>
-            <div className={styles.smallNote}>
-              This is the gradient that will update the selected row <span className={styles.mono}>E[{xTok}]</span>.
-            </div>
-            <div className={styles.vec}>
-              {dL_dx.map((v, i) => (
-                <span key={i} className={`${styles.cell} ${revealed ? (v >= 0 ? styles.cellMagenta : styles.cellCyan) : styles.hidden}`}>
-                  {v.toFixed(3)}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.block}>
-            <div className={styles.blockTitle}>C) Which rows get touched?</div>
-            <div className={styles.table}>
-              {INPUT_VOCAB.map((t, i) => (
-                <div key={t} className={`${styles.tableRow} ${i === xIndex ? styles.tableRowActive : styles.tableRowInactive}`}>
-                  <span className={styles.tableKey}>{t}</span>
-                  <span className={`${styles.tableNote} ${revealed ? '' : styles.hidden}`}>
-                    {i === xIndex ? 'updated' : 'untouched'}
-                  </span>
+              <div className={styles.block}>
+                <div className={styles.blockTitle}>2) Logits</div>
+                <div className={styles.smallNote}>
+                  <span className={styles.mono}>z = e_xᵀ W_out</span>
                 </div>
-              ))}
-            </div>
-            <div className={styles.note}>
-              This is why the one‑hot “selector switch” mattered: the forward pass only used one row, so only one row can receive blame.
-            </div>
-          </div>
+                <div className={styles.row3}>
+                  {OUT_VOCAB.map((c, j) => (
+                    <div key={c} className={styles.kv}>
+                      <div className={styles.k}>{c}</div>
+                      <div className={styles.v}>{(logits[j] ?? 0).toFixed(2)}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.block}>
+                <div className={styles.blockTitle}>3) Probabilities</div>
+                {OUT_VOCAB.map((c, j) => (
+                  <div key={c} className={styles.probRow}>
+                    <span className={styles.probKey}>{c}</span>
+                    <div className={styles.track}>
+                      <div className={styles.bar} style={{ width: `${Math.min(100, (probs[j] ?? 0) * 100)}%` }} />
+                    </div>
+                    <span className={styles.probVal}>{(probs[j] ?? 0).toFixed(3)}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className={styles.block}>
+                <div className={styles.blockTitle}>4) Loss</div>
+                <div className={styles.smallNote}>
+                  <span className={styles.mono}>L = −log p(true)</span> for <span className={styles.mono}>y={yTok}</span>
+                </div>
+                <div className={styles.lossVal}>{loss.toFixed(3)}</div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={styles.block}>
+                <div className={styles.blockTitle}>A) Logit blame: p − y</div>
+                <div className={styles.smallNote}>
+                  Positive means “push that logit down”. Negative means “push that logit up”.
+                </div>
+                <div className={styles.row3}>
+                  {OUT_VOCAB.map((c, j) => {
+                    const g = dL_dz[j] ?? 0
+                    const cls = g >= 0 ? styles.cellMagenta : styles.cellCyan
+                    return (
+                      <div key={c} className={styles.kv}>
+                        <div className={styles.k}>{c}</div>
+                        <div className={`${styles.v} ${revealed ? cls : styles.hidden}`}>{g.toFixed(3)}</div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className={styles.block}>
+                <div className={styles.blockTitle}>B) Embedding blame: dL/de_x</div>
+                <div className={styles.smallNote}>
+                  This is the gradient that will update the selected row <span className={styles.mono}>E[{xTok}]</span>.
+                </div>
+                <div className={styles.vec}>
+                  {dL_dx.map((v, i) => (
+                    <span key={i} className={`${styles.cell} ${revealed ? (v >= 0 ? styles.cellMagenta : styles.cellCyan) : styles.hidden}`}>
+                      {v.toFixed(3)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.block}>
+                <div className={styles.blockTitle}>C) Which rows get touched?</div>
+                <div className={styles.table}>
+                  {INPUT_VOCAB.map((t, i) => (
+                    <div key={t} className={`${styles.tableRow} ${i === xIndex ? styles.tableRowActive : styles.tableRowInactive}`}>
+                      <span className={styles.tableKey}>{t}</span>
+                      <span className={`${styles.tableNote} ${revealed ? '' : styles.hidden}`}>
+                        {i === xIndex ? 'updated' : 'untouched'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className={styles.note}>
+                  This is why the one‑hot “selector switch” mattered: the forward pass only used one row, so only one row can receive blame.
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </VizCard>
   )
 }
-

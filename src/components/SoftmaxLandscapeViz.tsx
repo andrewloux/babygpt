@@ -337,33 +337,33 @@ export function SoftmaxLandscapeViz() {
           >
             Reset view
           </button>
+
+          <div className={`${styles.readingPanel} panel-dark inset-box`} aria-live="polite">
+            <div className={styles.overlayTitle}>Reading the plot</div>
+            <div className={styles.overlayLine}>
+              <span className={styles.overlayKey}>Base</span> score gaps: Δℓ(e), Δℓ(a) (relative to ℓ(i)=0).
+            </div>
+            <div className={styles.overlayLine}>
+              <span className={styles.overlayKey}>Height</span> <span className={styles.overlayEmph}>P('{token.label}')</span>.
+            </div>
+            <div className={styles.overlayLine}>
+              <span className={styles.overlayKey}>T</span> reshapes the same landscape.
+            </div>
+            <div className={styles.overlayDivider} />
+            <div className={styles.overlayTitle}>Focused pillar</div>
+            <div className={styles.overlayMono}>
+              Δℓ(e)=<span className={styles.overlayAccentCyan}>{formatSigned(focus?.a ?? 0)}</span>{' '}
+              Δℓ(a)=<span className={styles.overlayAccentMagenta}>{formatSigned(focus?.b ?? 0)}</span>
+            </div>
+            <div className={styles.overlayValue}>
+              P('{token.label}') = <span className={styles.overlayEmph}>{(focus?.probs[selectedIndex] ?? 0).toFixed(3)}</span>
+            </div>
+            <div className={styles.overlayHint}>Drag to rotate · click to pin</div>
+          </div>
         </div>
 
         <div className={styles.chartPanel}>
           <div className={`${styles.chartFrame} panel-dark inset-box`}>
-            <div className={`${styles.overlay} panel-dark inset-box`} aria-live="polite">
-              <div className={styles.overlayTitle}>Reading the plot</div>
-              <div className={styles.overlayLine}>
-                <span className={styles.overlayKey}>Base</span> score gaps: Δℓ(e), Δℓ(a) (relative to ℓ(i)=0).
-              </div>
-              <div className={styles.overlayLine}>
-                <span className={styles.overlayKey}>Height</span> <span className={styles.overlayEmph}>P('{token.label}')</span>.
-              </div>
-              <div className={styles.overlayLine}>
-                <span className={styles.overlayKey}>T</span> reshapes the same landscape.
-              </div>
-              <div className={styles.overlayDivider} />
-              <div className={styles.overlayTitle}>Focused pillar</div>
-              <div className={styles.overlayMono}>
-                Δℓ(e)=<span className={styles.overlayAccentCyan}>{formatSigned(focus?.a ?? 0)}</span>{' '}
-                Δℓ(a)=<span className={styles.overlayAccentMagenta}>{formatSigned(focus?.b ?? 0)}</span>
-              </div>
-              <div className={styles.overlayValue}>
-                P('{token.label}') = <span className={styles.overlayEmph}>{(focus?.probs[selectedIndex] ?? 0).toFixed(3)}</span>
-              </div>
-              <div className={styles.overlayHint}>Drag to rotate · click to pin</div>
-            </div>
-
             <svg
               viewBox={`0 0 ${viewW} ${viewH}`}
               className={styles.svg}
