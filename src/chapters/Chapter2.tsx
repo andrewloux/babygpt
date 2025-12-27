@@ -39,6 +39,7 @@ import {
   EmbeddingInspector,
   SoftmaxWidget,
   SoftmaxBarsViz,
+  SamplingConvergenceViz,
   SoftmaxSimplexViz,
   SoftmaxLandscapeViz,
   GradientTraceDemo,
@@ -1197,6 +1198,10 @@ score = float(np.dot(a, b))`}</CodeBlock>
           <li><strong>T = 1:</strong> Sample according to the raw logits.</li>
           <li><strong>T → ∞:</strong> Everything flattens toward uniform.</li>
         </ul>
+        <Paragraph>
+          The distribution is what the model believes. Sampling is how you turn that belief into an actual next token. Click <strong>Draw 100</strong> a few times and watch the empirical histogram converge.
+        </Paragraph>
+        <SamplingConvergenceViz />
         <Paragraph>
           One detail that clears up a lot of confusion: temperature is mostly a <strong>sampling knob</strong>. You apply it at inference time by rescaling logits before softmax. It doesn’t add knowledge or remove knowledge — it changes how willing you are to take second‑best options.
         </Paragraph>
