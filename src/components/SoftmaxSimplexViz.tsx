@@ -81,6 +81,8 @@ export function SoftmaxSimplexViz() {
   const [trail, setTrail] = useState<{ x: number; y: number }[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const [attemptLocked, setAttemptLocked] = useState(false)
+  const [pulseId, setPulseId] = useState(0)
+  const [pulseTarget, setPulseTarget] = useState<'plot' | 'feedback' | null>(null)
   const svgRef = useRef<SVGSVGElement | null>(null)
   const isDraggingRef = useRef(false)
   const pointRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
@@ -111,6 +113,17 @@ export function SoftmaxSimplexViz() {
     if (Math.hypot(point.x - last.x, point.y - last.y) <= 5) return
     setTrail((prev) => [...prev.slice(-40), point])
   }, [point.x, point.y, trail.length])
+
+  useEffect(() => {
+    if (!pulseTarget) return
+    const t = window.setTimeout(() => setPulseTarget(null), 950)
+    return () => window.clearTimeout(t)
+  }, [pulseId, pulseTarget])
+
+  const triggerPulse = (target: 'plot' | 'feedback') => {
+    setPulseTarget(target)
+    setPulseId((v) => v + 1)
+  }
 
   const updateFromClientPoint = (clientX: number, clientY: number) => {
     const svg = svgRef.current
@@ -187,7 +200,11 @@ export function SoftmaxSimplexViz() {
               <button
                 type="button"
                 className={styles.lockBtn}
-                onClick={() => setAttemptLocked(true)}
+                onClick={() => {
+                  setAttemptLocked(true)
+                  triggerPulse('feedback')
+                  triggerPulse('plot')
+                }}
                 disabled={attemptLocked}
               >
                 {attemptLocked ? 'Attempt locked' : 'Lock attempt'}
@@ -202,12 +219,17 @@ export function SoftmaxSimplexViz() {
                   setLogitC(-0.5)
                   setTemperature(1.0)
                   setTrail([point])
+                  triggerPulse('plot')
                 }}
               >
                 Reset
               </button>
             </div>
-            <div className={styles.challengeFeedback} aria-live="polite">
+            <div
+              className={`${styles.challengeFeedback} focus-pulse ${pulseTarget === 'feedback' ? 'focus-pulse--active' : ''}`}
+              style={{ ['--focus-pulse-color' as any]: 'rgba(0, 217, 255, 0.22)' }}
+              aria-live="polite"
+            >
               {attemptLocked ? (
                 challengeSuccess ? (
                   <span className={styles.good}>Nice. You killed 'a' without collapsing into a corner.</span>
@@ -351,7 +373,10 @@ export function SoftmaxSimplexViz() {
           </div>
         </div>
 
-        <div className={styles.vizPanel}>
+        <div
+          className={`${styles.vizPanel} focus-pulse ${pulseTarget === 'plot' ? 'focus-pulse--active' : ''}`}
+          style={{ ['--focus-pulse-color' as any]: 'rgba(0, 217, 255, 0.18)' }}
+        >
           <svg
             ref={svgRef}
             viewBox={`0 0 ${WIDTH} ${HEIGHT}`}

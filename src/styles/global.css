@@ -268,6 +268,73 @@ details.collapsible > summary:focus-visible {
   box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.25);
 }
 
+/*
+ * Narrative highlight utility
+ * Use when the story says “look here” and we want the target to briefly light up.
+ *
+ * Usage:
+ * - Always keep the base class: `focus-pulse`
+ * - Toggle `focus-pulse--active` for ~1s via JS
+ * - Optional: set `--focus-pulse-color` inline for semantic color
+ */
+.focus-pulse {
+  position: relative;
+  isolation: isolate;
+}
+
+.focus-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 0 0 var(--focus-pulse-color, rgba(0, 217, 255, 0.25));
+}
+
+.focus-pulse--active::after {
+  opacity: 1;
+  animation: focusPulse 900ms var(--ease-smooth) 1;
+}
+
+@keyframes focusPulse {
+  0% {
+    transform: scale(0.99);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+      0 0 0 0 var(--focus-pulse-color, rgba(0, 217, 255, 0.25));
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  60% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+      0 0 0 7px var(--focus-pulse-color, rgba(0, 217, 255, 0.25));
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+      0 0 0 12px rgba(0, 0, 0, 0);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .focus-pulse--active::after {
+    animation: none;
+    opacity: 1;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+      0 0 0 3px var(--focus-pulse-color, rgba(0, 217, 255, 0.25));
+  }
+}
+
 .interactive {
   cursor: pointer;
   transition: var(--transition-fast);
