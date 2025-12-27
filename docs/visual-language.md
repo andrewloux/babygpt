@@ -8,6 +8,19 @@ Goal: make it easy for any engineer to add a new viz that *looks like BabyGPT* w
 
 These are “what we mean” pictures. They live in `docs/assets/visual-audit/`.
 
+### Updating the “gold” screenshots
+
+These images are our current “this is what good looks like” baseline. If you change UI primitives or a big viz layout, update them deliberately.
+
+**Current limitation:** automated capture via our headless Playwright harness is not reliable in this environment (it can produce all-black PNGs). For now, update the gold images **manually**.
+
+Manual workflow:
+
+1) Run the app locally (`npm run dev`), open Chapter 2 in a real browser.
+2) Navigate to the relevant figure and ensure the state looks “baseline” (no hover tooltips, no dropdowns open).
+3) Take a screenshot of the **full VizCard** (including header + footer) and overwrite the matching file in `docs/assets/visual-audit/gold/`.
+4) Verify `docs/visual-language.md` still references valid filenames.
+
 For the “why”, see:
 
 - `docs/assets/visual-audit/gold/README.md` (what to copy)
