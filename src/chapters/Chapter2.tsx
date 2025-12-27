@@ -1030,6 +1030,42 @@ score = float(np.dot(a, b))`}</CodeBlock>
           </Paragraph>
         </Callout>
 
+        <WorkedExample title="Numerical stability: the overflow that max-subtraction prevents">
+          <WorkedStep n="1">
+            <Paragraph>
+              Take logits like <MathInline equation={String.raw`[100,\;0,\;-100]`} />. The probabilities are extremely concentrated on the first
+              entry — but the <em>computation</em> still needs to behave.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="2">
+            <Paragraph>
+              If you naively compute <MathInline equation={String.raw`e^{100}`} /> in floating point, you’re living dangerously. In <Term>float32</Term>, <MathInline equation={String.raw`e^{100}`} /> is already huge; by <MathInline equation={String.raw`e^{1000}`} /> you overflow to <Term>∞</Term>.
+            </Paragraph>
+          </WorkedStep>
+          <WorkedStep n="3" final>
+            <Paragraph>
+              Max-subtraction rewrites the same softmax with safer numbers:
+              <MathInline equation={String.raw`[100,\;0,\;-100] - 100 = [0,\;-100,\;-200]`} />.
+              Now the biggest exponent is <MathInline equation={String.raw`e^{0}=1`} />, and everything else is ≤ 1.
+            </Paragraph>
+            <WorkedNote>
+              This isn’t a hack. It’s the same probabilities — we’re just choosing a constant that makes the computation well-behaved.
+            </WorkedNote>
+          </WorkedStep>
+        </WorkedExample>
+
+        <CodeBlock filename="stable_softmax.py">{`import numpy as np
+
+def softmax(z):
+    z = z - z.max()           # subtract max for stability
+    e = np.exp(z)
+    return e / e.sum()
+
+def log_softmax(z):
+    z = z - z.max()
+    logZ = np.log(np.exp(z).sum())  # log-sum-exp (simple form)
+    return z - logZ`}</CodeBlock>
+
         <WorkedExample title="Softmax by hand (3 logits)">
           <WorkedStep n="1">
             <Paragraph>
