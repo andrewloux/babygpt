@@ -73,12 +73,12 @@ export function Chapter1() {
             description: 'Turn P(text) into a product of P(next | context).',
           },
           {
-            to: '1.1.7.2',
-            title: 'The Sparsity Trap',
-            description: 'Why counting hits zeros (and why overlap is the only escape hatch).',
+            to: '1.2',
+            title: 'Counting Models',
+            description: 'Build probabilities by counting, then hit the engineering ceiling.',
           },
           {
-            to: '1.3.2',
+            to: '1.4.2',
             title: 'The Free Lunch',
             description: 'One block of text becomes thousands of training targets.',
           },
@@ -142,6 +142,9 @@ export function Chapter1() {
         </Paragraph>
         <Paragraph>
           I'll use <em>words</em> for intuition in a few places because they're easier to read. When we implement this, we'll work with <em>characters</em> so the vocabulary stays tiny and nothing is hidden. Same math, smaller Lego bricks.
+        </Paragraph>
+        <Paragraph>
+          <em>Vocabulary note: In Chapter 1, "token" and "character" are synonymous. We'll call the context window <Term>context_length</Term> in code and <Term>T</Term> in math.</em>
         </Paragraph>
         <Paragraph>
           We'll make this precise in a second. For now, keep the direction straight: <strong>high probability → low surprise</strong>, and <strong>low probability → high surprise</strong>.
@@ -224,14 +227,12 @@ export function Chapter1() {
         <Paragraph>
           The model is betting 40% on <Term>l</Term> (hello), 35% on <Term>p</Term> (help), and leaving scraps for the rest. These five numbers form a <Term>probability distribution</Term>—a complete accounting of all possibilities that sums to 1.
         </Paragraph>
-        <Callout variant="insight" title="The Core Insight">
-          <p>
-            A language model is just a function that takes some context and outputs a probability distribution over the vocabulary. All the complexity you'll see later—all the matrix multiplications and nonlinearities and clever tricks—exists solely to make this function produce good distributions.
-          </p>
-          <p>
-            Context in → probability distribution out. Everything else is implementation details.
-          </p>
-        </Callout>
+        <Paragraph>
+          A language model is just a function that takes some context and outputs a probability distribution over the vocabulary. All the complexity you'll see later—all the matrix multiplications and nonlinearities and clever tricks—exists solely to make this function produce good distributions.
+        </Paragraph>
+        <Paragraph>
+          <Highlight>Context in → probability distribution out.</Highlight> Everything else is implementation details.
+        </Paragraph>
       </Section>
 
       {/* Section 1.1.2 */}
@@ -335,31 +336,6 @@ export function Chapter1() {
             </Paragraph>
           </Callout>
 
-          <Callout variant="warning" title="Why Lookup Tables Don't Scale">
-            <Paragraph>
-              Where does this huge number come from? It's the number of options multiplied across each position:
-            </Paragraph>
-            <MathBlock
-              equation={String.raw`\underbrace{27}_{\text{char 1}} \times \underbrace{27}_{\text{char 2}} \times \dots \times \underbrace{27}_{\text{char 100}} = 27^{100}`}
-              explanation="For a paragraph of 100 characters, you have 27 choices at every single step. Multiplication, not addition — because each choice at position 1 can pair with any of 27 at position 2."
-            />
-            <Paragraph>
-              The problem isn't just size—it's that lookup tables treat every context as an independent key. "the cat sat"
-              and "the dog sat" share a common structure, but in a word-level table they're unrelated entries. Learning
-              one doesn't help the other.
-            </Paragraph>
-            <Paragraph>
-              Character-level models help somewhat—"cat" and "can" share "ca", so counts transfer through literal overlap.
-              But that's not meaning, it's spelling. "cat" and "dog" share almost none, so a counting model can't "feel"
-              that they're related. You need a model that learns <Term>shared structure</Term>—that's what Chapter 2 builds.
-            </Paragraph>
-          </Callout>
-
-          <Callout variant="insight" title="The Warehouse Is Empty">
-            <Paragraph>
-              Think of your brain as a warehouse. Every time you read a new sentence, you need a filing cabinet for that exact sequence. "The cat sat"? Cabinet #47,203. "The dog sat"? Completely different address: Cabinet #89,441. Same verb, same structure, but the warehouse doesn't know they're related. It just knows: different string, different cabinet.
-            </Paragraph>
-          </Callout>
 
 		          <Paragraph>
 		            The counting approach is still just a giant lookup table—same idea as before, just scaled up. To this naive model, "cat" and "dog" are just symbols. <Term>"the cat sat"</Term> and <Term>"the dog sat"</Term> are different keys. Learning one doesn't automatically change the other, because the model has no way to share information between keys. It's a phone book: entries don't talk to each other.
@@ -530,7 +506,7 @@ export function Chapter1() {
         </Paragraph>
       </Section>
 
-      {/* Section 1.1.4 */}
+      {/* Section 1.1.5 */}
       <Section number="1.1.5" title="The Chain Rule">
         <Paragraph>
           Now we can write it down formally. The chain rule connects joint probability (what we want) to conditional probability (what we can actually estimate from data):
@@ -703,7 +679,7 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
                 <li><strong>Mix multiple strategies:</strong> Blend estimates from different context lengths (interpolation)</li>
               </ul>
               <Paragraph>
-                Section 1.1.7 covers these. The point here: smoothing isn't a hack—it's how you handle a mathematically undefined situation.
+                Section 1.2.2 covers these techniques in detail. The point here: smoothing isn't a hack—it's how you handle a mathematically undefined situation.
               </Paragraph>
             </Callout>
           </FormalSubSection>
@@ -735,10 +711,40 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
             ]}
           />
         </FormalRigor>
+        <Callout variant="insight" title="This Becomes the Training Objective">
+          <Paragraph>
+            This formula is the training objective. The model's job is to <Highlight>assign high probability to the correct next token</Highlight>.
+          </Paragraph>
+          <Paragraph>
+            If the real text is <Term>"cat"</Term>, the model sees <Term>"c"</Term> and should put most of its probability mass on <Term>"a"</Term>.
+            Then it sees <Term>"ca"</Term> and should put most of the mass on <Term>"t"</Term>.
+          </Paragraph>
+          <Paragraph>
+            By maximizing the probability of the correct token at every step, the model implicitly maximizes the probability of the whole sequence.
+            That's why training looks like "next token prediction" — and in stats terms, it's maximum likelihood.
+          </Paragraph>
+          <Paragraph>
+            The loop is: predict → measure surprise → adjust the model so next time it assigns more probability to what actually happens.
+          </Paragraph>
+          <Paragraph>
+            For our character-level world with 27 possible characters, random guessing gives <Term>log₂(27) ≈ 4.75 bits</Term> per character.
+            That's the baseline — pure ignorance. A trained model should do better.
+          </Paragraph>
+        </Callout>
       </Section>
 
-      {/* Section 1.1.6 */}
-      <Section number="1.1.6" title="Building Probabilities From a Corpus">
+      {/* Section 1.2 */}
+      <Section number="1.2" title="Counting Models">
+        <Paragraph>
+          We've established the math: the chain rule decomposes P(sequence) into a product of conditional probabilities. But where do those conditionals actually come from?
+        </Paragraph>
+        <Paragraph>
+          The oldest answer is counting. Count how often each context appears in your training data, count what follows it, divide. It's conceptually simple, practically useful, and fundamentally limited.
+        </Paragraph>
+      </Section>
+
+      {/* Section 1.2.1 */}
+      <Section number="1.2.1" title="Building Probabilities From a Corpus">
         <Paragraph>
           Okay, but where do these probabilities actually <em>come from</em>? We build them by counting—count how often sequences appear, divide by totals. Let's work through it.
         </Paragraph>
@@ -825,8 +831,11 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
         </Callout>
       </Section>
 
-      {/* Section 1.1.7.1 */}
-      <Section number="1.1.7.1" title="The Hidden Graph & The Speed Limit">
+      {/* Section 1.2.2 */}
+      <Section number="1.2.2" title="The Engineering Limit">
+        <Paragraph>
+          Before we abandon counting models, let's see how far engineering heroics can push them. The techniques in this section represent the pinnacle of n-gram engineering—but even at peak efficiency, they can't solve the generalization problem.
+        </Paragraph>
         <Paragraph>
           We've been talking about "counts" and "tables," but there's a deeper structure here. What we just built is a <Term>Markov Chain</Term>.
         </Paragraph>
@@ -1014,7 +1023,10 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
           <li><strong>Late 2010s:</strong> Transformers make neural language models the default for general-purpose text generation.</li>
         </ul>
         <Paragraph>
-          What if we stored something else entirely? What if similar situations could share information?
+          KenLM solves the <em>speed</em> problem but not the <em>coverage</em> problem. We can look up any context in microseconds, but if that context never appeared in training, we still get nothing useful back.
+        </Paragraph>
+        <Paragraph>
+          What if we stored something else entirely? What if similar situations could share information? To generalize, we need similarity—not just retrieval.
         </Paragraph>
         <Paragraph>
           Chapter 2 builds that system.
@@ -1065,210 +1077,11 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
         />
       </Section>
 
-      {/* Section 1.1.7.2 */}
-      <Section number="1.1.7.2" title="The Sparsity Trap">
+      {/* Section 1.3 */}
+      <Section number="1.3" title="Tokenization">
         <Paragraph>
-          Why did we start this chapter with characters ("c", "a", "t") instead of words ("cat")?
+          To implement these probability calculations, we need to convert text to numbers. That's what tokenization does—and it's simpler than it sounds.
         </Paragraph>
-        <Paragraph>
-          Words seem better. They have meaning! But word-level n-gram models are incredibly brittle. If you train on a corpus that contains "dog ran" and "cat sat", but <strong>never</strong> "dog sat", the model learns a hard zero:
-        </Paragraph>
-        <MathBlock equation='P("sat" \mid "dog") = 0' />
-        <Paragraph>
-          The graph is disconnected. You can't get there from here.
-        </Paragraph>
-        <Paragraph>
-          Why does character-level help? At the word level, 'cat' and 'dog' share <em>zero</em> structure. They're atomic—unrelated keys in the lookup table. But decompose them into characters and overlap appears everywhere. Both end in consonants. Both follow similar phonetic patterns (CVC structure). The space character appears after <em>every</em> word, creating a universal hub node with stable statistics. When you've seen space→s 10,000 times across thousands of different words, that probability estimate is rock solid. Character-level models exploit this: they recombine fragments that actually repeat, rather than waiting to see exact word pairs.
-        </Paragraph>
-        <SparseMarkovViz />
-        <Paragraph>
-          This is the <Term>Sparsity Problem</Term>. Language is combinatorial; you will never see every valid two-word combination, no matter how much text you read.
-        </Paragraph>
-        <Callout variant="warning" title="Sparsity → Zeros (and Zeros Break the Score)">
-          <Paragraph>
-            In a pure counting model, an unseen next token gets probability 0. That sounds fine until you remember the cross‑entropy formula:
-          </Paragraph>
-          <MathBlock equation={String.raw`H = -\frac{1}{N} \sum \log_2 P(x_i)`} />
-          <Paragraph>
-            The moment <em>any</em> <Term>P(xᵢ) = 0</Term>, you're computing <Term>-log(0) = ∞</Term>. One unseen bigram and your entire score explodes. That’s not a useful metric.
-          </Paragraph>
-          <Paragraph>
-            Now zoom out. Imagine training on 1 million sentences. Sounds huge — but English has roughly 170,000 common words. The number of possible two‑word combinations is 170,000 × 170,000 = 29 billion. Your 1 million training sentences contain maybe 10 million bigrams. That’s 10 million / 29 billion ≈ 0.03% coverage.
-          </Paragraph>
-          <Paragraph>
-            Concretely: suppose <Term>"dog"</Term> appears 5,000 times. You’d expect it to pair with roughly <Term>5,000 / 170,000 ≈ 3%</Term> of the vocabulary. So for most words — 97% of them — <Term>P(word | "dog")</Term> is 0. Not “low.” Zero. The model literally can’t generate <Term>"dog veterinarian"</Term> if that exact pair never appeared, even though it’s perfectly valid English.
-          </Paragraph>
-          <Paragraph>
-            Smoothing keeps the score finite. It doesn’t solve the deeper problem: <strong>memorization doesn’t generalize</strong>. The fix requires sharing information between similar contexts — which is what embeddings give us in Chapter 2.
-          </Paragraph>
-        </Callout>
-        <Exercise
-          number="1.1"
-          title="Perplexity + Smoothing by Hand"
-          hint={
-            <>
-              <Paragraph>
-                For a bigram model, you score a test string by predicting every character from the one before it. So a length-4 string gives you <Term>N = 3</Term> predictions.
-              </Paragraph>
-              <Paragraph>
-                Add-1 smoothing (k=1) looks like:<br />
-                <code>P(x | c) = (count(c→x) + 1) / (count(c) + V)</code>
-              </Paragraph>
-            </>
-          }
-          solution={
-            <>
-              <Paragraph>
-                <strong>Training corpus:</strong> <Term>"aba"</Term>
-              </Paragraph>
-              <Paragraph>Bigram counts:</Paragraph>
-              <CodeBlock lang="text">{`a→b: 1
-b→a: 1
-a→a: 0
-b→b: 0`}</CodeBlock>
-              <Paragraph>Unsmoothed probabilities:</Paragraph>
-              <CodeBlock lang="text">{`P(b|a) = 1/1 = 1
-P(a|b) = 1/1 = 1
-P(a|a) = 0/1 = 0`}</CodeBlock>
-              <Paragraph>
-                <strong>Test string:</strong> <Term>"aaaa"</Term> has three bigrams: <Term>a→a</Term>, <Term>a→a</Term>, <Term>a→a</Term>. The first one already hits <Term>P(a|a)=0</Term>, so:
-              </Paragraph>
-              <CodeBlock lang="text">{`H = - (1/3) * (log2 0 + log2 0 + log2 0) = ∞`}</CodeBlock>
-              <MathBlock equation={String.raw`\text{perplexity} = 2^{H} = \infty`} />
-              <Paragraph>
-                Now add-1 smoothing with vocabulary <Term>V = 2</Term> (just <Term>a</Term> and <Term>b</Term>).
-              </Paragraph>
-              <Paragraph>
-                For context <Term>a</Term>, the denominator is <Term>count(a) + V = 1 + 2 = 3</Term>:
-              </Paragraph>
-              <CodeBlock lang="text">{`P(a|a) = (0 + 1) / 3 = 1/3
-P(b|a) = (1 + 1) / 3 = 2/3`}</CodeBlock>
-              <Paragraph>
-                With smoothing, every step in <Term>"aaaa"</Term> has probability <MathInline equation={String.raw`\frac{1}{3}`} />, so:
-              </Paragraph>
-              <CodeBlock lang="text">{`H = - (1/3) * (log2(1/3) + log2(1/3) + log2(1/3))
-  = -log2(1/3)
-  = log2(3)
-  ≈ 1.585 bits/char`}</CodeBlock>
-              <MathBlock equation={String.raw`\text{perplexity} = 2^{H} = 3`} />
-              <Paragraph>
-                Smoothing didn't make the model smarter. It just made the score finite by refusing to say "impossible."
-              </Paragraph>
-            </>
-          }
-        >
-          <Paragraph>
-            Train a <strong>bigram character model</strong> on the tiny corpus <Term>"aba"</Term>. Your vocabulary is just <Term>{'{a, b}'}</Term> (so <Term>V = 2</Term>).
-          </Paragraph>
-          <ol>
-            <li>Write down the bigram counts (a→a, a→b, b→a, b→b).</li>
-            <li>Without smoothing, what's the perplexity on the test string <Term>"aaaa"</Term>?</li>
-            <li>Now apply add-1 smoothing. What's the new perplexity?</li>
-          </ol>
-        </Exercise>
-        <Citations
-          title="Perplexity & Smoothing"
-          items={[
-            {
-              n: 1,
-              href: 'https://arxiv.org/abs/1312.3005',
-              label: 'Chelba et al. (2013) — One Billion Word Benchmark for Measuring Progress in Statistical Language Modeling',
-            },
-            {
-              n: 2,
-              href: 'https://aclanthology.org/P96-1041.pdf',
-              label: 'Chen & Goodman (1996) — An Empirical Study of Smoothing Techniques for Language Modeling',
-            },
-            {
-              n: 3,
-              href: 'https://www-i6.informatik.rwth-aachen.de/publications/download/951/Kneser-ICASSP-95.pdf',
-              label: 'Kneser & Ney (1995) — Improved Backing-Off for M-gram Language Modeling',
-            },
-          ]}
-        />
-        <Paragraph>
-          Now look at what happens when we switch to characters. We decompose the words into atoms.
-        </Paragraph>
-        <MarkovChainViz />
-        <Paragraph>
-          Suddenly, "dog sat" is possible! The model has seen:
-        </Paragraph>
-        <ul style={{ listStyleType: 'decimal', paddingLeft: '1.5em', marginBottom: '1em' }}>
-          <li><Term>d-o-g-␣</Term> (from "dog ran")</li>
-          <li><Term>␣-s-a-t</Term> (from "cat sat")</li>
-        </ul>
-        <Paragraph>
-          The <Term>space</Term> character acts as a mechanical bridge. The model learned "words end with space" and "words start after space." It can now stitch together <em>any</em> word ending in space with <em>any</em> word starting after space.
-        </Paragraph>
-        <Paragraph>
-          Why does frequency help? It's the law of large numbers. If you've seen 'space' followed by various characters 10,000 times, your estimate of P(next|space) is stable — adding one more example barely changes it. If you've seen 'q' only 50 times, each new example shifts your estimate significantly. High frequency means low variance in your probability estimates, which means reliable predictions even for new combinations.
-        </Paragraph>
-        <Callout variant="info" title="Overlap vs. Understanding">
-          <Paragraph>
-            This is a double-edged sword. Character models are robust—they never say probability zero—but they are also hallucination machines. A character model might happily generate "dogs meow" just because the spellings overlap, not because it understands biology.
-          </Paragraph>
-          <Paragraph>
-            <CorpusDisplay sentences={['"cats meow"', '"dogs bark"']} />
-          </Paragraph>
-          <Paragraph>
-            That's transfer through <Highlight>overlap</Highlight>. Semantic similarity is the stronger thing: "cat" and
-            "dog" should behave similarly in many contexts even when they share almost no spelling. Getting that kind of
-            reuse is what Chapter 2 is about.
-          </Paragraph>
-          <Paragraph>
-            Chapter 2 is where we build a model that can share what it learns across many different contexts—even when they don't share the same characters.
-          </Paragraph>
-        </Callout>
-      </Section>
-
-      {/* Section 1.1.8 */}
-      <Section number="1.1.8" title="Applying the Chain Rule">
-        <Paragraph>
-          Let's apply the chain rule to compute P("cat") using the probabilities we just built:
-        </Paragraph>
-        <MathBlock
-          equation="P(c) = 0.25"
-          explanation="From our first-character table."
-        />
-        <MathBlock
-          equation={`P(a \\,|\\, c) = 1.0`}
-          explanation="We counted: 'c' is always followed by 'a' in our corpus."
-        />
-        <MathBlock
-          equation={`P(t \\,|\\, ca) \\approx 0.67`}
-          explanation="2 out of 3 times, 'ca' was followed by 't'."
-        />
-        <Paragraph>
-          Multiply them together:
-        </Paragraph>
-        <MathBlock
-          equation={`P(\\text{"cat"}) = P(c) \\times P(a \\,|\\, c) \\times P(t \\,|\\, ca) = 0.25 \\times 1.0 \\times 0.67 \\approx 0.17`}
-          explanation="There's a 17% chance of generating 'cat' if we sampled from this model."
-        />
-        <Callout variant="insight" title="This Becomes the Training Objective">
-          <Paragraph>
-            This formula is the training objective. The model’s job is to <Highlight>assign high probability to the correct next token</Highlight>.
-          </Paragraph>
-          <Paragraph>
-            If the real text is <Term>"cat"</Term>, the model sees <Term>"c"</Term> and should put most of its probability mass on <Term>"a"</Term>.
-            Then it sees <Term>"ca"</Term> and should put most of the mass on <Term>"t"</Term>.
-          </Paragraph>
-          <Paragraph>
-            By maximizing the probability of the correct token at every step, the model implicitly maximizes the probability of the whole sequence.
-            That’s why training looks like “next token prediction” — and in stats terms, it’s maximum likelihood.
-          </Paragraph>
-          <Paragraph>
-            The loop is: predict → measure surprise → adjust the model so next time it assigns more probability to what actually happens.
-          </Paragraph>
-          <Paragraph>
-            For our character-level world with 27 possible characters, random guessing gives <Term>log₂(27) ≈ 4.75 bits</Term> per character.
-            That’s the baseline — pure ignorance. A trained model should do better.
-          </Paragraph>
-        </Callout>
-      </Section>
-
-      {/* Section 1.2 */}
-      <Section number="1.2" title="The Actual Meat Grinder: Tokenization">
         <Callout variant="info" title="A Quick Expectations Reset">
           <Paragraph>
             This section is intentionally unglamorous: the translation layer that turns raw text into integers a model can learn from.
@@ -1325,8 +1138,8 @@ P(b|a) = (1 + 1) / 3 = 2/3`}</CodeBlock>
         </Paragraph>
       </Section>
 
-      {/* Section 1.2.1 */}
-      <Section number="1.2.1" title="Building the Vocabulary">
+      {/* Section 1.3.1 */}
+      <Section number="1.3.1" title="Building the Vocabulary">
         <Paragraph>
           First, we need to know what characters we're even dealing with. Scan the training data, collect every unique character. That's our alphabet.
         </Paragraph>
@@ -1389,8 +1202,8 @@ itos = {i: ch for ch, i in stoi.items()}
         </Paragraph>
       </Section>
 
-      {/* Section 1.2.2 */}
-      <Section number="1.2.2" title="Encoding and Decoding">
+      {/* Section 1.3.2 */}
+      <Section number="1.3.2" title="Encoding and Decoding">
         <Paragraph>
           Now we can actually <em>use</em> the vocabulary.
         </Paragraph>
@@ -1426,8 +1239,8 @@ itos = {i: ch for ch, i in stoi.items()}
       </Paragraph>
       <TokenizerDemo />
 
-      {/* Section 1.3 */}
-      <Section number="1.3" title="The Sliding Window">
+      {/* Section 1.4 */}
+      <Section number="1.4" title="The Sliding Window">
         <Paragraph>
           We've got text → integers. But simply feeding a stream of numbers isn't enough. We need to structure this data to operationalize the <Highlight>Decomposition Strategy</Highlight> we derived in <SectionLink to="1.1">Section 1.1</SectionLink>.
         </Paragraph>
@@ -1443,8 +1256,8 @@ itos = {i: ch for ch, i in stoi.items()}
         </Paragraph>
       </Section>
 
-      {/* Section 1.3.1 */}
-      <Section number="1.3.1" title="Context Length">
+      {/* Section 1.4.1 */}
+      <Section number="1.4.1" title="Context Length">
         <Paragraph>
           Back in section 1.1, we wrote P(xₙ | x₁, x₂, ..., xₙ₋₁)—condition on <em>all</em> previous tokens. But in practice, we can't do that. We need to pick a finite window and condition only on the last k tokens.
         </Paragraph>
@@ -1525,8 +1338,8 @@ itos = {i: ch for ch, i in stoi.items()}
         </Callout>
       </Section>
 
-      {/* Section 1.3.2 */}
-      <Section number="1.3.2" title="The Free Lunch">
+      {/* Section 1.4.2 */}
+      <Section number="1.4.2" title="The Free Lunch">
         <Paragraph>
           We want our model to be robust. It should handle "h" (1 char context), "he" (2 chars), and "hel" (3 chars).
         </Paragraph>
@@ -1607,8 +1420,8 @@ Input: [h, e, l]    Target: l`}</CodeBlock>
       </Paragraph>
       <SlidingWindowDemo />
 
-      {/* Section 1.4 */}
-      <Section number="1.4" title="Putting It Together">
+      {/* Section 1.5 */}
+      <Section number="1.5" title="Putting It Together">
         <Paragraph>
           Let's build <code>prepare_data</code> in three phases. Try each challenge before revealing the solution—it'll stick better.
         </Paragraph>
@@ -1741,23 +1554,6 @@ print(f"First Y: {Y[0]}")               # [2, 4, 4, 5] ("ello")`}</CodeBlock>
         </Callout>
       </Section>
 
-      {/* Section 1.5 */}
-      <Section number="1.5" title="What We Built">
-        <Invariants title="Chapter 1 Invariants">
-          <InvariantItem>A language model computes P(next | context) via the chain rule</InvariantItem>
-          <InvariantItem>Probabilities must sum to 1 over the vocabulary</InvariantItem>
-          <InvariantItem>Tokenization: text ↔ integers via stoi/itos dictionaries</InvariantItem>
-          <InvariantItem>Training examples: (context, target) pairs from sliding window</InvariantItem>
-          <InvariantItem>X[i] shifted by 1 = Y[i] (next-token prediction)</InvariantItem>
-        </Invariants>
-        <Paragraph>
-          We started with raw text and ended with training data. The pipeline is simple: text becomes characters, characters become integers, and a sliding window extracts (context, target) pairs. Pure Python, no magic.
-        </Paragraph>
-        <Paragraph>
-          Our tiny corpus processed in microseconds. Good thing, because real training data is... bigger.
-        </Paragraph>
-      </Section>
-
       {/* Section 1.6 */}
       <Section number="1.6" title="The Limit">
         <Callout variant="insight" title="The Generalization Limit">
@@ -1813,6 +1609,21 @@ print(f"First Y: {Y[0]}")               # [2, 4, 4, 5] ("ello")`}</CodeBlock>
         />
         <Paragraph>
           This isn't just a "buy a bigger hard drive" problem. This is a physics problem.
+        </Paragraph>
+        <Paragraph>
+          But wait — we chose characters precisely because words are even worse. Word-level models are incredibly brittle. If you train on "dog ran" and "cat sat" but <strong>never</strong> "dog sat", the model learns a hard zero:
+        </Paragraph>
+        <MathBlock equation='P("sat" \mid "dog") = 0' />
+        <SparseMarkovViz />
+        <Paragraph>
+          The graph is disconnected. You can't get there from here. With characters, at least we get mechanical bridges:
+        </Paragraph>
+        <MarkovChainViz />
+        <Paragraph>
+          The <Term>space</Term> character acts as a bridge. The model learned "words end with space" and "words start after space." It can now stitch together <em>any</em> word ending in space with <em>any</em> word starting after space.
+        </Paragraph>
+        <Paragraph>
+          So characters are less sparse than words — but that just means the wall is farther away, not gone.
         </Paragraph>
         <Callout variant="warning" title="The Real Problem Is Sparsity">
           <p>Even if you <em>could</em> build a hard drive the size of the universe, it would mostly be empty.</p>
@@ -1911,9 +1722,74 @@ print(f"First Y: {Y[0]}")               # [2, 4, 4, 5] ("ello")`}</CodeBlock>
         </Paragraph>
         <ul>
           <li><strong>Decompose a sequence:</strong> use the chain rule to turn P(text) into a product of next-token probabilities.</li>
-          <li><strong>Handle tokenization edge cases:</strong> decide what “unknown token” means in code.</li>
-          <li><strong>Count the data you’re creating:</strong> understand how the sliding window turns one string into many training pairs.</li>
+          <li><strong>Handle tokenization edge cases:</strong> decide what "unknown token" means in code.</li>
+          <li><strong>Count the data you're creating:</strong> understand how the sliding window turns one string into many training pairs.</li>
+          <li><strong>See smoothing in action:</strong> understand how add-1 smoothing keeps perplexity finite.</li>
         </ul>
+        <Exercise
+          number="1.0"
+          title="Perplexity + Smoothing by Hand"
+          hint={
+            <>
+              <Paragraph>
+                For a bigram model, you score a test string by predicting every character from the one before it. So a length-4 string gives you <Term>N = 3</Term> predictions.
+              </Paragraph>
+              <Paragraph>
+                Add-1 smoothing (k=1) looks like:<br />
+                <code>P(x | c) = (count(c→x) + 1) / (count(c) + V)</code>
+              </Paragraph>
+            </>
+          }
+          solution={
+            <>
+              <Paragraph>
+                <strong>Training corpus:</strong> <Term>"aba"</Term>
+              </Paragraph>
+              <Paragraph>Bigram counts:</Paragraph>
+              <CodeBlock lang="text">{`a→b: 1
+b→a: 1
+a→a: 0
+b→b: 0`}</CodeBlock>
+              <Paragraph>Unsmoothed probabilities:</Paragraph>
+              <CodeBlock lang="text">{`P(b|a) = 1/1 = 1
+P(a|b) = 1/1 = 1
+P(a|a) = 0/1 = 0`}</CodeBlock>
+              <Paragraph>
+                <strong>Test string:</strong> <Term>"aaaa"</Term> has three bigrams: <Term>a→a</Term>, <Term>a→a</Term>, <Term>a→a</Term>. The first one already hits <Term>P(a|a)=0</Term>, so:
+              </Paragraph>
+              <CodeBlock lang="text">{`H = - (1/3) * (log2 0 + log2 0 + log2 0) = ∞`}</CodeBlock>
+              <MathBlock equation={String.raw`\text{perplexity} = 2^{H} = \infty`} />
+              <Paragraph>
+                Now add-1 smoothing with vocabulary <Term>V = 2</Term> (just <Term>a</Term> and <Term>b</Term>).
+              </Paragraph>
+              <Paragraph>
+                For context <Term>a</Term>, the denominator is <Term>count(a) + V = 1 + 2 = 3</Term>:
+              </Paragraph>
+              <CodeBlock lang="text">{`P(a|a) = (0 + 1) / 3 = 1/3
+P(b|a) = (1 + 1) / 3 = 2/3`}</CodeBlock>
+              <Paragraph>
+                With smoothing, every step in <Term>"aaaa"</Term> has probability <MathInline equation={String.raw`\frac{1}{3}`} />, so:
+              </Paragraph>
+              <CodeBlock lang="text">{`H = - (1/3) * (log2(1/3) + log2(1/3) + log2(1/3))
+  = -log2(1/3)
+  = log2(3)
+  ≈ 1.585 bits/char`}</CodeBlock>
+              <MathBlock equation={String.raw`\text{perplexity} = 2^{H} = 3`} />
+              <Paragraph>
+                Smoothing didn't make the model smarter. It just made the score finite by refusing to say "impossible."
+              </Paragraph>
+            </>
+          }
+        >
+          <Paragraph>
+            Train a <strong>bigram character model</strong> on the tiny corpus <Term>"aba"</Term>. Your vocabulary is just <Term>{'{a, b}'}</Term> (so <Term>V = 2</Term>).
+          </Paragraph>
+          <ol>
+            <li>Write down the bigram counts (a→a, a→b, b→a, b→b).</li>
+            <li>Without smoothing, what's the perplexity on the test string <Term>"aaaa"</Term>?</li>
+            <li>Now apply add-1 smoothing. What's the new perplexity?</li>
+          </ol>
+        </Exercise>
         <Exercise
           number="1.1"
           title="Chain Rule by Hand"
@@ -1941,7 +1817,7 @@ This is a limitation of sentence-level models.`}</CodeBlock>
           }
         >
           <Paragraph>
-            Using the corpus from section 1.1.6 ("cat sat", "dog ran", "a can", "a cat"), compute the following probabilities.
+            Using the corpus from section 1.2.1 ("cat sat", "dog ran", "a can", "a cat"), compute the following probabilities.
           </Paragraph>
           <Paragraph>
              <em>Assume these four sentences are independent samples from the universe.</em>
