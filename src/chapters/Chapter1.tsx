@@ -101,7 +101,7 @@ export function Chapter1() {
           We're building a machine that <Highlight>predicts the future</Highlight>. Not stock prices, not the weather—just the next character in a sequence. Sounds modest, but this is the entire job description of GPT-4, Claude, and every other language model.
         </Paragraph>
         <Paragraph>
-          But before we write a single line of code, we need to understand <em>what we're even trying to do</em> mathematically. Because if you don't understand the goal, you're just typing with extra steps.
+          But before we write a single line of code, we need to understand <em>what we're even trying to do</em> mathematically.
         </Paragraph>
         <Paragraph>
           We're going to derive the entire training objective from scratch. No hand-waving, no "just trust me"—just following the logic until it clicks.
@@ -295,7 +295,7 @@ export function Chapter1() {
         <NgramGraphViz />
 
         <Paragraph>
-          But wait—<em>why</em> should we expect "the cat" to help predict "the dog"? Because humans generalize based on <strong>syntactic role</strong>: both "cat" and "dog" are nouns that appear after an article. They serve the same grammatical function. Counting models have no notion of "role"—they only match exact strings. This is the fundamental limitation we're building toward fixing. (Spoiler: embeddings in Chapter 2 will encode these roles as geometric relationships.)
+          But wait—<em>why</em> should we expect "the cat" to help predict "the dog"? Because humans generalize based on <strong>syntactic role</strong>: both "cat" and "dog" are nouns that appear after an article. They serve the same grammatical function. Counting models have no notion of "role"—they only match exact strings. This is the fundamental limitation we're building toward fixing.
         </Paragraph>
       </Section>
 
@@ -618,7 +618,7 @@ P({\small\text{"the next morning"}}) &= P({\small\text{the}}) \times P({\small\t
         </Paragraph>
 
         <Paragraph>
-          That's the intuition. If you're curious why the math works out this way, expand below—it's actually pretty satisfying to see the corridor metaphor fall directly out of the definitions.
+          That's the intuition. If you're curious why the math works out this way, expand below to see the corridor metaphor fall directly out of the definitions.
         </Paragraph>
 
         <FormalRigor
@@ -1121,9 +1121,6 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
             <strong>Sliding window:</strong> generate (context → target) training pairs with a chosen context length.
           </InvariantItem>
         </Invariants>
-        <Paragraph>
-          Okay, enough theory. Let's build something.
-        </Paragraph>
         <Paragraph>
           Here's the problem: computers don't understand letters. They understand numbers. Your GPU can multiply matrices all day long, but it has no concept of what "a" or "cat" means.
         </Paragraph>
