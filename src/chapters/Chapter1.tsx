@@ -1028,6 +1028,9 @@ P(\text{A, B, C}) &= P(\text{A, B}) \times P(C \mid \text{A, B}) \\
         <Paragraph>
           Chapter 2 builds that system.
         </Paragraph>
+        <Paragraph>
+          But first, let's set up the machinery that makes our model trainable.
+        </Paragraph>
         <Citations
           items={[
             {
