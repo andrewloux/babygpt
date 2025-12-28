@@ -83,6 +83,25 @@
   padding: 1rem 1.5rem;
   background: rgba(0, 0, 0, 0.15);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.stepIndicator::-webkit-scrollbar {
+  height: 8px;
+}
+
+.stepIndicator::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+}
+
+.stepIndicator::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .stepContent {

@@ -1470,28 +1470,94 @@ def log_softmax(z):
         </Paragraph>
         <CodeWalkthrough filename="tiny_embedding_lm.py" lang="python">
           <Step code="import numpy as np">
-            We’ll use NumPy just to avoid writing loops. The math is the same either way.
+            Import NumPy so we can write the core moves as vector math: dot products, outer products, and shapes.
           </Step>
-          <Step code="vocab = ['e', 'a', 'i']\nstoi = {ch: i for i, ch in enumerate(vocab)}\nV, D = len(vocab), 4">
-            A tiny vocabulary and a tiny embedding dimension so you can see the shapes.
+          <Step code="vocab = ['e', 'a', 'i']">
+            A toy vocabulary: three tokens, so nothing hides.
           </Step>
-          <Step code="rng = np.random.default_rng(0)\nE = 0.01 * rng.standard_normal((V, D))      # token → vector\nWout = 0.01 * rng.standard_normal((D, V))  # vector → logits\nb = np.zeros(V)">
-            Two learned tables: <code>E</code> (the embedding table) and <code>Wout</code> (the output weights). Plus a bias.
+          <Step code="stoi = {ch: i for i, ch in enumerate(vocab)}">
+            Map tokens to integer IDs. (The IDs are just addresses.)
           </Step>
-          <Step code="def softmax(z):\n    z = z - z.max()            # stability\n    e = np.exp(z)\n    return e / e.sum()">
-            Softmax turns logits into probabilities. We subtract the max so <code>exp</code> doesn’t blow up.
+          <Step code="V = len(vocab)">
+            Vocabulary size (<code>V = 3</code>).
           </Step>
-          <Step code="x, y = 'e', 'a'\nix, iy = stoi[x], stoi[y]">
-            One training example: after <code>x</code>, the true next token is <code>y</code>.
+          <Step code="D = 4">
+            Embedding dimension: each token gets <code>D</code> learnable numbers.
           </Step>
-          <Step code="e_x = E[ix]                 # lookup: pick one row\nlogits = e_x @ Wout + b       # scores for next token\np = softmax(logits)           # probabilities\nloss = -np.log(p[iy])         # NLL / cross-entropy">
-            That’s the forward pass: ID → vector → logits → probabilities → loss.
+          <Step code="rng = np.random.default_rng(0)">
+            Fix a seed so the walkthrough is repeatable.
           </Step>
-          <Step code="dlogits = p.copy()\ndlogits[iy] -= 1              # p − y\n\ndWout = np.outer(e_x, dlogits)\ndb = dlogits\ndEix = dlogits @ Wout.T">
-            Backward pass: the “blame signal” at the logits is <code>p − y</code>, and it flows back into the parameters.
+          <Step code="E = 0.01 * rng.standard_normal((V, D))">
+            Embedding table <code>E</code>, shape <code>(V, D)</code>. Start as tiny noise.
           </Step>
-          <Step code="lr = 0.1\nWout -= lr * dWout\nb -= lr * db\nE[ix] -= lr * dEix">
-            The key detail: only <code>E[ix]</code> moves — the one row we actually looked up.
+          <Step code="Wout = 0.01 * rng.standard_normal((D, V))">
+            Output weights <code>Wout</code>, shape <code>(D, V)</code>. Map a <code>D</code>-vector to <code>V</code> logits.
+          </Step>
+          <Step code="b = np.zeros(V)">
+            Bias <code>b</code>, shape <code>(V,)</code>.
+          </Step>
+          <Step code="def softmax(z):">
+            Softmax: logits in → probabilities out.
+          </Step>
+          <Step code="    z = z - z.max()">
+            Stability: softmax only cares about differences, so we can subtract the max safely.
+          </Step>
+          <Step code="    e = np.exp(z)">
+            Exponentiate to make everything positive.
+          </Step>
+          <Step code="    return e / e.sum()">
+            Normalize to a distribution (sums to 1).
+          </Step>
+          <Step code="x = 'e'">
+            Context token: what we just saw.
+          </Step>
+          <Step code="y = 'a'">
+            Target token: what actually came next.
+          </Step>
+          <Step code="ix = stoi[x]">
+            Convert the context token to an ID.
+          </Step>
+          <Step code="iy = stoi[y]">
+            Convert the target token to an ID.
+          </Step>
+          <Step code="e_x = E[ix]">
+            Lookup: select one row (shape <code>(D,)</code>).
+          </Step>
+          <Step code="logits = e_x @ Wout + b">
+            Scores for each candidate next token (shape <code>(V,)</code>).
+          </Step>
+          <Step code="p = softmax(logits)">
+            Convert scores to probabilities.
+          </Step>
+          <Step code="loss = -np.log(p[iy])">
+            Cross‑entropy for one example: the surprise of the true token.
+          </Step>
+          <Step code="dlogits = p.copy()">
+            Start the backward pass at the logits.
+          </Step>
+          <Step code="dlogits[iy] -= 1">
+            The clean result: <code>dlogits = p − y</code> (where <code>y</code> is one‑hot).
+          </Step>
+          <Step code="dWout = np.outer(e_x, dlogits)">
+            Gradient for <code>Wout</code>.
+          </Step>
+          <Step code="db = dlogits">
+            Gradient for the bias.
+          </Step>
+          <Step code="dEix = dlogits @ Wout.T">
+            Gradient for the selected embedding row.
+          </Step>
+          <Step code="lr = 0.1">
+            Learning rate: step size.
+          </Step>
+          <Step code="Wout -= lr * dWout">
+            Update <code>Wout</code>.
+          </Step>
+          <Step code="b -= lr * db">
+            Update <code>b</code>.
+          </Step>
+          <Step code="E[ix] -= lr * dEix">
+            Key detail: only <code>E[ix]</code> moves — the one row we actually looked up in the forward pass.
           </Step>
         </CodeWalkthrough>
       </Section>
