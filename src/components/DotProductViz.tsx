@@ -207,11 +207,14 @@ export function DotProductViz({
 
   const [internalCharA, setInternalCharA] = useState('a')
   const [internalCharB, setInternalCharB] = useState('e')
+  const [lastChanged, setLastChanged] = useState<'A' | 'B' | null>(null)
+  const [glowPulse, setGlowPulse] = useState(false)
 
   const charA = controlledCharA ?? internalCharA
   const charB = controlledCharB ?? internalCharB
 
   function setCharA(next: string) {
+    setLastChanged('A')
     if (controlledCharA === undefined) {
       setInternalCharA(next)
       return
@@ -220,6 +223,7 @@ export function DotProductViz({
   }
 
   function setCharB(next: string) {
+    setLastChanged('B')
     if (controlledCharB === undefined) {
       setInternalCharB(next)
       return
@@ -228,7 +232,7 @@ export function DotProductViz({
   }
 
   const normalized = useMemo(() => normalizeToVocab(rawCorpus), [rawCorpus])
-  const { nextProbs, charCounts } = useMemo(
+  const { nextProbs } = useMemo(
     () => buildNextCharDistributions(normalized),
     [normalized],
   )
@@ -250,9 +254,6 @@ export function DotProductViz({
   const topNextA = useMemo(() => topKFromDistribution(pa, VOCAB, 3), [pa])
   const topNextB = useMemo(() => topKFromDistribution(pb, VOCAB, 3), [pb])
 
-  const countA = charCounts[aIdx]
-  const countB = charCounts[bIdx]
-
   const baseline = 1 / VOCAB.length
   const scaleMax = Math.max(baseline * 4, matchProb * 1.15)
   const fillPercent = Math.min(100, (matchProb / scaleMax) * 100)
@@ -266,21 +267,51 @@ export function DotProductViz({
     setDemoChar(defaultDemoChar)
   }, [defaultDemoChar])
 
-  const demoIdx = vocabIndex[demoChar] ?? 0
-  const demoPa = pa[demoIdx]
-  const demoPb = pb[demoIdx]
-  const demoContrib = demoPa * demoPb
-  const demoShare = demoContrib / scoreSafe
-
   const [guess, setGuess] = useState<'high' | 'low' | null>(null)
   const [guessLocked, setGuessLocked] = useState(false)
   const [revealed, setRevealed] = useState(false)
+  const [displayedScore, setDisplayedScore] = useState(0)
+  const [highlightedChar, setHighlightedChar] = useState<string | null>(null)
 
   useEffect(() => {
     setGuess(null)
     setGuessLocked(false)
     setRevealed(false)
+    setDisplayedScore(0)
   }, [charA, charB, rawCorpus])
+
+  // Score count-up animation on reveal
+  useEffect(() => {
+    if (!revealed) return
+
+    const duration = 400 // ms
+    const startTime = performance.now()
+    const startValue = 0
+    const endValue = matchProb
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      // Ease-out: fast start, slow end
+      const eased = 1 - Math.pow(1 - progress, 3)
+      const currentValue = startValue + (endValue - startValue) * eased
+
+      setDisplayedScore(currentValue)
+
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      }
+    }
+
+    requestAnimationFrame(animate)
+  }, [revealed, matchProb])
+
+  // Ambient glow pulse on character change or reveal
+  useEffect(() => {
+    setGlowPulse(true)
+    const timer = setTimeout(() => setGlowPulse(false), 400)
+    return () => clearTimeout(timer)
+  }, [charA, charB, revealed])
 
   const isHigh = ratio >= 1.5
   const guessCorrect = revealed && ((guess === 'high' && isHigh) || (guess === 'low' && !isHigh))
@@ -301,12 +332,26 @@ export function DotProductViz({
     return list.slice(0, 8)
   }, [pa, pb, top, topNextA, topNextB, vocabIndex])
 
+  // Calculate ambient glow properties based on interaction and match score
+  const glowXOffset = lastChanged === 'A' ? -30 : lastChanged === 'B' ? 30 : 0
+  // Low overlap (characters different): more cyan; High overlap (characters similar): more magenta/gold
+  const cyanOpacity = matchProb < 0.1 ? 0.25 : 0.15
+  const magentaOpacity = matchProb > 0.15 ? 0.22 : 0.10
+
   return (
     <VizCard
       title="Dot Product: Overlap"
       subtitle="Imagine drawing one next character from A and one from B. How often do they land on the same character?"
     >
       <div className={styles.inner}>
+        <div
+          className={`${styles.ambientGlow} ${glowPulse ? styles.ambientGlowPulse : ''}`}
+          style={{
+            transform: `translateX(${glowXOffset}px)`,
+            '--glow-cyan-opacity': cyanOpacity,
+            '--glow-magenta-opacity': magentaOpacity,
+          } as React.CSSProperties}
+        />
         <div className={`${styles.prediction} panel-dark inset-box`}>
           <div className={styles.predictionPrompt}>Pick A and B. Predict: will overlap be high or low?</div>
           <div className={styles.predictionRow}>
@@ -333,7 +378,7 @@ export function DotProductViz({
             <div className={styles.predictionActions}>
               <button
                 type="button"
-                className={styles.lockBtn}
+                className={`${styles.lockBtn} ${guessLocked ? styles.lockBtnLocked : ''}`}
                 onClick={() => guess !== null && setGuessLocked(true)}
                 disabled={guessLocked || guess === null}
               >
@@ -433,121 +478,90 @@ export function DotProductViz({
         </div>
       </div>
 
-      <div className={`${styles.aligned} panel-dark inset-box`}>
-        <div className={styles.alignedHeader}>
-          <div className={styles.alignedTitle}>Aligned bins (same characters)</div>
-          <div className={styles.alignedLegend}>
-            <span className={styles.legendA}>A</span>
-            <span className={styles.legendB}>B</span>
-            <span className={styles.legendProd}>A×B</span>
-          </div>
-        </div>
-        <div className={styles.alignedRows} role="list" aria-label="Aligned histogram bins">
-          {alignedChars.map((ch) => {
-            const idx = vocabIndex[ch] ?? 0
-            const pA = pa[idx] ?? 0
-            const pB = pb[idx] ?? 0
-            const prod = pA * pB
-            const isActive = demoChar === ch
-            return (
-              <button
-                key={ch}
-                type="button"
-                className={`${styles.binRow} ${isActive ? styles.binRowActive : ''}`}
-                onMouseEnter={() => setDemoChar(ch)}
-                onFocus={() => setDemoChar(ch)}
-                onClick={() => setDemoChar(ch)}
-              >
-                <span className={styles.binChar}>{prettyChar(ch)}</span>
-                <span className={styles.binTrack} aria-hidden="true">
-                  <span className={styles.binBarA} style={{ width: `${Math.min(100, pA * 100)}%` }} />
-                  <span className={styles.binBarB} style={{ width: `${Math.min(100, pB * 100)}%` }} />
-                  <span className={styles.binBarProd} style={{ width: `${Math.min(100, (prod / scoreSafe) * 100)}%` }} />
-                </span>
-                <span className={styles.binNums}>
-                  <span className={styles.probA}>{pA.toFixed(3)}</span>
-                  <span className={styles.times}>×</span>
-                  <span className={styles.probB}>{pB.toFixed(3)}</span>
-                  <span className={styles.equals}>=</span>
-                  <span className={styles.contribValue}>{prod.toFixed(4)}</span>
-                </span>
-              </button>
-            )
-          })}
-        </div>
-        <div className={styles.topContribs}>
-          <div className={styles.topContribsLabel}>Top contributors</div>
-          <div className={styles.topContribsChips}>
-            {top.slice(0, 3).map((x) => (
-              <button key={x.char} type="button" className={styles.topChip} onClick={() => setDemoChar(x.char)}>
-                {prettyChar(x.char)}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className={styles.summary}>
-        <div className={`${styles.summaryLeft} panel-dark inset-box`}>
-          <div className={styles.pairLine}>
-            <span className={`${styles.badge} ${styles.badgeA}`}>{prettyChar(charA)}</span>
-            <span className={styles.symbol}>·</span>
-            <span className={`${styles.badge} ${styles.badgeB}`}>{prettyChar(charB)}</span>
-          </div>
-          <div className={styles.detailLine}>
-            Pairs seen: {prettyChar(charA)}→* = {countA.toLocaleString()} · {prettyChar(charB)}→* = {countB.toLocaleString()}
-          </div>
-          <div className={styles.topNextRow}>
-            <span className={`${styles.topNextLabel} ${styles.topNextLabelA}`}>
-              Top next after {prettyChar(charA)}
-            </span>
-            <div className={styles.topNextChips}>
-              {topNextA.length === 0 ? (
-                <span className={styles.topNextEmpty}>—</span>
-              ) : (
-                topNextA.map(x => (
-                  <span key={x.char} className={`${styles.chip} ${styles.chipA}`}>
-                    <span className={styles.chipChar}>{prettyChar(x.char)}</span>
-                    <span className={styles.chipPct}>{(x.p * 100).toFixed(0)}%</span>
-                  </span>
-                ))
-              )}
+      {/* Dashboard: bins LEFT, score RIGHT */}
+      <div className={styles.dashboard}>
+        {/* LEFT: Aligned bins */}
+        <div className={`${styles.aligned} panel-dark inset-box`}>
+          <div className={styles.alignedHeader}>
+            <div className={styles.alignedTitle}>Aligned bins</div>
+            <div className={styles.alignedLegend}>
+              <span className={styles.legendA}>A</span>
+              <span className={styles.legendB}>B</span>
+              <span className={styles.legendOverlap}>overlap</span>
             </div>
           </div>
-          <div className={styles.topNextRow}>
-            <span className={`${styles.topNextLabel} ${styles.topNextLabelB}`}>
-              Top next after {prettyChar(charB)}
-            </span>
-            <div className={styles.topNextChips}>
-              {topNextB.length === 0 ? (
-                <span className={styles.topNextEmpty}>—</span>
-              ) : (
-                topNextB.map(x => (
-                  <span key={x.char} className={`${styles.chip} ${styles.chipB}`}>
-                    <span className={styles.chipChar}>{prettyChar(x.char)}</span>
-                    <span className={styles.chipPct}>{(x.p * 100).toFixed(0)}%</span>
+          <div className={styles.alignedRows} role="list" aria-label="Aligned histogram bins">
+            {alignedChars.slice(0, 5).map((ch, rowIndex) => {
+              const idx = vocabIndex[ch] ?? 0
+              const pA = pa[idx] ?? 0
+              const pB = pb[idx] ?? 0
+              const prod = pA * pB
+              const isActive = demoChar === ch
+              const isHighlighted = highlightedChar === ch
+              return (
+                <button
+                  key={ch}
+                  type="button"
+                  className={`${styles.binRow} ${isActive ? styles.binRowActive : ''} ${isHighlighted ? styles.binRowHighlight : ''}`}
+                  style={{ animationDelay: `${rowIndex * 0.05}s` }}
+                  onMouseEnter={() => setDemoChar(ch)}
+                  onFocus={() => setDemoChar(ch)}
+                  onClick={() => setDemoChar(ch)}
+                  onAnimationEnd={() => {
+                    if (isHighlighted) setHighlightedChar(null)
+                  }}
+                >
+                  <span className={styles.binChar}>{prettyChar(ch)}</span>
+                  <span className={styles.binTrack} aria-hidden="true">
+                    <span className={styles.binBarRow}>
+                      <span className={styles.binBarA} style={{ width: `${Math.min(100, pA * 300)}px` }} />
+                    </span>
+                    <span className={styles.binBarRow}>
+                      <span className={styles.binBarB} style={{ width: `${Math.min(100, pB * 300)}px` }} />
+                    </span>
+                    <span
+                      className={styles.binOverlapGlow}
+                      style={{
+                        width: `${Math.min(pA, pB) * 300}px`,
+                        opacity: Math.min(pA, pB) > 0.03 ? 0.7 : 0.25
+                      }}
+                    />
                   </span>
-                ))
-              )}
-            </div>
-          </div>
-          <div className={styles.note}>
-            Space (<code>␣</code>) is a real token in this tiny vocabulary, and it often wins. Some presets avoid it so you can see
-            letter patterns more clearly.
+                  <span className={styles.binNums}>
+                    <span className={styles.probA}>{pA.toFixed(3)}</span>
+                    <span className={styles.times}>×</span>
+                    <span className={styles.probB}>{pB.toFixed(3)}</span>
+                    <span className={styles.equals}>=</span>
+                    <span className={styles.contribValue}>{prod.toFixed(4)}</span>
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </div>
 
-        <div className={`${styles.summaryRight} panel-dark inset-box`}>
+        {/* RIGHT: Score panel - HERO element */}
+        <div className={`${styles.summaryRight} panel-dark inset-box ${revealed ? styles.summaryRightRevealed : ''}`}>
           <div className={styles.scoreLabel}>
             <strong>P(match)</strong>
             <div className={styles.scoreSublabel}>
               Σ p<sub>i</sub>(A) · p<sub>i</sub>(B)
             </div>
           </div>
-          <div className={styles.scoreValue}>{revealed ? matchProb.toFixed(4) : '—'}</div>
+          <div className={`${styles.scoreValue} ${revealed ? styles.scoreValueRevealed : ''}`}>
+            {revealed ? displayedScore.toFixed(4) : '—'}
+          </div>
           <div className={styles.gauge}>
             <div className={styles.gaugeTrack}>
-              <div className={styles.gaugeFill} style={{ width: `${fillPercent}%` }} />
+              <div
+                className={`${styles.gaugeFill} ${revealed ? styles.gaugeFillAnimated : ''} ${revealed ? styles.gaugeFillDynamic : ''}`}
+                style={{
+                  '--target-width': `${fillPercent}%`,
+                  '--score-hue-start': `${180 - (matchProb * 80)}`,
+                  '--score-hue-end': `${330 - (matchProb * 30)}`,
+                  width: revealed ? undefined : '0%',
+                } as React.CSSProperties}
+              />
               <div className={styles.gaugeBaseline} style={{ left: `${baselinePercent}%` }} />
             </div>
             <div className={styles.gaugeMeta}>
@@ -560,97 +574,41 @@ export function DotProductViz({
           </div>
           <div className={styles.scoreHint}>
             {revealed ? (
-              <>≈ {ratio.toFixed(1)}× uniform. Higher means A and B tend to agree on what’s next.</>
+              <>≈ {ratio.toFixed(1)}× baseline</>
             ) : (
-              <>Lock a guess, then reveal.</>
+              <>Lock a guess, then reveal</>
             )}
-            <div className={styles.scoreSubhint}>
-              This score rewards shared probability mass — even if the top-1 next character differs.
+          </div>
+          {/* Top contributors integrated into score panel */}
+          <div className={styles.topContribs}>
+            <div className={styles.topContribsLabel}>Top contributors</div>
+            <div className={styles.topContribsChips}>
+              {top.slice(0, 3).map((x, chipIndex) => {
+                const isChipActive = demoChar === x.char
+                return (
+                  <button
+                    key={x.char}
+                    type="button"
+                    className={`${styles.topChip} ${isChipActive ? styles.topChipActive : ''}`}
+                    style={{ animationDelay: `${chipIndex * 0.05}s` }}
+                    onClick={() => {
+                      setDemoChar(x.char)
+                      setHighlightedChar(x.char)
+                    }}
+                  >
+                    {prettyChar(x.char)}
+                  </button>
+                )
+              })}
             </div>
           </div>
         </div>
       </div>
 
       <details className="collapsible">
-        <summary>Optional: why the dot product is a probability</summary>
+        <summary>▸ Show all 27 terms</summary>
         <div className={styles.breakdown}>
-          <div className={styles.breakdownIntro}>
-            <div className={styles.breakdownTitle}>Build it from one question</div>
-            <div className={styles.breakdownNote}>
-              You’re drawing twice: once from A, once from B. A “match” has to happen on some character.
-            </div>
-            <ol className={styles.breakdownSteps}>
-              <li>Pick a character <code>i</code>.</li>
-              <li>Chance A draws <code>i</code> is <code>p_i(A)</code>.</li>
-              <li>Chance B draws <code>i</code> is <code>p_i(B)</code>.</li>
-              <li>
-                Chance they both draw <code>i</code> is <code>p_i(A)·p_i(B)</code>. Add over all <code>i</code>.
-              </li>
-            </ol>
-          </div>
-          <div className={styles.termDemo}>
-            <div className={styles.termDemoHeader}>
-              <div className={styles.termDemoTitle}>One way to match</div>
-              <div className={styles.termDemoControls}>
-                <label className={styles.termDemoPicker}>
-                  <span className={styles.termDemoPickerLabel}>Match on</span>
-                  <select
-                    className={styles.termDemoSelect}
-                    value={demoChar}
-                    onChange={(e) => setDemoChar(e.target.value)}
-                  >
-                    {VOCAB.map(c => (
-                      <option key={c} value={c}>
-                        {prettyChar(c)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <button
-                  type="button"
-                  className={styles.termDemoBtn}
-                  onClick={() => setDemoChar(defaultDemoChar)}
-                  title="Pick the biggest term in the sum"
-                >
-                  biggest term
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.termRows}>
-              <div className={styles.termRow}>
-                <div className={styles.termLabel}>P(next = {prettyChar(demoChar)} | {prettyChar(charA)})</div>
-                <div className={styles.termBarTrack}>
-                  <div className={styles.termBarA} style={{ width: `${Math.min(100, demoPa * 100)}%` }} />
-                </div>
-                <div className={styles.termValue}>{(demoPa * 100).toFixed(1)}%</div>
-              </div>
-
-              <div className={styles.termRow}>
-                <div className={styles.termLabel}>P(next = {prettyChar(demoChar)} | {prettyChar(charB)})</div>
-                <div className={styles.termBarTrack}>
-                  <div className={styles.termBarB} style={{ width: `${Math.min(100, demoPb * 100)}%` }} />
-                </div>
-                <div className={styles.termValue}>{(demoPb * 100).toFixed(1)}%</div>
-              </div>
-
-              <div className={`${styles.termRow} ${styles.termRowMatch}`}>
-                <div className={styles.termLabel}>
-                  P(match on {prettyChar(demoChar)}) = P_A · P_B
-                  <div className={styles.termMeta}>
-                    {demoPa.toFixed(3)}×{demoPb.toFixed(3)} = <strong>{demoContrib.toFixed(4)}</strong> (
-                    {(demoShare * 100).toFixed(1)}% of dot)
-                  </div>
-                </div>
-                <div className={styles.termBarTrack}>
-                  <div className={styles.termBarMatch} style={{ width: `${Math.min(100, demoShare * 100)}%` }} />
-                </div>
-                <div className={styles.termValue}>{(demoShare * 100).toFixed(1)}%</div>
-              </div>
-            </div>
-          </div>
-
-          <details className={styles.details}>
+          <details className={styles.details} open>
             <summary className={styles.detailsSummary}>
               <span className={styles.detailsSummaryLeft}>
                 <span className={styles.detailsCaret} aria-hidden="true">

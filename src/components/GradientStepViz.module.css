@@ -1,127 +1,112 @@
 .layout {
-  display: grid;
-  grid-template-columns: 1fr 280px;
-  gap: 1.25rem;
-  align-items: start;
-}
-
-@media (max-width: 900px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-.panel {
-  padding: 1rem;
-  border-radius: 12px;
-}
-
-.chart {
-  padding: 1rem;
-  border-radius: 12px;
-}
-
-.promptTitle,
-.sectionTitle {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
-  margin-bottom: 0.65rem;
-}
-
-.promptText {
-  font-size: 0.98rem;
-  line-height: 1.35;
-  color: rgba(255, 255, 255, 0.85);
-  max-width: 70ch;
-}
-
-.promptRow {
-  margin-top: 0.85rem;
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+/* ===== COMPACT CHALLENGE BAR ===== */
+.challengeBar {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   flex-wrap: wrap;
 }
 
-.choiceRow {
+.challengeLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.challengePrompt {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.choiceChips {
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
 }
 
-.choiceBtn {
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.16);
-  color: rgba(255, 255, 255, 0.72);
+.choiceChip {
+  padding: 0.6rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(255, 255, 255, 0.8);
   font-family: var(--font-mono);
   font-weight: 800;
-  font-size: 0.82rem;
-  padding: 0.55rem 0.75rem;
+  font-size: 0.88rem;
   cursor: pointer;
-  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+  transition: transform 100ms ease, border-color 100ms ease, background 100ms ease;
 }
 
-.choiceBtn:hover {
+.choiceChip:hover {
   transform: translateY(-1px);
-  border-color: rgba(0, 217, 255, 0.28);
-  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(0, 217, 255, 0.3);
 }
 
-.choiceBtnSelected {
+.choiceChipSelected {
   color: rgba(0, 0, 0, 0.9);
   background: rgba(0, 217, 255, 0.9);
   border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.12);
 }
 
-.actions {
-  display: flex;
-  gap: 0.6rem;
-  align-items: center;
+.choiceChipLocked {
+  box-shadow: 0 0 0 2px rgba(255, 214, 0, 0.25);
 }
 
-.lockBtn,
-.revealBtn {
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.18);
-  color: rgba(255, 255, 255, 0.78);
-  font-family: var(--font-mono);
-  font-weight: 800;
-  font-size: 0.82rem;
-  padding: 0.55rem 0.8rem;
-  cursor: pointer;
-  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
-}
-
-.revealBtn {
-  border-color: rgba(0, 217, 255, 0.24);
-}
-
-.lockBtn:hover,
-.revealBtn:hover {
-  transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.lockBtn:disabled,
-.revealBtn:disabled,
-.choiceBtn:disabled {
+.choiceChip:disabled {
+  opacity: 0.6;
   cursor: default;
-  opacity: 0.55;
   transform: none;
 }
 
-.feedback {
-  margin-top: 0.7rem;
+.challengeRight {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.actionBtn {
+  padding: 0.6rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.2);
+  color: rgba(255, 255, 255, 0.75);
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.6);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: transform 100ms ease, border-color 100ms ease, background 100ms ease;
+}
+
+.actionBtn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.actionBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
+
+.actionBtnPrimary {
+  border-color: rgba(0, 217, 255, 0.3);
+  color: rgba(0, 217, 255, 0.9);
+}
+
+.feedback {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  min-width: 60px;
 }
 
 .good {
@@ -133,63 +118,80 @@
 }
 
 .neutral {
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.45);
 }
 
-.row {
+/* ===== CHART PANEL (hero element) ===== */
+.chartPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.chartFrame {
+  position: relative;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+}
+
+/* Stats HUD overlay */
+.statsHud {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  z-index: 10;
+}
+
+.hudTopRight {
+  top: 1rem;
+  right: 1rem;
+}
+
+.statRow {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
   gap: 0.75rem;
   font-family: var(--font-mono);
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.72);
-  margin-top: 0.65rem;
-}
-
-.key {
-  color: rgba(255, 255, 255, 0.55);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
   font-size: 0.72rem;
 }
 
-.val {
-  color: rgba(255, 255, 255, 0.82);
+.statRow + .statRow {
+  margin-top: 0.25rem;
 }
 
-.valEmph {
-  color: rgba(255, 255, 255, 0.92);
-  font-weight: 800;
+.statKey {
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.65rem;
 }
 
-.valHidden {
+.statVal {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 700;
+}
+
+.statValHidden {
   opacity: 0.2;
   filter: blur(3px);
 }
 
-.valReveal {
-  opacity: 1;
-  filter: none;
+.statValReveal {
+  color: rgba(255, 214, 0, 0.9);
 }
 
-.mono {
-  font-family: var(--font-mono);
-}
-
-.hint {
-  margin-top: 0.75rem;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.55);
-  line-height: 1.35;
-}
-
+/* ===== SVG CHART ===== */
 .svg {
   width: 100%;
   height: auto;
   display: block;
-  border-radius: 16px;
+  border-radius: 12px;
   background: rgba(0, 0, 0, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.07);
 }
@@ -197,6 +199,18 @@
 .axis {
   stroke: rgba(255, 255, 255, 0.16);
   stroke-width: 1.25;
+}
+
+.axisLabel {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  fill: rgba(255, 255, 255, 0.55);
+  font-style: italic;
+}
+
+.axisSubscript {
+  font-size: 0.7em;
+  font-style: normal;
 }
 
 .curve {
@@ -207,9 +221,10 @@
 }
 
 .tangent {
-  stroke: rgba(255, 214, 0, 0.55);
+  stroke: rgba(255, 214, 0, 0.65);
   stroke-width: 2;
   stroke-dasharray: 6 6;
+  transition: opacity 0.3s ease;
 }
 
 .tangentHidden {
@@ -220,9 +235,103 @@
   fill: rgba(255, 255, 255, 0.92);
   stroke: rgba(0, 0, 0, 0.55);
   stroke-width: 2;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
+/* ===== SLIDER DOCK (below chart, aligned with x-axis) ===== */
+.sliderDock {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+}
+
+.sliderLabel {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.6);
+  min-width: 50px;
+}
+
+.sliderLabel sub {
+  font-size: 0.7em;
+  font-style: normal;
+}
+
+.sliderTrack {
+  flex: 1;
+  min-width: 0;
+}
+
+.sliderValue {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  min-width: 48px;
+  text-align: right;
+}
+
+/* ===== FOOTER ===== */
 .footer {
   max-width: 72ch;
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* z_true variable with proper subscript */
+.zVar {
+  font-family: var(--font-mono);
+  font-style: italic;
+}
+
+.zVar sub {
+  font-size: 0.7em;
+  font-style: normal;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .challengeBar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .challengeLeft {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .challengeRight {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .statsHud {
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.35rem 0.5rem;
+  }
+
+  .statRow {
+    font-size: 0.65rem;
+  }
+
+  .sliderDock {
+    flex-wrap: wrap;
+  }
+
+  .sliderLabel {
+    width: 100%;
+    margin-bottom: 0.25rem;
+  }
+}

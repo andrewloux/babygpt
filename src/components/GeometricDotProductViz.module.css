@@ -13,10 +13,6 @@
     min-height: 300px;
   }
 
-  .svg {
-    touch-action: none;
-  }
-
   .handle,
   .handleB {
     r: 18;
@@ -70,6 +66,7 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  touch-action: none;
 }
 
 .p {
@@ -97,14 +94,12 @@
   stroke-width: 3;
   stroke-linecap: round;
   opacity: 0.95;
-  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .vectorB {
   stroke-width: 3;
   stroke-linecap: round;
   opacity: 0.95;
-  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .handle {
@@ -113,12 +108,10 @@
   stroke: var(--accent-cyan);
   stroke-width: 2;
   cursor: grab;
-  transition:
-    fill-opacity 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
-    cx 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
-    cy 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: fill-opacity 0.2s ease, filter 0.2s ease;
   filter: drop-shadow(0 0 12px rgba(0, 217, 255, 0.25));
   outline: none;
+  pointer-events: all;
 }
 
 .handle:hover {
@@ -143,6 +136,7 @@
   stroke: var(--accent-magenta);
   filter: drop-shadow(0 0 12px rgba(255, 0, 110, 0.25));
   outline: none;
+  pointer-events: all;
 }
 
 .handleB:hover {
@@ -162,7 +156,6 @@
   stroke-width: 4;
   stroke-linecap: round;
   opacity: 0.95;
-  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .perpLine {
@@ -170,13 +163,11 @@
   stroke-width: 1.5;
   stroke-dasharray: 4, 4;
   opacity: 0.6;
-  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .projPointGlow {
   fill: rgba(255, 214, 10, 0.25);
   filter: blur(3px);
-  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .projPoint {
@@ -184,7 +175,6 @@
   stroke: rgba(255, 255, 255, 0.9);
   stroke-width: 1.25;
   filter: drop-shadow(0 0 18px rgba(255, 214, 10, 0.35));
-  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .arcPositive {
@@ -192,7 +182,6 @@
   stroke: var(--accent-green);
   stroke-width: 2;
   opacity: 0.7;
-  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .arcNegative {
@@ -200,7 +189,6 @@
   stroke: var(--accent-red);
   stroke-width: 2;
   opacity: 0.7;
-  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .labelA {
@@ -208,7 +196,6 @@
   font-size: 14px;
   font-weight: 800;
   fill: var(--accent-cyan);
-  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .labelB {
@@ -216,7 +203,6 @@
   font-size: 14px;
   font-weight: 800;
   fill: var(--accent-magenta);
-  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .infoPanel {

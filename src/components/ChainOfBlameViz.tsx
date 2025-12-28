@@ -23,10 +23,6 @@ function lossNll(probs: number[], yIndex: number) {
   return -Math.log(p)
 }
 
-function oneHot(n: number, idx: number) {
-  return Array.from({ length: n }, (_, i) => (i === idx ? 1 : 0))
-}
-
 function dot(a: number[], b: number[]) {
   let s = 0
   for (let i = 0; i < a.length; i++) s += (a[i] ?? 0) * (b[i] ?? 0)
@@ -38,7 +34,6 @@ function matVec(W: number[][], v: number[]) {
 }
 
 function vecMat(v: number[], W: number[][]) {
-  // v^T W, where W is D x V. Return V.
   const V = W[0]?.length ?? 0
   const out = new Array(V).fill(0)
   for (let j = 0; j < V; j++) {
@@ -54,7 +49,6 @@ function vecMat(v: number[], W: number[][]) {
 export function ChainOfBlameViz() {
   const [xTok, setXTok] = useState<InputTok>('l')
   const [yTok, setYTok] = useState<OutTok>('e')
-  const [panel, setPanel] = useState<'forward' | 'backward'>('forward')
 
   const [guess, setGuess] = useState<'one' | 'all' | null>(null)
   const [guessLocked, setGuessLocked] = useState(false)
@@ -90,14 +84,13 @@ export function ChainOfBlameViz() {
   const xVec = E[xIndex] ?? new Array(D).fill(0)
   const logits = useMemo(() => vecMat(xVec, Wout), [Wout, xVec])
   const probs = useMemo(() => softmax(logits), [logits])
-  const y = useMemo(() => oneHot(OUT_VOCAB.length, yIndex), [yIndex])
+  const y = useMemo(() => Array.from({ length: OUT_VOCAB.length }, (_, i) => (i === yIndex ? 1 : 0)), [yIndex])
   const loss = useMemo(() => lossNll(probs, yIndex), [probs, yIndex])
 
-  // Core blame signal at logits
+  // Gradient at logits: p - y
   const dL_dz = useMemo(() => probs.map((p, i) => p - (y[i] ?? 0)), [probs, y])
 
-  // Backprop into embedding vector: dL/dx = Wout * dL/dz
-  // Here Wout is D x V, dL/dz is V, so result is D.
+  // Backprop into embedding: dL/de_x = Wout * dL/dz
   const dL_dx = useMemo(() => matVec(Wout, dL_dz), [Wout, dL_dz])
 
   useEffect(() => {
@@ -115,244 +108,192 @@ export function ChainOfBlameViz() {
       subtitle="Who gets pushed when the model is wrong?"
       figNum="Fig. 2.10c"
       footer={
-        <div className={styles.footer}>
-          Training is just moving numbers. The question is: <em>which</em> numbers, and in <em>which</em> direction?
+        <div className={styles.footerText}>
+          Forward pass used one row → only one row receives gradient.
         </div>
       }
     >
       <div className={styles.content}>
-        <div className={`${styles.panel} panel-dark inset-box`}>
-          <div className={styles.sectionTitle}>Pick a single example</div>
-
-          <div className={styles.row}>
-            <div className={styles.key}>Input token x</div>
-            <div className={styles.pills} role="radiogroup" aria-label="Input token">
-              {INPUT_VOCAB.map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  className={`${styles.pill} ${xTok === t ? styles.pillActive : ''}`}
-                  onClick={() => setXTok(t)}
-                >
-                  {t}
-                </button>
-              ))}
+        {/* Controls row */}
+        <div className={styles.controls}>
+          <div className={styles.controlSection}>
+            <div className={styles.sectionTitle}>1. Pick Training Example</div>
+            <div className={styles.tokenSelectors}>
+              <div className={styles.tokenGroup}>
+                <span className={styles.tokenLabel}>Input x</span>
+                <div className={styles.pills}>
+                  {INPUT_VOCAB.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      className={`${styles.pill} ${xTok === t ? styles.pillActive : ''}`}
+                      onClick={() => setXTok(t)}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className={styles.tokenGroup}>
+                <span className={styles.tokenLabel}>True y</span>
+                <div className={styles.pills}>
+                  {OUT_VOCAB.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      className={`${styles.pill} ${yTok === t ? styles.pillActive : ''}`}
+                      onClick={() => setYTok(t)}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className={styles.stats}>
+              <span className={styles.statItem}>
+                <span className={styles.statLabel}>p(true)</span>
+                <span className={styles.statValue}>{(probs[yIndex] ?? 0).toFixed(3)}</span>
+              </span>
+              <span className={styles.statItem}>
+                <span className={styles.statLabel}>loss</span>
+                <span className={styles.statValue}>{loss.toFixed(3)}</span>
+              </span>
             </div>
           </div>
 
-          <div className={styles.row}>
-            <div className={styles.key}>True next token y</div>
-            <div className={styles.pills} role="radiogroup" aria-label="True token">
-              {OUT_VOCAB.map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  className={`${styles.pill} ${yTok === t ? styles.pillActive : ''}`}
-                  onClick={() => setYTok(t)}
-                >
-                  {t}
-                </button>
-              ))}
+          <div className={styles.controlSection}>
+            <div className={styles.sectionTitle}>2. Predict the Update</div>
+            <div className={styles.challengePrompt}>
+              Training on <span className={styles.mono}>x={xTok}</span>, <span className={styles.mono}>y={yTok}</span>.
+              How many embedding rows get updated?
             </div>
-          </div>
-
-          <div className={styles.sectionTitle}>Before you reveal</div>
-          <div className={styles.promptText}>
-            When we train on this one example, do we update <strong>one embedding row</strong> (the row for <span className={styles.mono}>{xTok}</span>),
-            or do we update <strong>all</strong> rows?
-          </div>
-          <div className={styles.promptRow}>
-            <div className={styles.choiceRow}>
+            <div className={styles.pills} role="radiogroup" aria-label="Guess">
               <button
                 type="button"
-                className={`${styles.choiceBtn} ${guess === 'one' ? styles.choiceBtnSelected : ''}`}
+                className={`${styles.pill} ${guess === 'one' ? styles.pillActive : ''}`}
                 onClick={() => setGuess('one')}
-                aria-pressed={guess === 'one'}
                 disabled={guessLocked}
               >
                 One row
               </button>
               <button
                 type="button"
-                className={`${styles.choiceBtn} ${guess === 'all' ? styles.choiceBtnSelected : ''}`}
+                className={`${styles.pill} ${guess === 'all' ? styles.pillActive : ''}`}
                 onClick={() => setGuess('all')}
-                aria-pressed={guess === 'all'}
                 disabled={guessLocked}
               >
                 All rows
               </button>
             </div>
-            <div className={styles.actions}>
+            <div className={styles.actionRow}>
               <button
                 type="button"
-                className={styles.lockBtn}
+                className={styles.actionBtn}
                 onClick={() => guess !== null && setGuessLocked(true)}
                 disabled={guessLocked || guess === null}
               >
-                {guessLocked ? 'Guess locked' : 'Lock guess'}
+                {guessLocked ? 'Locked' : 'Lock'}
               </button>
-              <button type="button" className={styles.revealBtn} onClick={() => guessLocked && setRevealed(true)} disabled={!guessLocked}>
+              <button
+                type="button"
+                className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
+                onClick={() => guessLocked && setRevealed(true)}
+                disabled={!guessLocked}
+              >
                 Reveal
               </button>
-            </div>
-          </div>
-          <div className={styles.feedback} aria-live="polite">
-            {revealed ? (
-              guessCorrect ? (
-                <span className={styles.good}>Yep. Only the row you looked up can receive a gradient.</span>
-              ) : (
-                <span className={styles.bad}>Close — only the selected row gets updated for this example.</span>
-              )
-            ) : guessLocked ? (
-              <span className={styles.neutral}>Okay. Now reveal the blame chain.</span>
-            ) : (
-              <span className={styles.neutral}>Pick a guess, lock it, then reveal.</span>
-            )}
-          </div>
-
-          <div className={styles.metrics}>
-            <div className={styles.metricRow}>
-              <span className={styles.metricKey}>p(true)</span>
-              <span className={styles.metricVal}>{(probs[yIndex] ?? 0).toFixed(3)}</span>
-            </div>
-            <div className={styles.metricRow}>
-              <span className={styles.metricKey}>loss</span>
-              <span className={styles.metricVal}>{loss.toFixed(3)}</span>
+              <span className={styles.feedback}>
+                {revealed ? (
+                  guessCorrect ? (
+                    <span className={styles.good}>Correct!</span>
+                  ) : (
+                    <span className={styles.bad}>Only one row</span>
+                  )
+                ) : guessLocked ? (
+                  <span className={styles.neutral}>→</span>
+                ) : null}
+              </span>
             </div>
           </div>
         </div>
 
-        <div className={`${styles.panel} panel-dark inset-box`}>
-          <div className={styles.panelHeader}>
-            <div className={styles.sectionTitle}>Follow the blame</div>
-            <div className={styles.tabRow} role="tablist" aria-label="Choose which pass to view">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={panel === 'forward'}
-                className={`${styles.tabBtn} ${panel === 'forward' ? styles.tabBtnActive : ''}`}
-                onClick={() => setPanel('forward')}
-              >
-                Forward
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={panel === 'backward'}
-                className={`${styles.tabBtn} ${panel === 'backward' ? styles.tabBtnActive : ''}`}
-                onClick={() => setPanel('backward')}
-              >
-                Backward
-              </button>
+        {/* Hero: Embedding gradient table */}
+        <div className={styles.tableContainer}>
+          <div className={styles.tableHeader}>
+            <div className={styles.sectionTitle}>3. Which Embedding Rows Receive Gradient?</div>
+            <div className={styles.tableNote}>
+              Only the row that was looked up in the forward pass can receive blame.
             </div>
           </div>
-
-          {panel === 'forward' ? (
-            <>
-              <div className={styles.block}>
-                <div className={styles.blockTitle}>1) Embedding lookup</div>
-                <div className={styles.smallNote}>
-                  <span className={styles.mono}>x = {xTok}</span> selects one row: <span className={styles.mono}>e_x = E[x]</span>
-                </div>
-                <div className={styles.vec}>
-                  {xVec.map((v, i) => (
-                    <span key={i} className={`${styles.cell} ${styles.cellCyan}`}>
-                      {v.toFixed(1)}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className={styles.block}>
-                <div className={styles.blockTitle}>2) Logits</div>
-                <div className={styles.smallNote}>
-                  <span className={styles.mono}>z = e_xᵀ W_out</span>
-                </div>
-                <div className={styles.row3}>
-                  {OUT_VOCAB.map((c, j) => (
-                    <div key={c} className={styles.kv}>
-                      <div className={styles.k}>{c}</div>
-                      <div className={styles.v}>{(logits[j] ?? 0).toFixed(2)}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className={styles.block}>
-                <div className={styles.blockTitle}>3) Probabilities</div>
-                {OUT_VOCAB.map((c, j) => (
-                  <div key={c} className={styles.probRow}>
-                    <span className={styles.probKey}>{c}</span>
-                    <div className={styles.track}>
-                      <div className={styles.bar} style={{ width: `${Math.min(100, (probs[j] ?? 0) * 100)}%` }} />
-                    </div>
-                    <span className={styles.probVal}>{(probs[j] ?? 0).toFixed(3)}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className={styles.block}>
-                <div className={styles.blockTitle}>4) Loss</div>
-                <div className={styles.smallNote}>
-                  <span className={styles.mono}>L = −log p(true)</span> for <span className={styles.mono}>y={yTok}</span>
-                </div>
-                <div className={styles.lossVal}>{loss.toFixed(3)}</div>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className={styles.block}>
-                <div className={styles.blockTitle}>A) Logit blame: p − y</div>
-                <div className={styles.smallNote}>
-                  Positive means “push that logit down”. Negative means “push that logit up”.
-                </div>
-                <div className={styles.row3}>
-                  {OUT_VOCAB.map((c, j) => {
-                    const g = dL_dz[j] ?? 0
-                    const cls = g >= 0 ? styles.cellMagenta : styles.cellCyan
-                    return (
-                      <div key={c} className={styles.kv}>
-                        <div className={styles.k}>{c}</div>
-                        <div className={`${styles.v} ${revealed ? cls : styles.hidden}`}>{g.toFixed(3)}</div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-
-              <div className={styles.block}>
-                <div className={styles.blockTitle}>B) Embedding blame: dL/de_x</div>
-                <div className={styles.smallNote}>
-                  This is the gradient that will update the selected row <span className={styles.mono}>E[{xTok}]</span>.
-                </div>
-                <div className={styles.vec}>
-                  {dL_dx.map((v, i) => (
-                    <span key={i} className={`${styles.cell} ${revealed ? (v >= 0 ? styles.cellMagenta : styles.cellCyan) : styles.hidden}`}>
-                      {v.toFixed(3)}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className={styles.block}>
-                <div className={styles.blockTitle}>C) Which rows get touched?</div>
-                <div className={styles.table}>
-                  {INPUT_VOCAB.map((t, i) => (
-                    <div key={t} className={`${styles.tableRow} ${i === xIndex ? styles.tableRowActive : styles.tableRowInactive}`}>
-                      <span className={styles.tableKey}>{t}</span>
-                      <span className={`${styles.tableNote} ${revealed ? '' : styles.hidden}`}>
-                        {i === xIndex ? 'updated' : 'untouched'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <div className={styles.note}>
-                  This is why the one‑hot “selector switch” mattered: the forward pass only used one row, so only one row can receive blame.
-                </div>
-              </div>
-            </>
-          )}
+          <table className={styles.embeddingTable}>
+            <thead>
+              <tr>
+                <th>Token</th>
+                <th>d<sub>0</sub></th>
+                <th>d<sub>1</sub></th>
+                <th>d<sub>2</sub></th>
+                <th>d<sub>3</sub></th>
+                <th>d<sub>4</sub></th>
+                <th>Gradient</th>
+              </tr>
+            </thead>
+            <tbody>
+              {INPUT_VOCAB.map((tok, i) => {
+                const isActive = i === xIndex
+                const rowGrad = isActive ? dL_dx : null
+                return (
+                  <tr key={tok} className={isActive ? styles.rowActive : styles.rowInactive}>
+                    <td>{tok}</td>
+                    {Array.from({ length: D }, (_, j) => {
+                      const val = rowGrad?.[j]
+                      const showVal = revealed && isActive && val !== undefined
+                      return (
+                        <td key={j} className={showVal ? (val >= 0 ? styles.cellPos : styles.cellNeg) : ''}>
+                          {showVal ? val.toFixed(2) : '–'}
+                        </td>
+                      )
+                    })}
+                    <td className={styles.gradientStatus}>
+                      {revealed ? (isActive ? '← updated' : 'untouched') : '?'}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
         </div>
+
+        {/* Collapsible flow details */}
+        <details className="collapsible">
+          <summary>Show forward/backward flow</summary>
+          <div className={styles.flowGrid}>
+            <div className={styles.flowStep}>
+              <span className={styles.flowLabel}>1. Lookup</span>
+              <span className={styles.flowValue}>
+                E[{xTok}] = [{xVec.map(v => v.toFixed(1)).join(', ')}]
+              </span>
+            </div>
+            <div className={styles.flowStep}>
+              <span className={styles.flowLabel}>2. Logits</span>
+              <span className={styles.flowValue}>
+                z = [{logits.map(v => v.toFixed(2)).join(', ')}]
+              </span>
+            </div>
+            <div className={styles.flowStep}>
+              <span className={styles.flowLabel}>3. Probs</span>
+              <span className={styles.flowValue}>
+                p = [{probs.map(v => v.toFixed(3)).join(', ')}]
+              </span>
+            </div>
+            <div className={styles.flowStep}>
+              <span className={styles.flowLabel}>4. Grad p−y</span>
+              <span className={`${styles.flowValue} ${revealed ? '' : styles.flowValueHidden}`}>
+                [{dL_dz.map(v => v.toFixed(3)).join(', ')}]
+              </span>
+            </div>
+          </div>
+        </details>
       </div>
     </VizCard>
   )

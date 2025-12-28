@@ -1,183 +1,131 @@
-.container {
-    display: flex;
-    flex-direction: row;
-    gap: 2rem;
-    padding: 1.5rem;
-    background: var(--bg-secondary);
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    margin: 2rem 0;
-    font-family: var(--font-sans);
+.inner {
+  display: flex;
+  gap: var(--space-lg);
+  font-family: var(--font-sans);
 }
 
 .panel {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg);
 }
 
 .title {
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-secondary);
-    font-weight: 600;
-    margin-bottom: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .stage {
-    width: 100%;
-    height: 160px;
-    background: var(--bg-tertiary);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--border-color);
-    position: relative;
-    overflow: hidden;
+  width: 100%;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Discrete specific */
 .discreteButtons {
-    display: flex;
-    gap: 0.5rem;
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .discBtn {
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 0.9rem;
-    font-family: var(--font-sans);
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.82);
+  padding: 0.55rem 0.95rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
 }
 
 .discBtn:hover {
-    background: var(--bg-primary);
-    /* Slightly lighter/different interaction */
-    border-color: var(--accent-cyan);
+  border-color: rgba(var(--primary-rgb), 0.35);
 }
 
 .discBtn.active {
-    background: var(--accent-cyan);
-    color: var(--bg-primary);
-    border-color: var(--accent-cyan);
-    font-weight: 600;
+  background: rgba(var(--primary-rgb), 0.14);
+  color: rgba(255, 255, 255, 0.92);
+  border-color: rgba(var(--primary-rgb), 0.45);
 }
 
 .emojiDisplay {
-    font-size: 4rem;
-    line-height: 1;
-    transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-size: 4rem;
+  line-height: 1;
+  transition: transform var(--transition-fast);
 }
 
 .snapChange {
-    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: popIn 0.3s var(--ease-smooth);
 }
 
 @keyframes popIn {
-    0% {
-        transform: scale(0.5);
-        opacity: 0;
-    }
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
 
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
-/* Continuous specific */
 .sliderWrap {
-    width: 100%;
-    padding: 0 1rem;
-}
-
-.slider {
-    width: 100%;
-    -webkit-appearance: none;
-    appearance: none;
-    height: 6px;
-    background: var(--border-color);
-    border-radius: 3px;
-    outline: none;
-    cursor: pointer;
-}
-
-.slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 24px;
-    height: 24px;
-    background: var(--accent-magenta);
-    border-radius: 50%;
-    cursor: grab;
-    border: 2px solid white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    margin-top: -9px;
-    /* center thumb on track if needed, usually auto handled but safer */
-}
-
-/* Firefox compatibility */
-.slider::-moz-range-thumb {
-    width: 24px;
-    height: 24px;
-    background: var(--accent-magenta);
-    border: 2px solid white;
-    border-radius: 50%;
-    cursor: grab;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-}
-
-.slider:active::-webkit-slider-thumb {
-    transform: scale(1.1);
-    cursor: grabbing;
+  width: 100%;
+  padding: 0 var(--space-md);
 }
 
 .morphStage {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .morphEmoji {
-    font-size: 4rem;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    will-change: opacity, transform, filter;
+  font-size: 4rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  will-change: opacity, transform, filter;
 }
 
 .caption {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    text-align: center;
-    line-height: 1.4;
-    height: 2.8em;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  line-height: 1.4;
+  height: 2.8em;
 }
 
 .highlight {
-    color: var(--accent-cyan);
-    font-weight: 600;
+  color: var(--accent-cyan);
+  font-weight: 700;
 }
 
 .highlightSec {
-    color: var(--accent-magenta);
-    font-weight: 600;
+  color: var(--accent-magenta);
+  font-weight: 700;
 }
 
-@media (max-width: 600px) {
-    .container {
-        flex-direction: column;
-    }
+@media (max-width: 680px) {
+  .inner {
+    flex-direction: column;
+  }
 }
+

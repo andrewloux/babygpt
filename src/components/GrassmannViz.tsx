@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Slider } from './Slider'
+import { VizCard } from './VizCard'
 import styles from './GrassmannViz.module.css'
 
 // Vocabulary for character mode
@@ -106,43 +107,53 @@ export function GrassmannViz({ corpus = DEFAULT_CORPUS }: Props) {
   const r = Math.round(255 * (1 - mix))
   const b = Math.round(255 * mix)
   const currentColor = `rgb(${r}, 0, ${b})`
-  const glowColor = `rgba(${r}, 0, ${b}, 0.6)`
+  const glowColor = `rgba(${r}, 0, ${b}, 0.55)`
 
   // Character mode colors
-  const charColorA = '#4ecdc4'
-  const charColorB = '#ff6b6b'
+  const charColorA = 'var(--accent-cyan)'
+  const charColorB = 'var(--accent-magenta)'
 
   return (
-    <div className={styles.container}>
-      {/* Background Ambient Glow */}
-      <div
-        className={styles.ambientGlow}
-        style={{ background: mode === 'color' ? currentColor : `linear-gradient(90deg, ${charColorA}, ${charColorB})` }}
-      />
+    <VizCard
+      title="Mixing as Coordinates"
+      subtitle="Grassmann’s move: blending creates a usable geometry"
+      footer={
+        mode === 'color' ? (
+          <p className={styles.footerText}>
+            Slide <span className={styles.highlightAbstract}>t</span>. “In‑between” is a real place you can land — you’re moving along the line between A and B.
+          </p>
+        ) : (
+          <p className={styles.footerText}>
+            You’re not mixing letters — you’re mixing <span className={styles.highlightAbstract}>next‑character distributions</span>. As{' '}
+            <span className={styles.highlightAbstract}>t</span> slides from 0 to 1, the bars move from what follows '{prettyChar(charA)}' toward what follows '{prettyChar(charB)}'.
+          </p>
+        )
+      }
+    >
+      <div className={styles.inner}>
+        <div
+          className={styles.modeGlow}
+          style={{
+            background:
+              mode === 'color'
+                ? 'linear-gradient(90deg, rgb(248 113 113), rgb(96 165 250))'
+                : `linear-gradient(90deg, ${charColorA}, ${charColorB})`,
+          }}
+          aria-hidden="true"
+        />
 
-      <div className={styles.card}>
-
-        {/* Header with Mode Toggle */}
-        <div className={styles.header}>
-          <div>
-            <h3 className={styles.title}>
-              {mode === 'color' ? 'Colors as Coordinates' : 'Characters as Coordinates'}
-            </h3>
-            <p className={styles.subtitle}>
-              {mode === 'color' ? 'Grassmann\'s insight: blend = interpolate' : 'Same algebra, different domain'}
-            </p>
-          </div>
-          <div className={styles.modeToggle}>
+        <div className={styles.modeRow}>
+          <div className={`inset-box ${styles.modeToggle}`}>
             <button
               type="button"
-              className={`${styles.modeBtn} ${mode === 'color' ? styles.active : ''}`}
+              className={`${styles.modeBtn} ${mode === 'color' ? styles.active : ''} focus-glow`}
               onClick={() => setMode('color')}
             >
               Colors
             </button>
             <button
               type="button"
-              className={`${styles.modeBtn} ${mode === 'character' ? styles.active : ''}`}
+              className={`${styles.modeBtn} ${mode === 'character' ? styles.active : ''} focus-glow`}
               onClick={() => setMode('character')}
             >
               Characters
@@ -151,10 +162,8 @@ export function GrassmannViz({ corpus = DEFAULT_CORPUS }: Props) {
         </div>
 
         {mode === 'color' ? (
-          /* ========== COLOR MODE ========== */
-          <>
+          <div className={`panel-dark inset-box ${styles.modePanel}`}>
             <div className={styles.stage}>
-              {/* Concept A (Left) */}
               <div className={styles.concept} style={{ opacity: 1 - mix * 0.5 }}>
                 <div className={`${styles.node} ${styles.nodeA}`}>
                   <span>R</span>
@@ -165,10 +174,8 @@ export function GrassmannViz({ corpus = DEFAULT_CORPUS }: Props) {
                 </div>
               </div>
 
-              {/* Connection Beam */}
               <div className={styles.beam} />
 
-              {/* Slider */}
               <div className={styles.sliderContainer}>
                 <Slider
                   wrap={false}
@@ -194,7 +201,9 @@ export function GrassmannViz({ corpus = DEFAULT_CORPUS }: Props) {
                   <div className={styles.tooltip}>
                     <div className={styles.tooltipContent}>
                       <div className={styles.equation}>
-                        {(1 - mix).toFixed(2)}<span className={styles.valA}>R</span> + {mix.toFixed(2)}<span className={styles.valB}>B</span>
+                        {(1 - mix).toFixed(2)}
+                        <span className={styles.valA}>R</span> + {mix.toFixed(2)}
+                        <span className={styles.valB}>B</span>
                       </div>
                     </div>
                     <div className={styles.tooltipArrow} />
@@ -202,7 +211,6 @@ export function GrassmannViz({ corpus = DEFAULT_CORPUS }: Props) {
                 </div>
               </div>
 
-              {/* Concept B (Right) */}
               <div className={styles.concept} style={{ opacity: 0.5 + mix * 0.5 }}>
                 <div className={`${styles.node} ${styles.nodeB}`}>
                   <span>B</span>
@@ -213,47 +221,42 @@ export function GrassmannViz({ corpus = DEFAULT_CORPUS }: Props) {
                 </div>
               </div>
             </div>
-
-            <div className={styles.footer}>
-              <p className={styles.footerText}>
-                Slide <span className={styles.highlightAbstract}>t</span>. In a coordinate system, “in-between” is a real place you can land — you’re just moving along the line between A and B.
-              </p>
-            </div>
-          </>
+          </div>
         ) : (
-          /* ========== CHARACTER MODE ========== */
-          <>
-            {/* Character Selectors */}
+          <div className={`panel-dark inset-box ${styles.modePanel}`}>
             <div className={styles.charSelectors}>
               <div className={styles.charSelector}>
-                <label className={styles.charLabel}>Context char A</label>
+                <label className={styles.charLabel}>Context A</label>
                 <select
                   value={charA}
                   onChange={(e) => setCharA(e.target.value)}
                   className={styles.charSelect}
                   style={{ borderColor: charColorA }}
                 >
-                  {VOCAB.map(ch => (
-                    <option key={ch} value={ch}>{prettyChar(ch)}</option>
+                  {VOCAB.map((ch) => (
+                    <option key={ch} value={ch}>
+                      {prettyChar(ch)}
+                    </option>
                   ))}
                 </select>
               </div>
               <div className={styles.charSelector}>
-                <label className={styles.charLabel}>Context char B</label>
+                <label className={styles.charLabel}>Context B</label>
                 <select
                   value={charB}
                   onChange={(e) => setCharB(e.target.value)}
                   className={styles.charSelect}
                   style={{ borderColor: charColorB }}
                 >
-                  {VOCAB.map(ch => (
-                    <option key={ch} value={ch}>{prettyChar(ch)}</option>
+                  {VOCAB.map((ch) => (
+                    <option key={ch} value={ch}>
+                      {prettyChar(ch)}
+                    </option>
                   ))}
                 </select>
               </div>
             </div>
 
-            {/* Blend Stage */}
             <div className={styles.blendStage}>
               <div className={styles.blendEndpoint} style={{ color: charColorA }}>
                 <span className={styles.blendChar}>{prettyChar(charA)}</span>
@@ -272,9 +275,7 @@ export function GrassmannViz({ corpus = DEFAULT_CORPUS }: Props) {
                   onValueChange={setMix}
                   ariaLabel="Blend amount"
                 />
-                <div className={styles.blendValue}>
-                  t = {mix.toFixed(2)}
-                </div>
+                <div className={styles.blendValue}>t = {mix.toFixed(2)}</div>
               </div>
 
               <div className={styles.blendEndpoint} style={{ color: charColorB }}>
@@ -283,12 +284,13 @@ export function GrassmannViz({ corpus = DEFAULT_CORPUS }: Props) {
               </div>
             </div>
 
-            {/* Blended Distribution Display */}
-            <div className={styles.distSection}>
+            <div className={`inset-box ${styles.distSection}`}>
               <div className={styles.distHeader}>
                 <span className={styles.distTitle}>P(next | blend)</span>
                 <span className={styles.distFormula}>
-                  = {(1 - mix).toFixed(2)} × P(next|<span style={{ color: charColorA }}>{prettyChar(charA)}</span>) + {mix.toFixed(2)} × P(next|<span style={{ color: charColorB }}>{prettyChar(charB)}</span>)
+                  = {(1 - mix).toFixed(2)} × P(next|
+                  <span style={{ color: charColorA }}>{prettyChar(charA)}</span>) + {mix.toFixed(2)} × P(next|
+                  <span style={{ color: charColorB }}>{prettyChar(charB)}</span>)
                 </span>
               </div>
 
@@ -310,16 +312,9 @@ export function GrassmannViz({ corpus = DEFAULT_CORPUS }: Props) {
                 ))}
               </div>
             </div>
-
-            <div className={styles.footer}>
-              <p className={styles.footerText}>
-                You’re not mixing letters — you’re mixing <span className={styles.highlightAbstract}>next-character distributions</span>. As <span className={styles.highlightAbstract}>t</span> slides from 0 to 1, the bars move from what follows '{prettyChar(charA)}' toward what follows '{prettyChar(charB)}'.
-              </p>
-            </div>
-          </>
+          </div>
         )}
-
       </div>
-    </div>
+    </VizCard>
   )
 }

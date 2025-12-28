@@ -1,73 +1,129 @@
 .container {
-  margin: 1.75rem 0;
   padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
 }
 
 .vocabGrid {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-sm);
   flex-wrap: wrap;
-  margin-bottom: 1.5rem;
   justify-content: center;
 }
 
 .tokenBtn {
-  width: 40px;
-  height: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.22);
-  border-radius: var(--radius-sm);
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    radial-gradient(ellipse 100% 100% at 50% 0%, rgba(255, 255, 255, 0.03), transparent 60%),
+    rgba(0, 0, 0, 0.25);
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: 1rem;
-  transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
-  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  transition:
+    transform var(--transition-smooth),
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease,
+    box-shadow var(--transition-fast);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
 }
 
 .tokenBtn:hover {
-  border-color: rgba(0, 217, 255, 0.45);
-  background: rgba(0, 217, 255, 0.08);
-  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.2);
+  background:
+    radial-gradient(ellipse 100% 100% at 50% 0%, rgba(255, 255, 255, 0.06), transparent 60%),
+    rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+    0 8px 20px -8px rgba(0, 0, 0, 0.4);
 }
 
 .tokenBtn.active {
-  background: rgba(0, 217, 255, 0.18);
-  color: rgba(255, 255, 255, 0.95);
-  border-color: rgba(0, 217, 255, 0.65);
-  box-shadow: 0 0 0 1px rgba(0, 217, 255, 0.12) inset, 0 10px 24px -18px rgba(0, 217, 255, 0.45);
+  background:
+    radial-gradient(ellipse 120% 100% at 50% 0%, rgba(var(--primary-rgb), 0.15), transparent 60%),
+    rgba(var(--primary-rgb), 0.12);
+  color: var(--accent-cyan);
+  border-color: rgba(var(--primary-rgb), 0.5);
+  box-shadow:
+    0 0 0 1px rgba(var(--primary-rgb), 0.15) inset,
+    0 0 20px rgba(var(--primary-rgb), 0.22),
+    0 8px 24px -8px rgba(var(--primary-rgb), 0.28);
 }
 
 .vectorDisplay {
   font-family: var(--font-mono);
-  background: var(--code-bg);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 1rem;
-  border-radius: var(--radius-md);
+  font-size: 1.5rem;
+  letter-spacing: 0.05em;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255, 255, 255, 0.02), transparent 50%),
+    rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) var(--space-lg);
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    inset 0 1px 2px rgba(0, 0, 0, 0.2);
   overflow-x: auto;
-  color: rgba(255, 255, 255, 0.55);
 }
 
 .vectorValue {
   display: inline-block;
-  width: 2ch;
+  min-width: 1.5ch;
   text-align: center;
-  margin: 0 2px;
+  transition: color var(--transition-fast), transform var(--transition-smooth), text-shadow var(--transition-fast);
 }
 
 .hot {
   color: var(--accent-cyan);
-  font-weight: bold;
-  transform: scale(1.2);
-  display: inline-block;
+  font-weight: 900;
+  transform: scale(1.15);
+  text-shadow: 0 0 20px rgba(var(--primary-rgb), 0.6);
+  animation: hotPulse 2s ease-in-out infinite;
 }
 
-.label {
-  display: block;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  margin-bottom: 0.5rem;
-  text-align: center;
-  font-family: var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+@keyframes hotPulse {
+  0%, 100% {
+    text-shadow: 0 0 16px rgba(var(--primary-rgb), 0.5);
+  }
+  50% {
+    text-shadow: 0 0 28px rgba(var(--primary-rgb), 0.8);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hot {
+    animation: none;
+  }
+}
+
+@media (max-width: 500px) {
+  .tokenBtn {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
+  }
+
+  .vectorDisplay {
+    font-size: 1.1rem;
+    padding: var(--space-md);
+  }
 }

@@ -83,115 +83,119 @@ export function GradientStepViz() {
       figNum="Fig. 2.10a"
       footer={
         <div className={styles.footer}>
-          Here we hold everything fixed except one score. That’s the whole point: you can see the loss respond, and you can see which direction is “downhill”.
+          <span className={styles.mono}>y=1</span> for the true token. When <span className={styles.mono}>p{'<'}1</span>, the gradient <span className={styles.mono}>p−y</span> is negative — push <span className={styles.zVar}>z<sub>true</sub></span> <em>up</em>.
         </div>
       }
     >
       <div className={styles.layout}>
-        <div className={`${styles.panel} panel-dark inset-box`}>
-          <div className={styles.promptTitle}>Before you reveal</div>
-          <div className={styles.promptText}>
-            If the model is under‑predicting the true token, should the <em>true token’s</em> score go <strong>up</strong> or <strong>down</strong>?
+        {/* Compact challenge bar */}
+        <div className={styles.challengeBar}>
+          <div className={styles.challengeLeft}>
+            <span className={styles.challengePrompt}>
+              Should <span className={styles.zVar}>z<sub>true</sub></span> go ↑ or ↓ to reduce loss?
+            </span>
           </div>
-
-          <div className={styles.promptRow}>
-            <div className={styles.choiceRow}>
+          <div className={styles.challengeRight}>
+            <div className={styles.choiceChips} role="radiogroup" aria-label="Direction guess">
               <button
                 type="button"
-                className={`${styles.choiceBtn} ${guess === 'up' ? styles.choiceBtnSelected : ''}`}
+                className={`${styles.choiceChip} ${guess === 'up' ? styles.choiceChipSelected : ''} ${guessLocked && guess === 'up' ? styles.choiceChipLocked : ''}`}
                 onClick={() => setGuess('up')}
                 aria-pressed={guess === 'up'}
                 disabled={guessLocked}
               >
-                Up
+                ↑ Up
               </button>
               <button
                 type="button"
-                className={`${styles.choiceBtn} ${guess === 'down' ? styles.choiceBtnSelected : ''}`}
+                className={`${styles.choiceChip} ${guess === 'down' ? styles.choiceChipSelected : ''} ${guessLocked && guess === 'down' ? styles.choiceChipLocked : ''}`}
                 onClick={() => setGuess('down')}
                 aria-pressed={guess === 'down'}
                 disabled={guessLocked}
               >
-                Down
+                ↓ Down
               </button>
             </div>
-
-            <div className={styles.actions}>
-              <button
-                type="button"
-                className={styles.lockBtn}
-                onClick={() => guess !== null && setGuessLocked(true)}
-                disabled={guessLocked || guess === null}
-              >
-                {guessLocked ? 'Guess locked' : 'Lock guess'}
-              </button>
-              <button
-                type="button"
-                className={styles.revealBtn}
-                onClick={() => guessLocked && setRevealed(true)}
-                disabled={!guessLocked}
-              >
-                Reveal
-              </button>
+            <button
+              type="button"
+              className={styles.actionBtn}
+              onClick={() => guess !== null && setGuessLocked(true)}
+              disabled={guessLocked || guess === null}
+            >
+              {guessLocked ? 'Locked' : 'Lock'}
+            </button>
+            <button
+              type="button"
+              className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
+              onClick={() => guessLocked && setRevealed(true)}
+              disabled={!guessLocked}
+            >
+              Reveal
+            </button>
+            <div className={styles.feedback} aria-live="polite">
+              {revealed ? (
+                guessCorrect ? (
+                  <span className={styles.good}>Correct!</span>
+                ) : (
+                  <span className={styles.bad}>Answer: ↑</span>
+                )
+              ) : guessLocked ? (
+                <span className={styles.neutral}>→</span>
+              ) : null}
             </div>
-          </div>
-
-          <div className={styles.feedback} aria-live="polite">
-            {revealed ? (
-              guessCorrect ? (
-                <span className={styles.good}>Yep. The true score should go up.</span>
-              ) : (
-                <span className={styles.bad}>Close — the true score should go up.</span>
-              )
-            ) : guessLocked ? (
-              <span className={styles.neutral}>Okay. Now reveal the sign.</span>
-            ) : (
-              <span className={styles.neutral}>Pick a guess, lock it, then reveal.</span>
-            )}
           </div>
         </div>
 
-        <div className={`${styles.panel} panel-dark inset-box`}>
-          <div className={styles.sectionTitle}>Control</div>
-          <div className={styles.row}>
-            <div className={styles.key}>z_true</div>
-            <div className={styles.val}>{zTrue.toFixed(2)}</div>
-          </div>
-          <Slider wrap={false} min={-6} max={6} step={0.01} value={zTrue} onValueChange={setZTrue} ariaLabel="true token logit" />
+        {/* Chart as HERO with stats overlay */}
+        <div className={styles.chartPanel}>
+          <div className={styles.chartFrame}>
+            {/* Stats HUD overlay */}
+            <div className={`${styles.statsHud} ${styles.hudTopRight}`}>
+              <div className={styles.statRow}>
+                <span className={styles.statKey}>p(true)</span>
+                <span className={styles.statVal}>{(pTrue * 100).toFixed(1)}%</span>
+              </div>
+              <div className={styles.statRow}>
+                <span className={styles.statKey}>loss</span>
+                <span className={styles.statVal}>{loss.toFixed(3)}</span>
+              </div>
+              <div className={styles.statRow}>
+                <span className={styles.statKey}>p−y</span>
+                <span className={`${styles.statVal} ${revealed ? styles.statValReveal : styles.statValHidden}`}>
+                  {pMinusY.toFixed(3)}
+                </span>
+              </div>
+            </div>
 
-          <div className={styles.sectionTitle}>State</div>
-          <div className={styles.row}>
-            <div className={styles.key}>p(true)</div>
-            <div className={styles.valEmph}>{(pTrue * 100).toFixed(1)}%</div>
-          </div>
-          <div className={styles.row}>
-            <div className={styles.key}>loss</div>
-            <div className={styles.val}>{loss.toFixed(3)}</div>
-          </div>
-          <div className={styles.row}>
-            <div className={styles.key}>p − y</div>
-            <div className={`${styles.val} ${revealed ? styles.valReveal : styles.valHidden}`}>{pMinusY.toFixed(3)}</div>
-          </div>
-          <div className={styles.hint}>
-            <span className={styles.mono}>y=1</span> for the true token. When <span className={styles.mono}>p</span> is too small, <span className={styles.mono}>p−y</span> is negative.
-          </div>
-        </div>
+            <svg
+              className={styles.svg}
+              viewBox={`0 0 ${view.W} ${view.H}`}
+              role="img"
+              aria-label="Loss curve versus the true token logit, with a tangent line"
+            >
+              {/* Axis labels with proper subscript */}
+              <text className={styles.axisLabel} x={view.W - 8} y={view.xAxisY - 6} textAnchor="end">
+                z<tspan className={styles.axisSubscript} baselineShift="sub">true</tspan>
+              </text>
+              <text className={styles.axisLabel} x={view.yAxisX + 6} y={24} textAnchor="start">loss</text>
 
-        <div className={`${styles.chart} panel-dark inset-box`}>
-          <div className={styles.sectionTitle}>Loss vs true score</div>
-          <svg
-            className={styles.svg}
-            viewBox={`0 0 ${view.W} ${view.H}`}
-            role="img"
-            aria-label="Loss curve versus the true token logit, with a tangent line"
-          >
-            <line className={styles.axis} x1={44} y1={view.xAxisY} x2={504} y2={view.xAxisY} />
-            <line className={styles.axis} x1={view.yAxisX} y1={206} x2={view.yAxisX} y2={18} />
+              <line className={styles.axis} x1={44} y1={view.xAxisY} x2={504} y2={view.xAxisY} />
+              <line className={styles.axis} x1={view.yAxisX} y1={206} x2={view.yAxisX} y2={18} />
 
-            <polyline className={styles.curve} points={view.curve} />
-            <line className={`${styles.tangent} ${revealed ? '' : styles.tangentHidden}`} x1={view.tx1} y1={view.ty1} x2={view.tx2} y2={view.ty2} />
-            <circle className={styles.point} cx={view.px} cy={view.py} r={6} />
-          </svg>
+              <polyline className={styles.curve} points={view.curve} />
+              <line className={`${styles.tangent} ${revealed ? '' : styles.tangentHidden}`} x1={view.tx1} y1={view.ty1} x2={view.tx2} y2={view.ty2} />
+              <circle className={styles.point} cx={view.px} cy={view.py} r={6} />
+            </svg>
+          </div>
+
+          {/* Slider docked below chart - aligned with x-axis */}
+          <div className={styles.sliderDock}>
+            <span className={styles.sliderLabel}>z<sub>true</sub></span>
+            <div className={styles.sliderTrack}>
+              <Slider wrap={false} min={-6} max={6} step={0.01} value={zTrue} onValueChange={setZTrue} ariaLabel="true token logit" />
+            </div>
+            <span className={styles.sliderValue}>{zTrue.toFixed(2)}</span>
+          </div>
         </div>
       </div>
     </VizCard>

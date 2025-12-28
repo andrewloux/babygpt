@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import { Slider } from './Slider'
 import styles from './TrainingDynamicsViz.module.css'
 import { VOCAB, prettyChar } from '../data/characterData'
@@ -18,6 +18,7 @@ type TrainingRun = {
   pairsUsed: number
   pairsTotal: number
   snapshots: TrainingSnapshot[]
+  embeddings: Float32Array[][]  // Raw embeddings at each epoch for text generation
 }
 
 type TrainingDynamicsVizProps = {
@@ -286,15 +287,83 @@ function trainAndProject(corpus: string): TrainingRun {
     return { epoch: i, lossBits, perplexity, positions }
   })
 
-  return { dim, epochs, pairsUsed: pairs.length, pairsTotal: allPairs.length, snapshots }
+  return { dim, epochs, pairsUsed: pairs.length, pairsTotal: allPairs.length, snapshots, embeddings: snapshotsE }
+}
+
+function generateText(
+  embeddings: Float32Array[],
+  startChar: string,
+  length: number,
+  temperature: number = 1.0
+): string {
+  let ctxIdx = VOCAB.indexOf(startChar)
+  if (ctxIdx < 0) ctxIdx = 0 // fallback to space
+
+  let text = startChar
+
+  for (let step = 0; step < length; step++) {
+    const ctxEmb = embeddings[ctxIdx]
+
+    // Compute logits (dot product with all embeddings)
+    const logits: number[] = []
+    for (let j = 0; j < VOCAB.length; j++) {
+      logits.push(dot(ctxEmb, embeddings[j]))
+    }
+
+    // Apply temperature and softmax
+    const maxLogit = Math.max(...logits)
+    const expScores = logits.map((l) => Math.exp((l - maxLogit) / temperature))
+    const sumExp = expScores.reduce((a, b) => a + b, 0)
+    const probs = expScores.map((e) => e / sumExp)
+
+    // Sample next character
+    const r = Math.random()
+    let acc = 0
+    let nextIdx = 0
+    for (let j = 0; j < probs.length; j++) {
+      acc += probs[j]
+      if (r <= acc) {
+        nextIdx = j
+        break
+      }
+    }
+
+    text += VOCAB[nextIdx]
+    ctxIdx = nextIdx
+  }
+
+  return text
 }
 
 export function TrainingDynamicsViz({ corpus }: TrainingDynamicsVizProps) {
-  const [epoch, setEpoch] = useState(0)
+  const [epoch, setEpoch] = useState(260) // Default to trained state
+  const [prevEpoch, setPrevEpoch] = useState(260)
+  const [generatedText, setGeneratedText] = useState('')
+  const [displayedText, setDisplayedText] = useState('')
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [isThinking, setIsThinking] = useState(false)
+  const [temperature, setTemperature] = useState(1.0)
+  const animationRef = useRef<number | null>(null)
+  const thinkingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const prevPositionsRef = useRef<Vec2[] | null>(null)
+  const hasMovedRef = useRef(false)
 
   const run = useMemo(() => trainAndProject(corpus), [corpus])
   const clampedEpoch = clamp(epoch, 0, run.epochs)
   const snap = run.snapshots[clampedEpoch] ?? run.snapshots[0]
+
+  // Track previous positions for trails
+  useEffect(() => {
+    if (clampedEpoch !== prevEpoch) {
+      // Capture previous snapshot's positions before updating
+      const prevSnap = run.snapshots[prevEpoch]
+      if (prevSnap) {
+        prevPositionsRef.current = prevSnap.positions.map(p => ({ x: p.x, y: p.y }))
+        hasMovedRef.current = true
+      }
+      setPrevEpoch(clampedEpoch)
+    }
+  }, [clampedEpoch, prevEpoch, run.snapshots])
 
   const lossSeries = useMemo(() => run.snapshots.map((s) => s.lossBits), [run.snapshots])
   const lossMin = useMemo(() => Math.min(...lossSeries), [lossSeries])
@@ -308,8 +377,8 @@ export function TrainingDynamicsViz({ corpus }: TrainingDynamicsVizProps) {
   const toY = (y: number) => height - margin - y * (height - 2 * margin)
 
   // Loss chart config
-  const lossWidth = 240
-  const lossHeight = 160
+  const lossWidth = 360
+  const lossHeight = 180
   const lossPad = 16
   const lossX = (t: number) => lossPad + t * (lossWidth - 2 * lossPad)
   const lossY = (bits: number) => {
@@ -328,8 +397,111 @@ export function TrainingDynamicsViz({ corpus }: TrainingDynamicsVizProps) {
     return d
   }, [lossSeries, lossMax, lossMin])
 
+  // Area path for gradient fill under curve
+  const lossAreaPath = useMemo(() => {
+    if (lossSeries.length === 0) return ''
+    const bottomY = lossHeight - lossPad
+    let d = `M ${lossX(0)} ${bottomY}`
+    d += ` L ${lossX(0)} ${lossY(lossSeries[0] ?? 0)}`
+    for (let i = 1; i < lossSeries.length; i++) {
+      const t = i / Math.max(1, lossSeries.length - 1)
+      d += ` L ${lossX(t)} ${lossY(lossSeries[i] ?? 0)}`
+    }
+    d += ` L ${lossX(1)} ${bottomY} Z`
+    return d
+  }, [lossSeries, lossMax, lossMin])
+
+  // Milestone epochs for markers
+  const milestones = useMemo(() => {
+    const total = run.epochs
+    return [
+      { epoch: 0, label: 'random' },
+      { epoch: 50, label: 'learning' },
+      { epoch: total, label: 'trained' },
+    ]
+  }, [run.epochs])
+
   const currentLossX = lossX(clampedEpoch / Math.max(1, run.epochs))
   const currentLossY = lossY(snap?.lossBits ?? 0)
+
+  // Compute trail data (distances and opacities)
+  const trailData = useMemo(() => {
+    const prevPositions = prevPositionsRef.current
+    if (!prevPositions || !hasMovedRef.current || !snap) return null
+
+    return VOCAB.map((_, i) => {
+      const prev = prevPositions[i]
+      const curr = snap.positions[i]
+      if (!prev || !curr) return { distance: 0, opacity: 0 }
+
+      // Distance in normalized [0,1] space
+      const dx = curr.x - prev.x
+      const dy = curr.y - prev.y
+      const distance = Math.sqrt(dx * dx + dy * dy)
+
+      // Scale opacity: barely moved = 0.02, moved a lot = 0.2
+      // Max expected movement per epoch step is roughly 0.1 in normalized space
+      const normalizedDist = Math.min(distance / 0.1, 1)
+      const opacity = 0.02 + normalizedDist * 0.18
+
+      return { distance, opacity, prev, curr }
+    })
+  }, [snap, prevPositionsRef.current])
+
+  // Typing animation effect with variable speed and thinking indicator
+  useEffect(() => {
+    if (!generatedText) {
+      setDisplayedText('')
+      return
+    }
+
+    setDisplayedText('')
+    setIsThinking(true)
+
+    // Show thinking dots for 400ms before typing starts
+    thinkingTimeoutRef.current = setTimeout(() => {
+      setIsThinking(false)
+      let idx = 0
+
+      const typeChar = () => {
+        if (idx < generatedText.length) {
+          setDisplayedText(generatedText.slice(0, idx + 1))
+          const currentChar = generatedText[idx]
+          idx++
+
+          // Variable typing speed: longer pause after spaces (word boundaries)
+          const delay = currentChar === ' ' ? 60 : 35
+
+          animationRef.current = requestAnimationFrame(() => {
+            setTimeout(typeChar, delay)
+          })
+        } else {
+          setIsGenerating(false)
+        }
+      }
+      typeChar()
+    }, 400)
+
+    return () => {
+      if (animationRef.current !== null) {
+        cancelAnimationFrame(animationRef.current)
+      }
+      if (thinkingTimeoutRef.current !== null) {
+        clearTimeout(thinkingTimeoutRef.current)
+      }
+    }
+  }, [generatedText])
+
+  const handleGenerate = useCallback(() => {
+    const embeddings = run.embeddings[clampedEpoch]
+    if (!embeddings) return
+
+    setIsGenerating(true)
+    // Pick a random start character (weighted towards space for natural starts)
+    const startChar = Math.random() < 0.7 ? ' ' : VOCAB[Math.floor(Math.random() * VOCAB.length)]
+    const text = generateText(embeddings, startChar, 40, temperature)
+    setGeneratedText(text)
+  }, [run.embeddings, clampedEpoch, temperature])
 
   return (
     <div className={styles.container}>
@@ -386,6 +558,37 @@ export function TrainingDynamicsViz({ corpus }: TrainingDynamicsVizProps) {
               </g>
             ))}
 
+            {/* Trail lines connecting previous to current positions */}
+            {trailData && trailData.map((trail, i) => {
+              if (!trail.prev || !trail.curr || trail.distance < 0.001) return null
+              return (
+                <line
+                  key={`trail-${i}`}
+                  x1={toX(trail.prev.x)}
+                  y1={toY(trail.prev.y)}
+                  x2={toX(trail.curr.x)}
+                  y2={toY(trail.curr.y)}
+                  className={styles.trailLine}
+                  style={{ opacity: trail.opacity * 0.5 }}
+                />
+              )
+            })}
+
+            {/* Ghost points at previous positions */}
+            {trailData && trailData.map((trail, i) => {
+              if (!trail.prev || trail.distance < 0.001) return null
+              return (
+                <circle
+                  key={`ghost-${i}`}
+                  cx={toX(trail.prev.x)}
+                  cy={toY(trail.prev.y)}
+                  r="5"
+                  className={styles.ghostPoint}
+                  style={{ opacity: trail.opacity }}
+                />
+              )
+            })}
+
             {VOCAB.map((ch, i) => {
               const p = snap?.positions[i] ?? { x: 0.5, y: 0.5 }
               const isVowel = VOWELS.has(ch)
@@ -404,9 +607,16 @@ export function TrainingDynamicsViz({ corpus }: TrainingDynamicsVizProps) {
               else if (isCommon) cls = `${styles.point} ${styles.pointCommon}`
 
               return (
-                <g key={ch} className={styles.pointGroup}>
-                  <circle cx={cx} cy={cy} r="8" className={cls} />
-                  <text x={cx} y={cy + 4} textAnchor="middle" className={styles.pointLabel}>
+                <g
+                  key={ch}
+                  className={styles.pointGroup}
+                  style={{
+                    transform: `translate(${cx}px, ${cy}px)`,
+                    animationDelay: `${0.2 + i * 0.02}s`,
+                  }}
+                >
+                  <circle cx="0" cy="0" r="8" className={cls} />
+                  <text x="0" y="4" textAnchor="middle" className={styles.pointLabel}>
                     {prettyChar(ch)}
                   </text>
                 </g>
@@ -418,6 +628,12 @@ export function TrainingDynamicsViz({ corpus }: TrainingDynamicsVizProps) {
         <div className={styles.lossCard}>
           <div className={styles.lossHeader}>Loss over time</div>
           <svg className={styles.lossSvg} viewBox={`0 0 ${lossWidth} ${lossHeight}`} role="img" aria-label="Loss curve">
+            <defs>
+              <linearGradient id="lossAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="rgba(0, 217, 255, 0.15)" />
+                <stop offset="100%" stopColor="rgba(0, 217, 255, 0)" />
+              </linearGradient>
+            </defs>
             <rect x="0" y="0" width={lossWidth} height={lossHeight} rx="14" className={styles.lossBg} />
             {[lossMin, (lossMin + lossMax) / 2, lossMax].map((b, idx) => (
               <g key={`loss-grid-${idx}`}>
@@ -427,6 +643,27 @@ export function TrainingDynamicsViz({ corpus }: TrainingDynamicsVizProps) {
                 </text>
               </g>
             ))}
+            {/* Milestone markers */}
+            {milestones.map(({ epoch, label }) => {
+              const mx = lossX(epoch / Math.max(1, run.epochs))
+              return (
+                <g key={`milestone-${epoch}`}>
+                  <line
+                    x1={mx}
+                    y1={lossPad}
+                    x2={mx}
+                    y2={lossHeight - lossPad}
+                    className={styles.milestoneLine}
+                  />
+                  <text x={mx} y={lossPad - 4} className={styles.milestoneLabel} textAnchor="middle">
+                    {label}
+                  </text>
+                </g>
+              )
+            })}
+            {/* Area fill under curve */}
+            <path d={lossAreaPath} className={styles.lossArea} />
+            {/* Main loss curve with draw animation */}
             <path d={lossPath} className={styles.lossPath} />
             <line
               x1={currentLossX}
@@ -435,12 +672,66 @@ export function TrainingDynamicsViz({ corpus }: TrainingDynamicsVizProps) {
               y2={lossHeight - lossPad}
               className={styles.lossGuide}
             />
-            <circle cx={currentLossX} cy={currentLossY} r="4.5" className={styles.lossPoint} />
+            <circle cx={currentLossX} cy={currentLossY} r="5" className={styles.lossPoint} />
           </svg>
           <div className={styles.lossCaption}>
             Start ≈ <span className={styles.mono}>log₂(27)</span> bits (uniform). Training pushes the average down.
           </div>
         </div>
+      </div>
+
+      <div className={styles.generateSection}>
+        <div className={styles.generateHeader}>Make it speak</div>
+        <div className={styles.generateControls}>
+          <label className={styles.tempLabel}>
+            Temperature: <span className={styles.tempValue}>{temperature.toFixed(1)}</span>
+            <span className={styles.tempHint}>(lower = predictable, higher = creative)</span>
+          </label>
+          <Slider
+            id="generation-temperature"
+            wrap={false}
+            min={0.5}
+            max={2.0}
+            step={0.1}
+            value={temperature}
+            onValueChange={setTemperature}
+            ariaLabel="Temperature"
+          />
+          <button
+            className={styles.generateButton}
+            onClick={handleGenerate}
+            disabled={clampedEpoch === 0 || isGenerating}
+          >
+            {isGenerating ? 'Generating...' : 'Generate'}
+          </button>
+        </div>
+        {(displayedText || isThinking) && (
+          <div className={`${styles.generatedOutput} ${isGenerating ? styles.generatedOutputGenerating : ''}`}>
+            <span className={styles.generatedText}>
+              {displayedText.split('').map((char, i) => (
+                <span key={i} className={styles.char}>
+                  {char}
+                </span>
+              ))}
+            </span>
+            {isThinking && (
+              <span className={styles.thinkingDots}>
+                <span className={styles.thinkingDot} />
+                <span className={styles.thinkingDot} />
+                <span className={styles.thinkingDot} />
+              </span>
+            )}
+            {isGenerating && !isThinking && <span className={styles.cursor}>|</span>}
+          </div>
+        )}
+        {clampedEpoch === 0 && (
+          <div className={styles.generateHint}>Move epoch slider to train the model first</div>
+        )}
+        {displayedText && !isGenerating && clampedEpoch > 50 && (
+          <div className={styles.generateHint}>
+            Drag the slider back to epoch 50 — watch structure dissolve into noise.
+          </div>
+        )}
       </div>
 
       <div className={styles.legend}>

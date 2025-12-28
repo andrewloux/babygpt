@@ -3,8 +3,6 @@ import { useEffect, useMemo, useState } from 'react'
 import styles from './MatrixRowSelectViz.module.css'
 import { VizCard } from './VizCard'
 
-type ExpansionTerm = { char: string; coeff: 0 | 1 }
-
 export function MatrixRowSelectViz() {
   const vocab = ['h', 'e', 'l', 'o', '␣']
   const [targetIndex, setTargetIndex] = useState(2)
@@ -40,15 +38,6 @@ export function MatrixRowSelectViz() {
   const result = useMemo(() => W[targetIndex]?.map((x) => x.toFixed(1)).join(', ') ?? '', [targetIndex])
   const vocabPreview = useMemo(() => vocab.join(' '), [vocab])
 
-  const expansion = useMemo(() => {
-    const terms: ExpansionTerm[] = vocab.map((char, i) => ({
-      char,
-      coeff: (i === targetIndex ? 1 : 0) as 0 | 1,
-    }))
-    const left = terms.map((t) => `${t.coeff}·W[${t.char}]`).join(' + ')
-    return { left }
-  }, [targetIndex])
-
   const guessChoices = useMemo(() => {
     const a = targetIndex
     const b = (targetIndex + 1) % vocab.length
@@ -81,27 +70,15 @@ export function MatrixRowSelectViz() {
       title="Row Selection (You Can See It)"
       subtitle="One-hot selects a row"
       figNum="Fig. 2.4"
-      footer={
-        <div className={styles.footerHint}>
-          <span className={styles.footerLabel}>Vocabulary order:</span>{' '}
-          <span className={styles.footerVocab} aria-label="Vocabulary order used by this demo">
-            [{vocabPreview}]
-          </span>
-          <span className={styles.footerNote}>
-            {' '}
-            — the <span className={styles.mono}>1</span> goes at the selected token’s index in this order.
-          </span>
-        </div>
-      }
     >
       <div className={`${styles.stageWrap} ${pulse ? styles.pulse : ''}`}>
-        <div className={styles.prediction} aria-label="Prediction prompt">
-          <div className={styles.predictionPrompt}>
-            Before you click: which row of <span className={styles.mono}>W</span> do you think you’ll get when the{' '}
-            <span className={styles.mono}>1</span> is on <span className={styles.mono}>{promptToken}</span>?
-          </div>
-          <div className={styles.predictionControls}>
-            <div className={styles.predictionChoices} role="radiogroup" aria-label="Row guess">
+        {/* Compact challenge bar */}
+        <div className={styles.challengeBar} aria-label="Prediction prompt">
+          <div className={styles.challengeLeft}>
+            <span className={styles.challengePrompt}>
+              Which row when <span className={styles.mono}>1</span>→<span className={styles.mono}>{promptToken}</span>?
+            </span>
+            <div className={styles.guessChips} role="radiogroup" aria-label="Row guess">
               {guessChoices.map((ix) => {
                 const ch = vocab[ix] ?? ''
                 const selected = guessIndex === ix
@@ -110,50 +87,49 @@ export function MatrixRowSelectViz() {
                   <button
                     key={ch}
                     type="button"
-                    className={`${styles.guessBtn} ${selected ? styles.guessBtnSelected : ''} ${locked ? styles.guessBtnLocked : ''}`}
+                    className={`${styles.guessChip} ${selected ? styles.guessChipSelected : ''} ${locked ? styles.guessChipLocked : ''}`}
                     onClick={() => setGuessIndex(ix)}
                     aria-pressed={selected}
                     disabled={guessLocked}
                   >
-                    row = {ch}
+                    {ch}
                   </button>
                 )
               })}
             </div>
-            <div className={styles.predictionActions}>
-              <button type="button" className={styles.lockBtn} onClick={onLockGuess} disabled={guessLocked || lockGuessDisabled}>
-                {guessLocked ? 'Guess locked' : 'Lock guess'}
-              </button>
-              <button type="button" className={styles.revealBtn} onClick={onReveal} disabled={revealDisabled}>
-                Reveal
-              </button>
-            </div>
           </div>
-          <div className={styles.predictionFeedback} aria-live="polite">
-            {revealed ? (
-              guessIsCorrect ? (
-                <span className={styles.good}>Nice. The 1 was on {activeChar}, so we select row {activeChar}.</span>
-              ) : (
-                <span className={styles.bad}>
-                  Close — the 1 was on {activeChar}, so we select row {activeChar}.
-                </span>
-              )
-            ) : guessLocked ? (
-              <span className={styles.neutral}>Okay. Now reveal the result.</span>
-            ) : (
-              <span className={styles.neutral}>Pick a guess, lock it, then reveal.</span>
-            )}
+          <div className={styles.challengeRight}>
+            <button type="button" className={styles.actionBtn} onClick={onLockGuess} disabled={guessLocked || lockGuessDisabled}>
+              {guessLocked ? 'Locked' : 'Lock'}
+            </button>
+            <button type="button" className={`${styles.actionBtn} ${styles.actionBtnPrimary}`} onClick={onReveal} disabled={revealDisabled}>
+              Reveal
+            </button>
           </div>
         </div>
 
-        <div className={styles.toolbar} aria-label="Select token">
-          <div className={styles.toolbarLabel}>Select token</div>
-          <div className={styles.controls}>
+        {/* Feedback + Token selector row */}
+        <div className={styles.controlRow}>
+          <div className={styles.feedback} aria-live="polite">
+            {revealed ? (
+              guessIsCorrect ? (
+                <span className={styles.good}>Correct! Row {activeChar} selected.</span>
+              ) : (
+                <span className={styles.bad}>Close — row {activeChar} was selected.</span>
+              )
+            ) : guessLocked ? (
+              <span className={styles.neutral}>Now reveal →</span>
+            ) : (
+              <span className={styles.neutral}>Pick & lock a guess</span>
+            )}
+          </div>
+          <div className={styles.tokenSelector}>
+            <span className={styles.tokenLabel}>Token:</span>
             {vocab.map((char, i) => (
               <button
                 key={char}
                 type="button"
-                className={`${styles.btn} ${i === targetIndex ? styles.btnSelected : ''}`}
+                className={`${styles.tokenBtn} ${i === targetIndex ? styles.tokenBtnSelected : ''}`}
                 onClick={() => setTargetIndex(i)}
               >
                 {char}
@@ -162,10 +138,12 @@ export function MatrixRowSelectViz() {
           </div>
         </div>
 
+        {/* Main multiplication layout: x × W = result */}
         <div className={`panel-dark ${styles.stage}`}>
-          <div className={styles.layout}>
-            <div className={styles.vectorWrap}>
-              <div className={styles.caption}>x (one-hot)</div>
+          <div className={styles.multiplicationLayout}>
+            {/* x vector */}
+            <div className={styles.vectorSection}>
+              <div className={styles.sectionLabel}>x</div>
               <div className={`inset-box ${styles.vectorFrame}`}>
                 {vocab.map((char, i) => (
                   <div
@@ -180,12 +158,12 @@ export function MatrixRowSelectViz() {
               </div>
             </div>
 
-            <div className={styles.times} aria-hidden="true">
-              ×
-            </div>
+            {/* × operator */}
+            <div className={styles.operator} aria-hidden="true">×</div>
 
-            <div className={styles.matrixWrap}>
-              <div className={styles.caption}>W (embedding table)</div>
+            {/* W matrix */}
+            <div className={styles.matrixSection}>
+              <div className={styles.sectionLabel}>W</div>
               <div className={`inset-box ${styles.matrixFrame}`}>
                 <table className={styles.matrixTable} aria-label="Embedding table rows">
                   <tbody>
@@ -214,48 +192,55 @@ export function MatrixRowSelectViz() {
                 </table>
               </div>
             </div>
-          </div>
-        </div>
 
-        <div className={`inset-box ${styles.mathCard}`}>
-          <div className={styles.mathTop}>
-            <div className={styles.mathTitle}>Row selection as math</div>
-            <details className="collapsible">
-              <summary>Show expansion</summary>
-              <div className={styles.expansion}>
-                <div className={styles.expansionLine}>
-                  <span className={styles.mono}>xᵀW</span>
-                  <span className={styles.equationEquals}>=</span>
-                  <span className={styles.expansionText}>{expansion.left}</span>
-                </div>
-                <div className={styles.expansionNote}>
-                  Only one coefficient is <span className={styles.mono}>1</span>, so only one row survives.
-                </div>
+            {/* = and result */}
+            <div className={styles.resultSection}>
+              <div className={styles.equalsSign}>=</div>
+              <div
+                className={`inset-box ${styles.resultBox} ${!revealed ? styles.blurred : ''} ${
+                  revealPhase === 'result' ? styles.resultPulse : ''
+                }`}
+              >
+                <div className={styles.resultName}>W[{activeChar}]</div>
+                <div className={styles.resultValues}>[{result}]</div>
               </div>
-            </details>
-          </div>
-
-          <div className={styles.equationLine}>
-            <span className={styles.mono}>xᵀW</span>
-            <span className={styles.equationEquals}>=</span>
-            <span className={`${styles.resultMono} ${!revealed ? styles.hidden : ''}`}>
-              W[{activeChar}]
-            </span>
+            </div>
           </div>
         </div>
 
-        <div
-          className={`inset-box ${styles.resultCard} ${!revealed ? styles.blurred : ''} ${
-            revealPhase === 'result' ? styles.resultPulse : ''
-          }`}
-        >
-          <div className={styles.resultLabel}>Result</div>
-          <div className={styles.resultValue}>
-            <span className={styles.resultMono}>W[{activeChar}]</span>
-            <span className={styles.resultArrow} aria-hidden="true">
-              →
-            </span>
-            <span className={styles.resultVector}>[{result}]</span>
+        {/* Consolidated footer: equation + expansion + vocab */}
+        <div className={styles.mathFooter}>
+          <div className={styles.equation}>
+            <span className={styles.mono}>xᵀW</span>
+            <span className={styles.eqSign}>=</span>
+            <span className={`${styles.eqResult} ${!revealed ? styles.hidden : ''}`}>W[{activeChar}]</span>
+          </div>
+          <details className="collapsible">
+            <summary className={styles.expandToggle}>Why?</summary>
+            <div className={styles.termBreakdown}>
+              {vocab.map((char, i) => {
+                const isActive = i === targetIndex
+                return (
+                  <div
+                    key={char}
+                    className={`${styles.termRow} ${isActive ? styles.termActive : styles.termDimmed}`}
+                  >
+                    <span className={styles.termCoeff}>{isActive ? '1' : '0'}</span>
+                    <span className={styles.termDot}>·</span>
+                    <span className={styles.termName}>W[{char}]</span>
+                    <span className={styles.termArrow}>=</span>
+                    <span className={styles.termResult}>{isActive ? `W[${char}]` : '0'}</span>
+                  </div>
+                )
+              })}
+              <div className={styles.termSumRow}>
+                <span className={styles.termSumLabel}>sum</span>
+                <span className={styles.termSumValue}>W[{activeChar}]</span>
+              </div>
+            </div>
+          </details>
+          <div className={styles.vocabHint}>
+            [{vocabPreview}]
           </div>
         </div>
       </div>

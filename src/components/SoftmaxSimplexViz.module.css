@@ -1,14 +1,96 @@
+/* ===== ENTRANCE ANIMATIONS ===== */
+
+@keyframes containerFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sliderStaggerIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes triangleDraw {
+  from {
+    stroke-dashoffset: 300;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pointDrop {
+  from {
+    transform: translateY(-30px) scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(3px) scale(1.1);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes explanationFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes textCrossfade {
+  0% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 0;
+  }
+  55% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Main 2-column layout: Triangle LEFT (hero), Controls RIGHT */
 .content {
   display: grid;
-  grid-template-columns: minmax(240px, 280px) minmax(0, 520px);
-  justify-content: center;
-  gap: 1.5rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
   align-items: start;
+  animation: containerFadeIn 0.6s ease-out;
 }
 
 @media (max-width: 768px) {
   .content {
     grid-template-columns: 1fr;
+  }
+
+  /* Stack slider panel above triangle on mobile */
+  .sliderPanel {
+    order: 1;
+  }
+
+  .vizPanel {
+    order: 2;
   }
 }
 
@@ -17,13 +99,57 @@
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
+  animation: sliderStaggerIn 0.4s ease-out;
+  animation-delay: 0.1s;
+  animation-fill-mode: backwards;
 }
 
+/* Challenge bar - inline header spanning full width */
+.challengeBar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.challengeBarText {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.75);
+  flex: 1;
+}
+
+.challengeBarText .mono {
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+.challengeBarActions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.challengeBarFeedback {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Legacy challenge box - kept for reference but replaced by challengeBar */
 .challenge {
   border-radius: 12px;
   padding: 1rem;
   background: rgba(0, 0, 0, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .challengeTitle {
@@ -100,13 +226,30 @@
   color: rgba(255, 255, 255, 0.55);
 }
 
+.ready {
+  color: rgba(76, 217, 153, 0.85);
+  animation: readyPulse 1s ease-in-out infinite;
+}
+
+@keyframes readyPulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}
+
+/* Controls header - Context + Temperature in one row */
+.controlsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 .scenario {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding-bottom: 0.85rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 0.5rem;
 }
 
 .scenario strong {
@@ -128,6 +271,42 @@
   color: rgba(255, 255, 255, 0.75);
 }
 
+/* Temperature control - compact inline */
+.tempControl {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.tempLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.tempName {
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 600;
+}
+
+.tempValue {
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 700;
+  min-width: 2ch;
+}
+
+.tempControl .tempSlider {
+  width: 70px;
+}
+
+/* Logits section */
+.logitsSection {
+  padding-top: 0.5rem;
+}
+
 .section {
   padding-top: 0.25rem;
 }
@@ -145,6 +324,31 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  position: relative;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Staggered entrance animation for slider groups */
+.sliderGroup:nth-child(1) { animation-delay: 0.2s; }
+.sliderGroup:nth-child(2) { animation-delay: 0.3s; }
+.sliderGroup:nth-child(3) { animation-delay: 0.4s; }
+
+/* Disabled slider overlay when locked */
+.sliderGroup.disabled {
+  opacity: 0.5;
+  filter: grayscale(0.3);
+  pointer-events: none;
+}
+
+/* Lock icon for disabled sliders */
+.lockIcon {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
 }
 
 .sliderLabel {
@@ -165,6 +369,247 @@
   color: rgba(255, 255, 255, 0.55);
   font-size: 0.8rem;
   font-weight: 600;
+  transition: transform 0.15s ease, text-shadow 0.15s ease;
+}
+
+/* Value pulse animation when slider changes */
+.logitValuePulse {
+  animation: sliderValuePulse 0.2s ease-out;
+}
+
+@keyframes sliderValuePulse {
+  0% {
+    transform: scale(1);
+    text-shadow: 0 0 0 transparent;
+  }
+  50% {
+    transform: scale(1.1);
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
+  }
+  100% {
+    transform: scale(1);
+    text-shadow: 0 0 0 transparent;
+  }
+}
+
+/* ===== CUSTOM SLIDER STYLING ===== */
+
+/* Logit sliders - colored per token */
+.logitSlider {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+  transition: all var(--transition-smooth);
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Track styling with fill gradient */
+.logitSlider::-webkit-slider-runnable-track {
+  height: 6px;
+  background: linear-gradient(to right,
+    var(--slider-color, rgba(255, 255, 255, 0.5)) 0%,
+    var(--slider-color, rgba(255, 255, 255, 0.5)) var(--slider-progress, 50%),
+    rgba(255, 255, 255, 0.1) var(--slider-progress, 50%),
+    rgba(255, 255, 255, 0.1) 100%);
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.logitSlider::-moz-range-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.logitSlider::-moz-range-progress {
+  height: 6px;
+  background: var(--slider-color, rgba(255, 255, 255, 0.5));
+  border-radius: 3px 0 0 3px;
+}
+
+/* Thumb styling */
+.logitSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.65));
+  border: 1px solid var(--slider-color, rgba(255, 255, 255, 0.4));
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.4),
+    0 0 0 3px rgba(var(--slider-rgb, 255, 255, 255), 0.15);
+  cursor: grab;
+  transition: all 0.2s ease;
+  margin-top: -5px;
+}
+
+.logitSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+  box-shadow:
+    0 5px 14px rgba(0, 0, 0, 0.5),
+    0 0 0 5px rgba(var(--slider-rgb, 255, 255, 255), 0.22);
+}
+
+.logitSlider::-webkit-slider-thumb:active,
+.logitSlider:focus::-webkit-slider-thumb {
+  cursor: grabbing;
+  box-shadow:
+    0 0 0 6px rgba(var(--slider-rgb, 255, 255, 255), 0.3),
+    0 0 20px rgba(var(--slider-rgb, 255, 255, 255), 0.4);
+}
+
+.logitSlider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.65));
+  border: 1px solid var(--slider-color, rgba(255, 255, 255, 0.4));
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.4),
+    0 0 0 3px rgba(var(--slider-rgb, 255, 255, 255), 0.15);
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.logitSlider::-moz-range-thumb:hover {
+  transform: scale(1.12);
+  box-shadow:
+    0 5px 14px rgba(0, 0, 0, 0.5),
+    0 0 0 5px rgba(var(--slider-rgb, 255, 255, 255), 0.22);
+}
+
+.logitSlider::-moz-range-thumb:active {
+  cursor: grabbing;
+  box-shadow:
+    0 0 0 6px rgba(var(--slider-rgb, 255, 255, 255), 0.3),
+    0 0 20px rgba(var(--slider-rgb, 255, 255, 255), 0.4);
+}
+
+.logitSlider:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.logitSlider:disabled::-webkit-slider-thumb {
+  cursor: not-allowed;
+}
+
+.logitSlider:disabled::-moz-range-thumb {
+  cursor: not-allowed;
+}
+
+/* Temperature slider - cold to hot gradient */
+.tempSlider {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 217, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.25) 20%,
+    rgba(255, 100, 170, 0.5) 100%
+  );
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  transition: all var(--transition-smooth);
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tempSlider:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 217, 255, 0.65) 0%,
+    rgba(255, 255, 255, 0.35) 20%,
+    rgba(255, 100, 170, 0.65) 100%
+  );
+}
+
+.tempSlider:focus {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 0 0 3px rgba(255, 100, 170, 0.15);
+}
+
+.tempSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.4),
+    0 0 0 3px rgba(255, 255, 255, 0.12);
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.tempSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+  box-shadow:
+    0 5px 14px rgba(0, 0, 0, 0.5),
+    0 0 0 5px rgba(255, 255, 255, 0.18);
+}
+
+.tempSlider::-webkit-slider-thumb:active,
+.tempSlider:focus::-webkit-slider-thumb {
+  cursor: grabbing;
+  box-shadow:
+    0 0 0 6px rgba(255, 100, 170, 0.3),
+    0 0 20px rgba(255, 100, 170, 0.4);
+}
+
+.tempSlider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.4),
+    0 0 0 3px rgba(255, 255, 255, 0.12);
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.tempSlider::-moz-range-thumb:hover {
+  transform: scale(1.12);
+  box-shadow:
+    0 5px 14px rgba(0, 0, 0, 0.5),
+    0 0 0 5px rgba(255, 255, 255, 0.18);
+}
+
+.tempSlider::-moz-range-thumb:active {
+  cursor: grabbing;
+  box-shadow:
+    0 0 0 6px rgba(255, 100, 170, 0.3),
+    0 0 20px rgba(255, 100, 170, 0.4);
+}
+
+.tempSlider:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.tempSlider:disabled::-webkit-slider-thumb {
+  cursor: not-allowed;
+}
+
+.tempSlider:disabled::-moz-range-thumb {
+  cursor: not-allowed;
 }
 
 .probDisplay {
@@ -210,6 +655,7 @@
 .probBarC {
   height: 100%;
   border-radius: 999px;
+  transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .probBarA {
@@ -227,8 +673,93 @@
 .probVal {
   color: rgba(255, 255, 255, 0.72);
   white-space: nowrap;
+  transition: transform 0.15s ease, text-shadow 0.15s ease;
 }
 
+/* Flash animation for significant probability changes */
+@keyframes probFlash {
+  0% {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scaleX(1);
+  }
+  50% {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scaleX(1.01);
+  }
+  100% {
+    background: transparent;
+    transform: scaleX(1);
+  }
+}
+
+.probRowFlash {
+  animation: probFlash 0.3s ease-out;
+  border-radius: 4px;
+}
+
+/* Value flash - scale + glow pulse */
+@keyframes valueFlash {
+  0% {
+    transform: scale(1);
+    text-shadow: 0 0 0 transparent;
+  }
+  50% {
+    transform: scale(1.08);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  }
+  100% {
+    transform: scale(1);
+    text-shadow: 0 0 0 transparent;
+  }
+}
+
+.probValFlash {
+  animation: valueFlash 0.3s ease-out;
+}
+
+/* Dominant probability row highlight */
+.probRowDominant {
+  position: relative;
+}
+
+.probRowDominant::before {
+  content: '';
+  position: absolute;
+  inset: -2px -4px;
+  border-radius: 6px;
+  background: radial-gradient(ellipse at left, rgba(255, 255, 255, 0.06), transparent 70%);
+  pointer-events: none;
+}
+
+.probRowDominant .probVal {
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 700;
+}
+
+/* Footer - consolidated action row + explanation */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footerExplanation {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-family: var(--font-mono);
+  text-align: right;
+  flex: 1;
+}
+
+.footerExplanation strong {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 700;
+}
+
+/* Legacy actionRow - kept for reference */
 .actionRow {
   display: flex;
   align-items: center;
@@ -276,10 +807,32 @@
 
 .vizPanel {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 1.25rem;
+  gap: 0.5rem;
+  padding: 1rem;
   min-height: 360px;
+  position: relative;
+  overflow: hidden;
+  /* Edge fade vignette effect - matching SoftmaxLandscapeViz */
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.4);
+  border-radius: 16px;
+}
+
+/* Ambient glow layer that follows the point */
+.vizPanel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--glow-x, 50%) var(--glow-y, 50%),
+    color-mix(in srgb, var(--glow-color, transparent) 20%, transparent),
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: 0;
+  transition: background 0.4s ease;
+  border-radius: inherit;
 }
 
 .svg {
@@ -289,28 +842,96 @@
   cursor: grab;
   touch-action: none;
   user-select: none;
+  position: relative;
+  z-index: 1;
 }
 
 .dragging {
   cursor: grabbing;
 }
 
-.triangleFill {
-  fill: rgba(0, 0, 0, 0.15);
-  opacity: 0.85;
+/* Vertex color overlays for 3-way gradient effect */
+.vertexOverlay {
+  pointer-events: none;
+  opacity: 0.9;
 }
 
-.triangleOutline {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.18);
-  stroke-width: 2.5;
-  opacity: 0.95;
+/* Triangle edge styling */
+.triangleEdge {
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.15));
+  transition: filter 0.3s ease, stroke-width 0.2s ease;
+}
+
+/* Entrance animation - edges draw from vertices */
+.triangleEdgeEnter {
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  animation: triangleDraw 0.8s ease-out forwards;
+}
+
+.triangleEdgeEnter:nth-of-type(1) { animation-delay: 0.1s; }
+.triangleEdgeEnter:nth-of-type(2) { animation-delay: 0.2s; }
+.triangleEdgeEnter:nth-of-type(3) { animation-delay: 0.3s; }
+
+/* Highlighted edge when corresponding slider is active */
+.triangleEdgeHighlightA {
+  stroke-width: 5 !important;
+  filter: drop-shadow(0 0 12px rgba(0, 217, 255, 0.6)) !important;
+}
+
+.triangleEdgeHighlightB {
+  stroke-width: 5 !important;
+  filter: drop-shadow(0 0 12px rgba(255, 0, 110, 0.6)) !important;
+}
+
+.triangleEdgeHighlightC {
+  stroke-width: 5 !important;
+  filter: drop-shadow(0 0 12px rgba(255, 201, 71, 0.6)) !important;
+}
+
+/* Grid line group */
+.gridGroup {
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.08));
 }
 
 .gridLine {
-  stroke: rgba(255, 255, 255, 0.06);
+  stroke: rgba(255, 255, 255, 0.1);
   stroke-width: 1;
-  opacity: 0.75;
+  opacity: 0.85;
+  transition: stroke 0.2s ease, opacity 0.2s ease;
+}
+
+/* Vertex glow animation */
+@keyframes vertexPulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.08);
+  }
+}
+
+.vertexGlow {
+  animation: vertexPulse 2s ease-in-out infinite;
+  transform-origin: center;
+  pointer-events: none;
+}
+
+/* Center glow animation */
+@keyframes centerPulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.centerGlow {
+  animation: centerPulse 3s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .vertexLabel {
@@ -324,34 +945,53 @@
 
 .centerLabel {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
-  fill: rgba(255, 255, 255, 0.35);
+  font-size: 0.72rem;
+  fill: rgba(255, 255, 255, 0.5);
   text-anchor: middle;
-  opacity: 0.85;
-  font-weight: 500;
-  letter-spacing: 0.05em;
+  opacity: 1;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
 }
 
 .centerDot {
-  fill: rgba(255, 255, 255, 0.22);
-  stroke: rgba(255, 255, 255, 0.12);
-  stroke-width: 1.5;
+  fill: rgba(255, 255, 255, 0.35);
+  stroke: rgba(255, 255, 255, 0.25);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
 }
 
-.trail {
-  fill: none;
-  stroke: var(--accent-magenta);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  opacity: 0.45;
-  filter: drop-shadow(0 0 6px rgba(255, 0, 110, 0.3));
-}
+/* Trail is now rendered as individual segments with gradient opacity */
 
 .pointGlow {
   fill: rgba(0, 217, 255, 0.3);
   opacity: 0.85;
   filter: blur(12px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+/* Point glow breathing when idle */
+@keyframes pointGlowBreathe {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.1);
+  }
+}
+
+.pointGlowIdle {
+  animation: pointGlowBreathe 2s ease-in-out infinite;
+}
+
+.pointGlowDragging {
+  animation: none;
+  opacity: 1;
+  transform: scale(1.3);
 }
 
 .point {
@@ -359,7 +999,92 @@
   stroke: rgba(255, 255, 255, 0.9);
   stroke-width: 1.5;
   filter: drop-shadow(0 0 18px rgba(0, 217, 255, 0.45));
-  transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+/* Point entrance animation - drops in with bounce */
+.pointEnter {
+  animation: pointDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation-delay: 0.5s;
+  opacity: 0;
+}
+
+/* Point glow entrance */
+.pointGlowEnter {
+  animation: pointDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation-delay: 0.5s;
+  opacity: 0;
+}
+
+/* Point breathing when idle */
+@keyframes pointBreathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.pointIdle {
+  animation: pointBreathe 2s ease-in-out infinite;
+}
+
+.pointDragging {
+  animation: none;
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 24px rgba(0, 217, 255, 0.7));
+}
+
+/* Click ripple effect */
+@keyframes rippleExpand {
+  from {
+    r: 0;
+    opacity: 0.5;
+  }
+  to {
+    r: 40;
+    opacity: 0;
+  }
+}
+
+.clickRipple {
+  fill: rgba(0, 217, 255, 0.4);
+  animation: rippleExpand 0.4s ease-out forwards;
+  pointer-events: none;
+}
+
+/* Snap indicator ring animations */
+@keyframes snapRingPulse {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.snapRing {
+  fill: none;
+  stroke: var(--accent-cyan);
+  stroke-width: 2;
+  stroke-dasharray: 4 4;
+  animation: snapRingPulse 0.6s ease-in-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+  pointer-events: none;
+}
+
+.snapRingGlow {
+  fill: rgba(0, 217, 255, 0.25);
+  animation: snapRingPulse 0.6s ease-in-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+  pointer-events: none;
 }
 
 .explanation {
@@ -371,9 +1096,297 @@
   line-height: 1.6;
   font-family: var(--font-mono);
   text-align: center;
+  animation: explanationFadeIn 0.5s ease-out;
+  animation-delay: 0.6s;
+  animation-fill-mode: backwards;
+  /* Subtle background gradient */
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.02) 50%,
+    transparent 100%
+  );
+  position: relative;
 }
 
 .explanation strong {
   color: rgba(255, 255, 255, 0.85);
   font-weight: 700;
+}
+
+/* Temperature regime change transition */
+.explanationTransition {
+  animation: textCrossfade 0.4s ease-in-out;
+}
+
+/* Connection lines showing perpendicular distances during drag */
+.connectionLines {
+  opacity: 0;
+  animation: fadeInConnectionLines 0.15s ease-out forwards;
+}
+
+@keyframes fadeInConnectionLines {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ===== CHALLENGE MODE ANIMATIONS ===== */
+
+/* Challenge panel shake on failure */
+@keyframes challengeShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+.challengeShake {
+  animation: challengeShake 0.4s ease-in-out;
+}
+
+/* Challenge success glow */
+@keyframes successPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(76, 217, 153, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px 5px rgba(76, 217, 153, 0.5);
+  }
+}
+
+.challengeSuccessGlow {
+  animation: successPulse 1s ease-in-out 3;
+  border-color: rgba(76, 217, 153, 0.4) !important;
+}
+
+/* Lock button animations */
+.lockBtnPressed {
+  transform: scale(0.95) !important;
+  transition: transform 0.1s ease-out !important;
+}
+
+.lockBtnLocked {
+  background: rgba(0, 0, 0, 0.35) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  cursor: default !important;
+}
+
+.lockBtnShake {
+  animation: challengeShake 0.4s ease-in-out;
+}
+
+.lockIconInline {
+  margin-right: 0.4em;
+  font-size: 0.85em;
+}
+
+/* Reset button spin */
+.resetIcon {
+  display: inline-block;
+  margin-right: 0.3em;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.resetBtnSpin .resetIcon {
+  transform: rotate(360deg);
+}
+
+/* Feedback success glow */
+@keyframes feedbackSuccessGlow {
+  0%, 100% {
+    text-shadow: 0 0 6px rgba(76, 217, 153, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 12px rgba(76, 217, 153, 0.8);
+  }
+}
+
+.feedbackSuccess .good {
+  animation: feedbackSuccessGlow 1s ease-in-out 3;
+}
+
+/* Feedback fail pulse */
+@keyframes feedbackFailPulse {
+  0%, 100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 8px rgba(255, 214, 0, 0.6);
+  }
+}
+
+.feedbackFail .bad {
+  animation: feedbackFailPulse 0.8s ease-in-out 2;
+}
+
+/* ===== PROGRESS INDICATOR ===== */
+
+.progressSection {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.progressRow {
+  display: grid;
+  grid-template-columns: 5ch 1fr 1.5ch;
+  gap: 0.5rem;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.progressLabel {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+.progressBarTrack {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.progressMet {
+  background: rgba(76, 217, 153, 0.7);
+}
+
+.progressCheck {
+  color: rgba(76, 217, 153, 0.9);
+  font-weight: 700;
+  text-align: center;
+}
+
+.progressX {
+  color: transparent;
+  text-align: center;
+}
+
+/* ===== TARGET ZONE ===== */
+
+.targetZone {
+  pointer-events: none;
+}
+
+.targetZonePath {
+  fill: rgba(76, 217, 153, 0.06);
+  stroke: none;
+  transition: fill 0.3s ease;
+}
+
+.targetZoneReady {
+  fill: rgba(76, 217, 153, 0.15);
+  animation: targetZonePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes targetZonePulse {
+  0%, 100% {
+    fill: rgba(76, 217, 153, 0.12);
+  }
+  50% {
+    fill: rgba(76, 217, 153, 0.22);
+  }
+}
+
+.targetZoneEdge {
+  stroke: rgba(76, 217, 153, 0.25);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+}
+
+/* Target zone success glow */
+@keyframes targetZoneSuccessGlow {
+  0%, 100% {
+    fill: rgba(76, 217, 153, 0.15);
+    filter: drop-shadow(0 0 8px rgba(76, 217, 153, 0.4));
+  }
+  50% {
+    fill: rgba(76, 217, 153, 0.3);
+    filter: drop-shadow(0 0 16px rgba(76, 217, 153, 0.7));
+  }
+}
+
+.targetZoneSuccess {
+  fill: rgba(76, 217, 153, 0.2);
+  animation: targetZoneSuccessGlow 1s ease-in-out 3;
+  pointer-events: none;
+}
+
+/* ===== SUCCESS ANIMATIONS ===== */
+
+/* Success ring expanding from point */
+@keyframes successRingExpand {
+  from {
+    r: 10;
+    stroke-width: 4;
+    stroke-opacity: 0.8;
+  }
+  to {
+    r: 80;
+    stroke-width: 1;
+    stroke-opacity: 0;
+  }
+}
+
+.successRing {
+  fill: none;
+  stroke: rgba(76, 217, 153, 0.9);
+  stroke-width: 3;
+  animation: successRingExpand 0.8s ease-out forwards;
+  pointer-events: none;
+}
+
+/* Point success glow */
+.pointSuccess {
+  fill: rgba(76, 217, 153, 0.9) !important;
+  filter: drop-shadow(0 0 20px rgba(76, 217, 153, 0.8)) !important;
+}
+
+/* Confetti particles */
+@keyframes confettiFall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-60px) scale(0.3) rotate(180deg);
+  }
+}
+
+.confettiParticle {
+  animation: confettiFall 2s ease-out forwards;
+  animation-delay: var(--delay, 0ms);
+  pointer-events: none;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+/* Viz panel success glow */
+@keyframes vizPanelSuccessPulse {
+  0%, 100% {
+    box-shadow: inset 0 0 0 0 rgba(76, 217, 153, 0);
+  }
+  50% {
+    box-shadow: inset 0 0 40px 10px rgba(76, 217, 153, 0.15);
+  }
+}
+
+.vizPanelSuccess {
+  animation: vizPanelSuccessPulse 1s ease-in-out 2;
 }

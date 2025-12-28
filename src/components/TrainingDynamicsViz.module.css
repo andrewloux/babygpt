@@ -1,3 +1,14 @@
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .container {
   margin: 2.5rem 0;
   position: relative;
@@ -7,6 +18,9 @@
 .header {
   text-align: center;
   margin-bottom: 1.25rem;
+  opacity: 0;
+  animation: fadeSlideIn 0.5s ease-out forwards;
+  animation-delay: 0s;
 }
 
 .title {
@@ -35,6 +49,9 @@
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.02) inset,
     0 18px 40px -28px rgba(0, 0, 0, 0.85);
+  opacity: 0;
+  animation: fadeSlideIn 0.5s ease-out forwards;
+  animation-delay: 0.1s;
 }
 
 .sliderLabel {
@@ -110,7 +127,7 @@
 
 .stage {
   display: grid;
-  grid-template-columns: 1fr 260px;
+  grid-template-columns: 1fr 380px;
   gap: 1.25rem;
   align-items: start;
 }
@@ -136,6 +153,9 @@
 
 .scatterCard {
   padding: 0.75rem;
+  opacity: 0;
+  animation: fadeSlideIn 0.5s ease-out forwards;
+  animation-delay: 0.2s;
 }
 
 .scatter {
@@ -191,6 +211,28 @@
   filter: drop-shadow(0 0 12px rgba(57, 255, 20, 0.18));
 }
 
+.pointGroup {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  opacity: 0;
+  animation: fadeSlideIn 0.3s ease-out forwards;
+}
+
+/* Ghost points showing previous positions */
+.ghostPoint {
+  fill: rgba(255, 255, 255, 0.12);
+  stroke: none;
+  pointer-events: none;
+  transition: opacity 0.3s ease-out;
+}
+
+/* Trail lines connecting previous to current positions */
+.trailLine {
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1;
+  pointer-events: none;
+  transition: opacity 0.3s ease-out;
+}
+
 .pointLabel {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -201,6 +243,9 @@
 
 .lossCard {
   padding: 0.9rem 0.9rem 1rem 0.9rem;
+  opacity: 0;
+  animation: fadeSlideIn 0.5s ease-out forwards;
+  animation-delay: 0.25s;
 }
 
 .lossHeader {
@@ -235,11 +280,25 @@
   fill: rgba(255, 255, 255, 0.35);
 }
 
+.lossArea {
+  fill: url(#lossAreaGradient);
+}
+
 .lossPath {
   fill: none;
   stroke: rgba(0, 217, 255, 0.9);
   stroke-width: 2.5;
   filter: drop-shadow(0 0 8px rgba(0, 217, 255, 0.2));
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  animation: drawLine 1.5s ease-out forwards;
+  animation-delay: 0.5s;
+}
+
+@keyframes drawLine {
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 .lossGuide {
@@ -251,7 +310,31 @@
 .lossPoint {
   fill: rgba(255, 0, 110, 0.95);
   stroke: rgba(255, 255, 255, 0.8);
+  stroke-width: 1.5;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(255, 0, 110, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(255, 0, 110, 0.9));
+  }
+}
+
+.milestoneLine {
+  stroke: rgba(255, 255, 255, 0.12);
   stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.milestoneLabel {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .lossCaption {
@@ -276,6 +359,9 @@
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.55);
+  opacity: 0;
+  animation: fadeSlideIn 0.5s ease-out forwards;
+  animation-delay: 0.4s;
 }
 
 .legendItem {
@@ -309,5 +395,196 @@
 
 .swatchSpace {
   background: rgba(57, 255, 20, 0.78);
+}
+
+/* Text generation section */
+.generateSection {
+  margin-top: 1.25rem;
+  padding: 1.25rem;
+  border-radius: 1rem;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 0%, rgba(255, 0, 110, 0.08), transparent 55%),
+    rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 18px 40px -28px rgba(0, 0, 0, 0.85);
+  opacity: 0;
+  animation: fadeSlideIn 0.5s ease-out forwards;
+  animation-delay: 0.35s;
+}
+
+.generateHeader {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.04em;
+  margin-bottom: 0.9rem;
+  text-align: center;
+}
+
+.generateControls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.tempLabel {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  min-width: 120px;
+}
+
+.tempValue {
+  color: rgba(255, 0, 110, 0.9);
+  font-weight: 700;
+}
+
+.tempHint {
+  display: block;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 0.25rem;
+}
+
+.generateControls > div {
+  flex: 1;
+  min-width: 150px;
+  max-width: 300px;
+}
+
+.generateButton {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 0.6rem 1.4rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(255, 0, 110, 0.4);
+  background: linear-gradient(135deg, rgba(255, 0, 110, 0.2), rgba(255, 0, 110, 0.1));
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.generateButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(255, 0, 110, 0.35), rgba(255, 0, 110, 0.2));
+  border-color: rgba(255, 0, 110, 0.6);
+  box-shadow: 0 0 20px rgba(255, 0, 110, 0.2);
+}
+
+.generateButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.generatedOutput {
+  margin-top: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  min-height: 2.5rem;
+}
+
+.generatedText {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.02em;
+  word-break: break-all;
+}
+
+.cursor {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  color: rgba(255, 0, 110, 0.9);
+  animation: cursorGlow 1s ease-in-out infinite;
+  text-shadow: 0 0 8px currentColor;
+}
+
+@keyframes cursorGlow {
+  0%, 100% {
+    opacity: 1;
+    text-shadow: 0 0 8px currentColor;
+  }
+  50% {
+    opacity: 0.3;
+    text-shadow: 0 0 2px currentColor;
+  }
+}
+
+.generateHint {
+  margin-top: 0.75rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Character fade-in animation */
+.char {
+  display: inline-block;
+  animation: charFadeIn 0.15s ease-out forwards;
+}
+
+@keyframes charFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Breathing background while generating */
+.generatedOutputGenerating {
+  animation: breathe 2s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% {
+    background: rgba(0, 0, 0, 0.35);
+  }
+  50% {
+    background: rgba(0, 0, 0, 0.42);
+  }
+}
+
+/* Thinking indicator dots */
+.thinkingDots {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 2px;
+}
+
+.thinkingDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 0, 110, 0.7);
+  animation: thinkingDot 1.2s ease-in-out infinite;
+}
+
+.thinkingDot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.thinkingDot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes thinkingDot {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 

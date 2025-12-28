@@ -1,45 +1,43 @@
+/* ===== LAYOUT ===== */
 .layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 1.75rem;
-  align-items: start;
-}
-
-.controls {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
-.readingPanel {
-  padding: 0.85rem 0.9rem;
+/* ===== TOKEN SELECTOR (top strip) ===== */
+.tokenSelector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.controlsTitle {
+.tokenSelectorLabel {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.5);
+  margin-right: 0.25rem;
 }
 
 .tokenButtons {
   display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+  flex-direction: row;
+  gap: 0.4rem;
 }
 
 .tokenButton {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.65rem 0.75rem;
-  border-radius: 12px;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(0, 0, 0, 0.22);
   color: rgba(255, 255, 255, 0.82);
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   cursor: pointer;
   transition: transform var(--transition-smooth), border-color var(--transition-smooth), background var(--transition-smooth);
 }
@@ -53,15 +51,19 @@
 .tokenButtonActive {
   border-color: color-mix(in srgb, var(--token-accent) 55%, rgba(255, 255, 255, 0.18));
   background: rgba(0, 0, 0, 0.32);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 0 0 3px rgba(0, 0, 0, 0.25);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 0 0 3px rgba(0, 0, 0, 0.25),
+    0 0 20px color-mix(in srgb, var(--token-accent) 40%, transparent),
+    0 0 40px color-mix(in srgb, var(--token-accent) 20%, transparent);
 }
 
 .tokenDot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 999px;
   background: var(--token-accent);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--token-accent) 55%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--token-accent) 55%, transparent);
 }
 
 .tokenLabel {
@@ -69,62 +71,10 @@
   white-space: nowrap;
 }
 
-.sliderBlock {
-  padding-top: 0.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.sliderHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.75rem;
-}
-
-.sliderLabel {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.6);
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-}
-
-.sliderValue {
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.sliderHint {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.45);
-}
-
-.resetButton {
-  align-self: flex-start;
-  padding: 0.5rem 0.75rem;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.22);
-  color: rgba(255, 255, 255, 0.8);
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: transform var(--transition-smooth), border-color var(--transition-smooth);
-}
-
-.resetButton:hover {
-  transform: translateY(-1px);
-  border-color: rgba(255, 255, 255, 0.18);
-}
-
+/* ===== CHART PANEL (hero element) ===== */
 .chartPanel {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
   min-width: 0;
 }
 
@@ -134,70 +84,265 @@
   overflow: hidden;
 }
 
-.overlayTitle {
+/* Ambient glow layer behind SVG */
+.chartFrame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 60%,
+    color-mix(in srgb, var(--ambient-color) 25%, transparent),
+    transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  transition: background 0.6s ease;
+}
+
+/* ===== HUD OVERLAY (just for drag hint) ===== */
+.hudOverlay {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.35rem 0.6rem;
+  z-index: 10;
+}
+
+.hudTopRight {
+  top: 1rem;
+  right: 1rem;
+}
+
+/* ===== CONTROLS BAR (below chart) ===== */
+.controlsBar {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.readoutSection {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.readoutLogits {
+  display: flex;
+  gap: 0.75rem;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.78rem;
 }
 
-.overlayLine {
-  margin-top: 0.5rem;
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.35;
+.readoutProb {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  transition: color 0.15s ease;
 }
 
-.overlayKey {
-  display: inline-block;
-  min-width: 5.5ch;
+.tempSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 140px;
+  padding: 0.35rem 0.5rem;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--temp-r, 255), var(--temp-g, 255), var(--temp-b, 255), 0.08),
+    rgba(0, 0, 0, 0.2)
+  );
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tempRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* ===== TEMPERATURE CONTROLS ===== */
+
+.tempLabel {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.5);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
 }
 
-.overlayEmph {
-  color: rgba(255, 255, 255, 0.92);
+/* Temperature indicator dot - shows current temperature "color" */
+.tempIndicatorDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tempValue {
   font-family: var(--font-mono);
-  font-weight: 700;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  transition: transform 0.15s ease;
 }
 
-.overlayDivider {
-  height: 1px;
-  margin: 0.8rem 0;
-  background: rgba(255, 255, 255, 0.08);
+/* Pulse animation when temperature changes */
+.tempValuePulse {
+  animation: tempPulse 0.2s ease-out;
 }
 
-.overlayMono {
-  margin-top: 0.45rem;
+@keyframes tempPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Temperature slider with gradient track (cold to hot) */
+.tempSlider {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  /* Gradient from cyan (cold) to white (neutral) to magenta (hot) */
+  background: linear-gradient(
+    90deg,
+    rgba(0, 217, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.25) 17%,
+    rgba(255, 100, 170, 0.5) 100%
+  );
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  transition: all var(--transition-smooth);
+}
+
+.tempSlider:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 217, 255, 0.65) 0%,
+    rgba(255, 255, 255, 0.35) 17%,
+    rgba(255, 100, 170, 0.65) 100%
+  );
+}
+
+.tempSlider:focus {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 0 0 3px rgba(0, 217, 255, 0.15);
+}
+
+.tempSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.4),
+    0 0 0 3px rgba(255, 255, 255, 0.12);
+  cursor: grab;
+  transition: all var(--transition-smooth);
+}
+
+.tempSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+  box-shadow:
+    0 5px 14px rgba(0, 0, 0, 0.5),
+    0 0 0 5px rgba(255, 255, 255, 0.18);
+}
+
+.tempSlider::-webkit-slider-thumb:active {
+  cursor: grabbing;
+}
+
+.tempSlider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.4),
+    0 0 0 3px rgba(255, 255, 255, 0.12);
+  cursor: grab;
+  transition: all var(--transition-smooth);
+}
+
+.tempSlider::-moz-range-thumb:hover {
+  transform: scale(1.12);
+  box-shadow:
+    0 5px 14px rgba(0, 0, 0, 0.5),
+    0 0 0 5px rgba(255, 255, 255, 0.18);
+}
+
+.tempSlider::-moz-range-thumb:active {
+  cursor: grabbing;
+}
+
+.tempHint {
   font-family: var(--font-mono);
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  margin-top: 0.15rem;
 }
 
-.overlayAccentCyan {
+/* ===== READOUT STYLES ===== */
+.readoutAccentCyan {
   color: var(--accent-cyan);
 }
 
-.overlayAccentMagenta {
+.readoutAccentMagenta {
   color: var(--accent-magenta);
 }
 
-.overlayValue {
-  margin-top: 0.55rem;
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.75);
+.readoutAccentYellow {
+  color: var(--accent-yellow);
+  opacity: 0.6;
 }
 
-.overlayHint {
-  margin-top: 0.5rem;
+/* Readout value flash animation on change */
+.readoutFlash {
+  animation: readoutFlash 0.35s ease-out;
+}
+
+@keyframes readoutFlash {
+  0% {
+    color: rgba(255, 255, 255, 1);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+  }
+  100% {
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: none;
+  }
+}
+
+/* ===== DRAG HINT HUD ===== */
+.dragHint {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.45);
+  padding: 0.35rem 0.6rem;
 }
 
 .svg {
@@ -210,12 +355,39 @@
   touch-action: none;
   position: relative;
   z-index: 1;
+  /* Edge fade vignette effect */
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.4);
+}
+
+/* Entrance fade-in for the whole visualization */
+@keyframes vizFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.svgEnter {
+  animation: vizFadeIn 0.5s ease-out;
 }
 
 .plane {
   fill: rgba(255, 255, 255, 0.03);
   stroke: rgba(255, 255, 255, 0.08);
   stroke-width: 1;
+}
+
+/* Temperature heat overlay on SVG grid */
+.heatOverlay {
+  transition: fill 0.4s ease;
+  mix-blend-mode: overlay;
+}
+
+/* Smooth perspective transitions for prism cells */
+.prismCell {
+  transition: transform 0.12s ease-out, opacity 0.12s ease-out;
 }
 
 .axisArrow {
@@ -226,20 +398,44 @@
 .axisLabel {
   font-family: var(--font-mono);
   font-size: 11px;
-  fill: rgba(255, 255, 255, 0.45);
+  fill: rgba(255, 255, 255, 0.55);
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
 }
 
 .prism {
-  transform-origin: center;
+  transform-origin: center bottom;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.2s ease;
+}
+
+/* Entrance animation - prisms grow from base */
+@keyframes prismGrow {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.prismEnter {
+  animation: prismGrow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation-delay: calc(var(--entrance-delay) * 30ms);
 }
 
 .prismDim {
   opacity: 0.35;
 }
 
+.prismHover {
+  transform: translateY(-2px) scale(1.05);
+}
+
 .prismSelected .face {
-  stroke: rgba(255, 255, 255, 0.35);
-  stroke-width: 1.2;
+  stroke: rgba(255, 255, 255, 0.5);
+  stroke-width: 1.5;
 }
 
 .prismHover .face {
@@ -247,35 +443,66 @@
   stroke-width: 1.4;
 }
 
+/* Selected prism pulsing ring */
+.prismSelectedRing {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.4);
+  stroke-width: 1.5;
+  animation: prismPulse 2s ease-in-out infinite;
+}
+
+/* Selected prism base glow */
+.prismSelectedGlow {
+  fill: rgba(var(--bar-rgb), 0.35);
+  filter: blur(4px);
+  animation: prismPulse 2s ease-in-out infinite;
+}
+
+@keyframes prismPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
 .top {
   fill: rgba(var(--bar-rgb), 0.34);
+  transition: fill 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .side {
   fill: rgba(var(--bar-rgb), 0.18);
+  transition: fill 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .face {
   fill: rgba(var(--bar-rgb), 0.26);
-  stroke: rgba(var(--bar-rgb), 0.16);
-  stroke-width: 1;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 0.5;
+  transition: fill 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+              stroke 0.2s ease;
 }
 
 .footer {
   max-width: 70ch;
 }
 
-@media (max-width: 860px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
-  .tokenButtons {
-    flex-direction: row;
+@media (max-width: 600px) {
+  .tokenSelector {
     flex-wrap: wrap;
   }
 
-  .tokenButton {
-    flex: 1 1 140px;
+  .hudTopRight {
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6rem;
+  }
+
+  .controlsBar {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .tempSection {
+    min-width: 100%;
   }
 }

@@ -42,7 +42,7 @@ const stations: Station[] = [
     sublabel: 'Linguistic Patterns',
     icon: '🔤',
     example: `"q" → "u" (often)`,
-    description: 'Language has measurable regularities: what tends to follow what, which contexts behave similarly, which substitutions preserve meaning.'
+    description: 'Language has structure you can measure NOW—what tends to follow what, which contexts behave similarly. You don\'t need to know where words came from.'
   },
   {
     id: 'embeddings',

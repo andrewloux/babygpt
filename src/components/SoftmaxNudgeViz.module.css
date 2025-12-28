@@ -1,89 +1,41 @@
+/* SoftmaxNudgeViz.module.css */
+
 .content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px;
+  font-family: var(--font-sans);
+}
+
+.controls {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
-  align-items: start;
+  gap: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
 }
 
-@media (max-width: 900px) {
-  .content {
-    grid-template-columns: 1fr;
-  }
-}
-
-.panel {
-  padding: 1rem;
-  border-radius: 12px;
+.controlSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .sectionTitle {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
-  margin: 0.25rem 0 0.65rem;
-}
-
-.row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.75rem;
-  margin-top: 0.65rem;
-}
-
-.key {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.val {
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.82);
-}
-
-.pills {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.pill {
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.16);
-  color: rgba(255, 255, 255, 0.72);
-  font-family: var(--font-mono);
-  font-weight: 800;
-  font-size: 0.82rem;
-  padding: 0.45rem 0.65rem;
-  cursor: pointer;
-  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
-}
-
-.pill:hover {
-  transform: translateY(-1px);
-  border-color: rgba(0, 217, 255, 0.28);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.pillActive {
-  color: rgba(0, 0, 0, 0.9);
-  background: rgba(0, 217, 255, 0.9);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.12);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
 }
 
 .sliderGroup {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  gap: 4px;
 }
 
 .sliderLabel {
@@ -91,239 +43,129 @@
   justify-content: space-between;
   align-items: center;
   font-size: 0.85rem;
+  width: 100%;
 }
 
 .name {
-  font-family: var(--font-mono);
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .value {
   font-family: var(--font-mono);
-  color: rgba(255, 255, 255, 0.55);
   font-size: 0.8rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: var(--color-bg-inset);
+}
+
+.pills {
+  display: flex;
+  gap: 8px;
+}
+
+.pill {
+  padding: 6px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--color-border);
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 150ms ease-in-out;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+.pill:hover {
+  background-color: var(--color-bg-inset);
+  border-color: var(--color-text-secondary);
+}
+
+.pillActive {
+  background-color: var(--color-accent-blue);
+  color: white;
+  border-color: var(--color-accent-blue);
   font-weight: 600;
 }
 
-.promptText {
-  font-size: 0.98rem;
-  line-height: 1.35;
-  color: rgba(255, 255, 255, 0.85);
+.pillActive:hover {
+  background-color: var(--color-accent-blue-dark);
+  border-color: var(--color-accent-blue-dark);
 }
 
-.promptRow {
-  margin-top: 0.75rem;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.choiceRow {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.choiceBtn {
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.16);
-  color: rgba(255, 255, 255, 0.72);
-  font-family: var(--font-mono);
-  font-weight: 800;
-  font-size: 0.82rem;
-  padding: 0.55rem 0.75rem;
-  cursor: pointer;
-  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
-}
-
-.choiceBtn:hover {
-  transform: translateY(-1px);
-  border-color: rgba(0, 217, 255, 0.28);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.choiceBtnSelected {
-  color: rgba(0, 0, 0, 0.9);
-  background: rgba(0, 217, 255, 0.9);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.12);
-}
-
-.actions {
-  display: flex;
-  gap: 0.6rem;
-  align-items: center;
-}
-
-.lockBtn,
-.revealBtn {
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.18);
-  color: rgba(255, 255, 255, 0.78);
-  font-family: var(--font-mono);
-  font-weight: 800;
-  font-size: 0.82rem;
-  padding: 0.55rem 0.8rem;
-  cursor: pointer;
-  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
-}
-
-.revealBtn {
-  border-color: rgba(0, 217, 255, 0.24);
-}
-
-.lockBtn:hover,
-.revealBtn:hover {
-  transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.lockBtn:disabled,
-.revealBtn:disabled,
-.choiceBtn:disabled,
-.pill:disabled {
-  cursor: default;
-  opacity: 0.55;
-  transform: none;
-}
-
-.feedback {
-  margin-top: 0.7rem;
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.good {
-  color: rgba(76, 217, 153, 0.9);
-}
-
-.bad {
-  color: rgba(255, 214, 0, 0.9);
-}
-
-.neutral {
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.stateRow {
+.lossDisplay {
+  margin-top: auto;
+  padding-top: 16px;
   display: flex;
   justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  align-items: baseline;
+  font-size: 1rem;
+}
+
+.lossLabel {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.lossValue {
   font-family: var(--font-mono);
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.72);
-  margin-top: 0.5rem;
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: var(--color-text-primary);
 }
 
-.stateKey {
-  color: rgba(255, 255, 255, 0.55);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.72rem;
+.tableContainer {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
 }
 
-.stateVal {
-  color: rgba(255, 255, 255, 0.82);
+.tableHeader {
+  margin-bottom: 16px;
 }
 
-.block {
-  margin-top: 1rem;
-  padding-top: 0.9rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+.tableNote {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  max-width: 90%;
 }
 
-.blockTitle {
+.comparisonTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.comparisonTable th,
+.comparisonTable td {
+  padding: 10px 12px;
+  text-align: right;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.comparisonTable th {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-align: right;
+}
+
+.comparisonTable th:first-child,
+.comparisonTable td:first-child {
+  text-align: left;
+  font-weight: 600;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 0.65rem;
 }
 
-.vecRow {
-  display: grid;
-  grid-template-columns: 3ch 1fr auto;
-  align-items: center;
-  gap: 0.6rem;
+.comparisonTable td {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
-  padding: 0.28rem 0;
 }
 
-.vecKey {
-  font-weight: 800;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.vecVal {
-  color: rgba(255, 255, 255, 0.72);
-  white-space: nowrap;
-}
-
-.track {
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-}
-
-.bar {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(0, 217, 255, 0.95), rgba(0, 217, 255, 0.12));
-}
-
-.note {
-  margin-top: 0.65rem;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.55);
-  line-height: 1.35;
-}
-
-.fdRow {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin-top: 0.4rem;
-}
-
-.fdKey {
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.fdVal {
-  color: rgba(255, 255, 255, 0.85);
+.comparisonTable tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .mono {
   font-family: var(--font-mono);
-}
-
-.hidden {
-  opacity: 0.2;
-  filter: blur(3px);
-}
-
-.reveal {
-  opacity: 1;
-  filter: none;
-}
-
-.footer {
-  max-width: 72ch;
+  font-size: 0.8em;
+  color: var(--color-text-tertiary);
 }
 

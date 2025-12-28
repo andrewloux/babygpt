@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useCallback } from 'react'
 import { ExplorableEssay } from './ExplorableEssay'
 import { VizCard } from './VizCard'
 import styles from './GeometricDotProductViz.module.css'
@@ -65,6 +65,8 @@ export function GeometricDotProductViz() {
   const [dragging, setDragging] = useState<'A' | 'B' | null>(null)
   const [showProjection, setShowProjection] = useState(true)
   const [keyboardFocus, setKeyboardFocus] = useState<'A' | 'B' | null>(null)
+  const svgRef = useRef<SVGSVGElement>(null)
+  const draggingRef = useRef<'A' | 'B' | null>(null)
 
   const computed = useMemo(() => {
     const dot = dotProduct(vecA, vecB)
@@ -77,30 +79,34 @@ export function GeometricDotProductViz() {
     return { dot, magA, magB, proj, projLength, angleDeg }
   }, [vecA, vecB])
 
-  const handleMouseDown = (vec: 'A' | 'B') => (e: React.MouseEvent) => {
+  const handlePointerDown = (vec: 'A' | 'B') => (e: React.PointerEvent<SVGCircleElement>) => {
     e.preventDefault()
+    draggingRef.current = vec
     setDragging(vec)
+    e.currentTarget.setPointerCapture(e.pointerId)
   }
 
-  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (!dragging) return
-    const svg = e.currentTarget
+  const handlePointerMove = (e: React.PointerEvent<SVGCircleElement>) => {
+    if (!draggingRef.current) return
+    const svg = svgRef.current
+    if (!svg) return
     const rect = svg.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
     const vec = fromScreen(x, y)
-
-    // Clamp to reasonable bounds
     const clamped = {
       x: Math.max(-3.5, Math.min(3.5, vec.x)),
       y: Math.max(-3.5, Math.min(3.5, vec.y)),
     }
-
-    if (dragging === 'A') setVecA(clamped)
+    if (draggingRef.current === 'A') setVecA(clamped)
     else setVecB(clamped)
   }
 
-  const handleMouseUp = () => setDragging(null)
+  const handlePointerUp = (e: React.PointerEvent<SVGCircleElement>) => {
+    draggingRef.current = null
+    setDragging(null)
+    e.currentTarget.releasePointerCapture(e.pointerId)
+  }
 
   const handleKeyDown = (vec: 'A' | 'B') => (e: React.KeyboardEvent) => {
     const step = e.shiftKey ? 0.5 : 0.1
@@ -133,30 +139,6 @@ export function GeometricDotProductViz() {
     }
   }
 
-  const handleTouchStart = (vec: 'A' | 'B') => (e: React.TouchEvent) => {
-    e.preventDefault()
-    setDragging(vec)
-  }
-
-  const handleTouchMove = (e: React.TouchEvent<SVGSVGElement>) => {
-    if (!dragging) return
-    const svg = e.currentTarget
-    const rect = svg.getBoundingClientRect()
-    const touch = e.touches[0]
-    const x = touch.clientX - rect.left
-    const y = touch.clientY - rect.top
-    const vec = fromScreen(x, y)
-
-    const clamped = {
-      x: Math.max(-3.5, Math.min(3.5, vec.x)),
-      y: Math.max(-3.5, Math.min(3.5, vec.y)),
-    }
-
-    if (dragging === 'A') setVecA(clamped)
-    else setVecB(clamped)
-  }
-
-  const handleTouchEnd = () => setDragging(null)
 
   const screenA = toScreen(vecA)
   const screenB = toScreen(vecB)
@@ -177,6 +159,28 @@ export function GeometricDotProductViz() {
   const largeArc = endAngle - startAngle > Math.PI ? 1 : 0
 
   const isPositive = computed.dot >= 0
+
+  const handleStepChange = useCallback((i: number) => {
+    setDragging(null)
+    setKeyboardFocus(null)
+    if (i === 0) {
+      setVecA({ x: 2.5, y: 1.5 })
+      setVecB({ x: 3, y: -0.5 })
+      setShowProjection(true)
+    } else if (i === 1) {
+      setVecA({ x: 2.5, y: 0 })
+      setVecB({ x: 0, y: 2.5 })
+      setShowProjection(false)
+    } else if (i === 2) {
+      setVecA({ x: 2.8, y: 0.2 })
+      setVecB({ x: -2.6, y: -0.3 })
+      setShowProjection(false)
+    } else {
+      setVecA({ x: 2.5, y: 1.5 })
+      setVecB({ x: 3, y: -0.5 })
+      setShowProjection(true)
+    }
+  }, [])
 
   return (
     <VizCard title="Dot Product: The Geometric View" figNum="Fig. 2.4">
@@ -267,37 +271,13 @@ export function GeometricDotProductViz() {
             ),
           },
         ]}
-        onStepChange={(i) => {
-          setDragging(null)
-          setKeyboardFocus(null)
-          if (i === 0) {
-            setVecA({ x: 2.5, y: 1.5 })
-            setVecB({ x: 3, y: -0.5 })
-            setShowProjection(true)
-          } else if (i === 1) {
-            setVecA({ x: 2.5, y: 0 })
-            setVecB({ x: 0, y: 2.5 })
-            setShowProjection(false)
-          } else if (i === 2) {
-            setVecA({ x: 2.8, y: 0.2 })
-            setVecB({ x: -2.6, y: -0.3 })
-            setShowProjection(false)
-          } else {
-            setVecA({ x: 2.5, y: 1.5 })
-            setVecB({ x: 3, y: -0.5 })
-            setShowProjection(true)
-          }
-        }}
+        onStepChange={handleStepChange}
         renderViz={() => (
           <div className={styles.vizPanel}>
             <svg
+              ref={svgRef}
               viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
               className={styles.svg}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
               role="img"
               aria-label="Interactive geometric dot product visualization with draggable vectors"
             >
@@ -355,10 +335,12 @@ export function GeometricDotProductViz() {
               <circle
                 cx={screenA.x}
                 cy={screenA.y}
-                r="12"
+                r="14"
                 className={`${styles.handle} ${dragging === 'A' ? styles.dragging : ''} ${keyboardFocus === 'A' ? styles.focused : ''}`}
-                onMouseDown={handleMouseDown('A')}
-                onTouchStart={handleTouchStart('A')}
+                onPointerDown={handlePointerDown('A')}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
                 tabIndex={0}
                 role="button"
                 aria-label="Vector A handle. Use arrow keys to move, hold shift for larger steps."
@@ -369,10 +351,12 @@ export function GeometricDotProductViz() {
               <circle
                 cx={screenB.x}
                 cy={screenB.y}
-                r="12"
+                r="14"
                 className={`${styles.handle} ${styles.handleB} ${dragging === 'B' ? styles.dragging : ''} ${keyboardFocus === 'B' ? styles.focused : ''}`}
-                onMouseDown={handleMouseDown('B')}
-                onTouchStart={handleTouchStart('B')}
+                onPointerDown={handlePointerDown('B')}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
                 tabIndex={0}
                 role="button"
                 aria-label="Vector B handle. Use arrow keys to move, hold shift for larger steps."

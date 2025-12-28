@@ -1,8 +1,9 @@
+/* EmbeddingGradientViz.module.css */
 .layout {
-  margin-top: 0.9rem;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 1.25rem;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  padding: 16px;
   align-items: start;
 }
 
@@ -12,388 +13,250 @@
   }
 }
 
-.left {
-  min-width: 0;
-}
-
-.right {
-  padding: 0.95rem;
-  min-width: 0;
-}
-
-.tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
-  margin-bottom: 0.85rem;
-}
-
-.tabBtn {
-  padding: 0.55rem 0.65rem;
-  border-radius: 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.22);
-  color: rgba(255, 255, 255, 0.78);
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  cursor: pointer;
-  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.tabBtn:hover {
-  transform: translateY(-1px);
-  border-color: rgba(0, 217, 255, 0.28);
-  box-shadow: 0 10px 24px rgba(0, 217, 255, 0.08);
-}
-
-.tabBtnActive {
-  background:
-    radial-gradient(ellipse 120% 90% at 30% 0%, rgba(0, 217, 255, 0.22), transparent 55%),
-    rgba(0, 217, 255, 0.12);
-  border-color: rgba(0, 217, 255, 0.34);
-  color: rgba(0, 0, 0, 0.92);
-  font-weight: 900;
-}
-
-.controlsPane,
-.probsPane {
-  min-width: 0;
-}
-
-.graphContainer {
-  position: relative;
+/* --- Left Panel: Controls --- */
+.controls {
   display: flex;
   flex-direction: column;
-  background:
-    radial-gradient(ellipse 120% 75% at 50% 0%, rgba(255, 255, 255, 0.04), transparent 65%),
-    rgba(0, 0, 0, 0.22);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
-    0 25px 40px -30px rgba(0, 0, 0, 0.7);
-  overflow: hidden;
+  gap: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: var(--font-sans);
 }
 
-.plotArea {
-  aspect-ratio: 13 / 10;
-  min-height: 280px;
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.plotHint {
-  padding: 0.65rem 0.9rem 0.7rem 0.9rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.6);
-  line-height: 1.35;
-}
-
-.hintContext {
-  color: var(--accent-magenta);
-  font-weight: 700;
-}
-
-.hintActual {
-  color: var(--accent-cyan);
-  font-weight: 700;
-}
-
-/* SVG primitives */
-
-.gridLine {
-  stroke: rgba(255, 255, 255, 0.05);
-  stroke-width: 1;
-}
-
-.axisLine {
-  stroke: rgba(255, 255, 255, 0.12);
-  stroke-width: 1.5;
-}
-
-.glow {
-  filter: blur(6px);
-  opacity: 0.6;
-}
-
-.contextRing {
-  filter: drop-shadow(0 0 8px rgba(255, 0, 110, 0.35));
-}
-
-.contextHit {
-  cursor: grab;
-}
-
-.contextHit:active {
-  cursor: grabbing;
-}
-
-.point {
-  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.22));
-  transition: transform var(--transition-fast), filter var(--transition-fast);
-  cursor: pointer;
-}
-
-.point:hover {
-  transform: translateY(-1px);
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.35));
-}
-
-.centroid {
-  filter: drop-shadow(0 0 10px rgba(255, 214, 10, 0.35));
-}
-
-.label {
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
+.sectionTitle {
   font-weight: 600;
-  pointer-events: none;
-  user-select: none;
-  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.75));
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 8px;
+  margin-bottom: 4px;
 }
 
-.gradArrow {
-  stroke-dasharray: 4 2;
-  opacity: 0.85;
-}
-
-.updateArrow {
-  opacity: 0.95;
-  filter: drop-shadow(0 0 6px rgba(255, 0, 110, 0.22));
-}
-
-.previewDot {
-  filter: drop-shadow(0 0 8px rgba(255, 0, 110, 0.18));
-}
-
-.probConnection {
-  transition: opacity var(--transition-fast);
-  stroke-linecap: round;
-}
-
-/* Right panel UI */
-
-.pickers {
+.picker {
   display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.pickerRow {
-  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.55rem;
-  flex-wrap: wrap;
+  font-size: 0.9rem;
 }
 
-.pickerLabel {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
-  min-width: 6ch;
+.picker label {
+  color: var(--color-text-primary);
 }
 
-.pickerSelect {
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.88);
-  padding: 0.35rem 0.55rem;
-  border-radius: 0.65rem;
+.picker select {
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  padding: 6px 8px;
+  border-radius: 6px;
   font-family: var(--font-mono);
   font-size: 0.9rem;
   cursor: pointer;
-  outline: none;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.pickerSelect:hover {
-  border-color: rgba(0, 217, 255, 0.3);
-}
-
-.pickerSelect:focus-visible {
-  border-color: rgba(0, 217, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.18);
-}
-
-.smallBtn {
-  padding: 0.35rem 0.55rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.78);
-  border-radius: 0.65rem;
-  cursor: pointer;
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
-}
-
-.smallBtn:hover {
-  border-color: rgba(0, 217, 255, 0.28);
-  background: rgba(255, 255, 255, 0.06);
-  transform: translateY(-1px);
-}
-
-.stats {
-  margin-top: 0.85rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.55rem;
-}
-
-.stat {
-  padding: 0.55rem 0.6rem;
-  border-radius: 0.9rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.22);
-  text-align: center;
-}
-
-.statLabel {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.statValue {
-  margin-top: 0.25rem;
-  font-family: var(--font-mono);
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: rgba(255, 255, 255, 0.9);
 }
 
 .etaControl {
-  margin-top: 0.85rem;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 10px;
+  font-size: 0.9rem;
   font-family: var(--font-mono);
-  color: rgba(255, 255, 255, 0.65);
 }
 
-.etaLabel {
-  color: var(--accent-yellow);
-  font-weight: 800;
+.etaControl > span:first-child {
+  color: var(--color-accent-yellow);
+  font-weight: 700;
 }
 
-.etaControl :global(input[type='range']) {
-  width: 100%;
-}
-
-.etaValue {
+.etaControl > span:last-child {
   min-width: 4ch;
   text-align: right;
-  color: rgba(255, 255, 255, 0.78);
-  font-weight: 700;
 }
 
 .actions {
-  margin-top: 0.85rem;
   display: flex;
-  gap: 0.6rem;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.btn {
-  flex: 1;
-  padding: 0.6rem 0.75rem;
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.82);
-  border-radius: 0.9rem;
+.primaryBtn,
+.secondaryBtn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
   cursor: pointer;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
+  font-weight: 600;
   font-size: 0.9rem;
-  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.btn:hover {
-  transform: translateY(-1px);
-  border-color: rgba(0, 217, 255, 0.28);
-  box-shadow: 0 10px 24px rgba(0, 217, 255, 0.08);
+  transition: all 150ms ease-in-out;
 }
 
 .primaryBtn {
-  background:
-    radial-gradient(ellipse 120% 90% at 30% 0%, rgba(0, 217, 255, 0.24), transparent 55%),
-    rgba(0, 217, 255, 0.12);
-  border-color: rgba(0, 217, 255, 0.3);
-  color: rgba(0, 0, 0, 0.9);
-  font-weight: 900;
+  background-color: var(--color-accent-blue);
+  border-color: var(--color-accent-blue);
+  color: white;
 }
 
 .primaryBtn:hover {
-  border-color: rgba(0, 217, 255, 0.45);
-  box-shadow: 0 12px 28px rgba(0, 217, 255, 0.14);
+  background-color: var(--color-accent-blue-dark);
+  border-color: var(--color-accent-blue-dark);
 }
 
-.probs {
-  margin-top: 0.95rem;
+.secondaryBtn {
+  background-color: transparent;
+  color: var(--color-text-secondary);
 }
 
-.probHeader {
+.secondaryBtn:hover {
+  background-color: var(--color-bg-inset);
+  border-color: var(--color-text-secondary);
+}
+
+.stats {
+  display: flex;
+  justify-content: space-around;
+  background-color: var(--color-bg-inset);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 0.9rem;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
-  margin-bottom: 0.55rem;
 }
 
-.probList {
+.stats span {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* --- Right Panel: Hero Table --- */
+.tableContainer {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.tableTitle {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 12px;
+  font-family: var(--font-sans);
+}
+
+.embeddingTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+}
+
+.embeddingTable th,
+.embeddingTable td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.embeddingTable th {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.embeddingTable td {
+  font-size: 0.9rem;
+}
+
+.embeddingTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.contextCell {
+  font-weight: 700;
+  color: var(--accent-magenta);
+}
+
+.gradCell {
+  color: var(--accent-yellow);
+  font-weight: 600;
+}
+
+.zeroGradCell {
+  color: var(--color-text-tertiary);
+}
+
+@keyframes flash {
+  0% {
+    background-color: transparent;
+  }
+  25% {
+    background-color: rgba(255, 214, 10, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.updatedRow {
+  animation: flash 500ms ease-out;
+}
+
+.tableFooter {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  text-align: center;
+  padding: 8px;
+  background-color: var(--color-bg-inset);
+  border-radius: 6px;
+}
+
+/* --- Gradient Comparison --- */
+.gradientCompare {
+  margin-top: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-}
-
-.probRow {
-  display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 8px;
 }
 
-.probChar {
-  width: 2ch;
-  text-align: center;
-  font-family: var(--font-mono);
+.gradientCompareTitle {
+  font-weight: 600;
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 700;
+  font-family: var(--font-sans);
+  color: var(--color-text-secondary);
 }
 
-.probBarTrack {
-  flex: 1;
-  height: 10px;
-  border-radius: 999px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.gradientSvg {
+  background: var(--color-bg-inset);
+  border-radius: 6px;
 }
 
-.probBar {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--accent-cyan), rgba(0, 217, 255, 0.55));
-}
-
-.probBarActual {
-  background: linear-gradient(90deg, var(--accent-green), rgba(57, 255, 20, 0.55));
-  box-shadow: 0 0 12px rgba(57, 255, 20, 0.16);
-}
-
-.probValue {
-  min-width: 4.2ch;
-  text-align: right;
+.similarGradients,
+.differentGradients {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+.similarGradients {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: var(--color-accent-green, #4caf50);
+}
+
+.differentGradients {
+  background-color: var(--color-bg-inset);
+  color: var(--color-text-secondary);
+}
+
+.similarBadge {
+  font-weight: 600;
 }

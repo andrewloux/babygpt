@@ -63,6 +63,7 @@
   z-index: 1;
   padding: 1.75rem 2rem 2rem 2rem;
   max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
 }
 

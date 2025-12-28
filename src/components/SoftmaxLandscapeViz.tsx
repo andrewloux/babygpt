@@ -1,8 +1,18 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Slider } from './Slider'
 import { VizCard } from './VizCard'
 import styles from './SoftmaxLandscapeViz.module.css'
+
+// Temperature color calculation: T<1 is cyan, T=1 is white, T>1 is magenta
+function getTempColorRgb(temperature: number): string {
+  if (temperature < 1) {
+    return `0, ${Math.round(180 + (1 - temperature) * 75)}, 255` // cyan-ish
+  } else if (temperature > 1) {
+    return `255, ${Math.round(Math.max(0, 180 - (temperature - 1) * 60))}, ${Math.round(Math.max(100, 255 - (temperature - 1) * 50))}` // magenta-ish
+  }
+  return '255, 255, 255' // white at T=1
+}
 
 const TOKENS = [
   { key: 'e', label: 'e', rgb: '0, 217, 255', accent: 'var(--accent-cyan)' },
@@ -60,6 +70,9 @@ function Prism({
   sideClassName,
   faceClassName,
   filter,
+  heightRatio,
+  entranceDelay,
+  showEntrance,
 }: {
   x: number
   yBottom: number
@@ -74,6 +87,9 @@ function Prism({
   sideClassName: string
   faceClassName: string
   filter?: string
+  heightRatio: number
+  entranceDelay?: number
+  showEntrance?: boolean
 }) {
   const h = Math.max(0, height)
   const yTop = yBottom - h
@@ -98,14 +114,47 @@ function Prism({
     .map((p) => p.join(','))
     .join(' ')
 
+  // Gradient IDs based on height ratio (cool cyan to warm magenta)
+  const gradientId = `prismGrad-${Math.round(heightRatio * 100)}`
+
+  const prismClasses = [
+    styles.prism,
+    dimmed && styles.prismDim,
+    selected && styles.prismSelected,
+    hovered && styles.prismHover,
+    showEntrance && styles.prismEnter,
+  ].filter(Boolean).join(' ')
+
   return (
     <g
-      className={`${styles.prism}${dimmed ? ` ${styles.prismDim}` : ''}${selected ? ` ${styles.prismSelected}` : ''}${hovered ? ` ${styles.prismHover}` : ''}`}
+      className={prismClasses}
       filter={filter}
+      style={showEntrance && entranceDelay !== undefined ? { ['--entrance-delay' as string]: entranceDelay } : undefined}
     >
-      <polygon className={topClassName} points={topPoints} />
-      <polygon className={sideClassName} points={sidePoints} />
-      <rect className={faceClassName} x={x} y={yTop} width={width} height={h} rx={2} />
+      {/* Selected prism base glow */}
+      {selected && (
+        <ellipse
+          className={styles.prismSelectedGlow}
+          cx={x + width / 2 + depthX / 2}
+          cy={yBottom - depthY / 2 + 2}
+          rx={width * 0.8}
+          ry={4}
+        />
+      )}
+      <polygon className={topClassName} points={topPoints} style={{ fill: `url(#${gradientId}-top)` }} />
+      <polygon className={sideClassName} points={sidePoints} style={{ fill: `url(#${gradientId}-side)` }} />
+      <rect className={faceClassName} x={x} y={yTop} width={width} height={h} rx={2} style={{ fill: `url(#${gradientId}-face)` }} />
+      {/* Selected prism ring */}
+      {selected && (
+        <rect
+          className={styles.prismSelectedRing}
+          x={x - 1}
+          y={yTop - 1}
+          width={width + 2}
+          height={h + 2}
+          rx={3}
+        />
+      )}
     </g>
   )
 }
@@ -143,6 +192,29 @@ export function SoftmaxLandscapeViz() {
   const [temperature, setTemperature] = useState(1.0)
   const safeT = Math.max(0.2, temperature)
 
+  // Track temperature changes for pulse animation
+  const [tempPulse, setTempPulse] = useState(false)
+  const prevTempRef = useRef(temperature)
+  useEffect(() => {
+    if (prevTempRef.current !== temperature) {
+      setTempPulse(true)
+      const timer = setTimeout(() => setTempPulse(false), 200)
+      prevTempRef.current = temperature
+      return () => clearTimeout(timer)
+    }
+  }, [temperature])
+
+  // Temperature color for visual feedback
+  const tempColorRgb = getTempColorRgb(safeT)
+
+  // Track mount state for entrance animations
+  const [hasMounted, setHasMounted] = useState(false)
+  useEffect(() => {
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => setHasMounted(true), 50)
+    return () => clearTimeout(timer)
+  }, [])
+
   const [depthX, setDepthX] = useState(DEPTH_X_DEFAULT)
   const [depthY, setDepthY] = useState(DEPTH_Y_DEFAULT)
 
@@ -151,6 +223,20 @@ export function SoftmaxLandscapeViz() {
     i: Math.floor(GRID / 2),
     j: Math.floor(GRID / 2),
   }))
+
+  // Track focus cell changes for readout flash animation
+  const [readoutFlash, setReadoutFlash] = useState(false)
+  const prevFocusCellRef = useRef<CellCoord | null>(null)
+  useEffect(() => {
+    const prevCell = prevFocusCellRef.current
+    const currentCell = hoveredCell ?? selectedCell
+    if (prevCell && (prevCell.i !== currentCell.i || prevCell.j !== currentCell.j)) {
+      setReadoutFlash(true)
+      const timer = setTimeout(() => setReadoutFlash(false), 350)
+      return () => clearTimeout(timer)
+    }
+    prevFocusCellRef.current = currentCell
+  }, [hoveredCell, selectedCell])
 
   const [isDragging, setIsDragging] = useState(false)
   const dragState = useRef<{
@@ -288,8 +374,9 @@ export function SoftmaxLandscapeViz() {
       }
     >
       <div className={styles.layout}>
-        <div className={styles.controls}>
-          <div className={styles.controlsTitle}>Height shows…</div>
+        {/* Token selector - compact horizontal strip at top */}
+        <div className={styles.tokenSelector}>
+          <span className={styles.tokenSelectorLabel}>Height:</span>
           <div className={styles.tokenButtons} role="tablist" aria-label="Choose which probability to plot as height">
             {TOKENS.map((t) => {
               const active = t.key === selectedToken
@@ -309,64 +396,22 @@ export function SoftmaxLandscapeViz() {
               )
             })}
           </div>
-
-          <div className={styles.sliderBlock}>
-            <div className={styles.sliderHeader}>
-              <div className={styles.sliderLabel}>Temperature</div>
-              <div className={styles.sliderValue}>{safeT.toFixed(1)}</div>
-            </div>
-            <Slider
-              wrap={false}
-              min={0.2}
-              max={5}
-              step={0.1}
-              value={temperature}
-              onValueChange={setTemperature}
-              ariaLabel="Temperature"
-            />
-            <div className={styles.sliderHint}>{safeT < 1 ? 'sharper' : safeT > 1 ? 'flatter' : 'neutral'}</div>
-          </div>
-
-          <button
-            type="button"
-            className={styles.resetButton}
-            onClick={() => {
-              setDepthX(DEPTH_X_DEFAULT)
-              setDepthY(DEPTH_Y_DEFAULT)
-            }}
-          >
-            Reset view
-          </button>
-
-          <div className={`${styles.readingPanel} panel-dark inset-box`} aria-live="polite">
-            <div className={styles.overlayTitle}>Reading the plot</div>
-            <div className={styles.overlayLine}>
-              <span className={styles.overlayKey}>Base</span> score gaps: Δℓ(e), Δℓ(a) (relative to ℓ(i)=0).
-            </div>
-            <div className={styles.overlayLine}>
-              <span className={styles.overlayKey}>Height</span> <span className={styles.overlayEmph}>P('{token.label}')</span>.
-            </div>
-            <div className={styles.overlayLine}>
-              <span className={styles.overlayKey}>T</span> reshapes the same landscape.
-            </div>
-            <div className={styles.overlayDivider} />
-            <div className={styles.overlayTitle}>Focused pillar</div>
-            <div className={styles.overlayMono}>
-              Δℓ(e)=<span className={styles.overlayAccentCyan}>{formatSigned(focus?.a ?? 0)}</span>{' '}
-              Δℓ(a)=<span className={styles.overlayAccentMagenta}>{formatSigned(focus?.b ?? 0)}</span>
-            </div>
-            <div className={styles.overlayValue}>
-              P('{token.label}') = <span className={styles.overlayEmph}>{(focus?.probs[selectedIndex] ?? 0).toFixed(3)}</span>
-            </div>
-            <div className={styles.overlayHint}>Drag to rotate · click to pin</div>
-          </div>
         </div>
 
+        {/* Chart panel - the hero element */}
         <div className={styles.chartPanel}>
-          <div className={`${styles.chartFrame} panel-dark inset-box`}>
+          <div
+            className={`${styles.chartFrame} panel-dark inset-box`}
+            style={{ ['--ambient-color' as string]: token.accent }}
+          >
+            {/* Drag hint - subtle overlay at top */}
+            <div className={`${styles.hudOverlay} ${styles.hudTopRight} ${styles.dragHint}`}>
+              drag to rotate · click to pin
+            </div>
+
             <svg
               viewBox={`0 0 ${viewW} ${viewH}`}
-              className={styles.svg}
+              className={`${styles.svg}${hasMounted ? '' : ` ${styles.svgEnter}`}`}
               style={svgStyle}
               role="img"
               aria-label="Softmax landscape showing probability as a function of logit differences and temperature"
@@ -381,6 +426,22 @@ export function SoftmaxLandscapeViz() {
                   <feDropShadow dx="0" dy="0" stdDeviation="7" floodColor="rgba(255, 0, 170, 0.25)" />
                 </filter>
 
+                <filter id="prismShadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="rgba(0, 0, 0, 0.3)" />
+                </filter>
+
+                {/* Shadow blur filter for ambient ground shadow */}
+                <filter id="shadowBlur" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur in="SourceGraphic" stdDeviation="15" />
+                </filter>
+
+                {/* Radial gradient for ground plane - lighter center, darker edges */}
+                <radialGradient id="planeGradient" cx="50%" cy="50%" r="70%" fx="50%" fy="50%">
+                  <stop offset="0%" stopColor="rgba(255, 255, 255, 0.06)" />
+                  <stop offset="70%" stopColor="rgba(255, 255, 255, 0.03)" />
+                  <stop offset="100%" stopColor="rgba(255, 255, 255, 0.01)" />
+                </radialGradient>
+
                 <marker
                   id="axisArrow"
                   markerWidth="10"
@@ -392,9 +453,62 @@ export function SoftmaxLandscapeViz() {
                 >
                   <path d="M0,0 L6,3 L0,6 Z" fill="rgba(255,255,255,0.45)" />
                 </marker>
+
+                {/* Generate gradient definitions for each height level (0-100%) */}
+                {Array.from({ length: 101 }, (_, i) => {
+                  const ratio = i / 100
+
+                  // Face gradient (top lighter, bottom darker)
+                  const faceTopAlpha = 0.35 + ratio * 0.15
+                  const faceBottomAlpha = 0.18 + ratio * 0.08
+
+                  // Top face (brighter)
+                  const topAlpha = 0.38 + ratio * 0.18
+
+                  // Side face (darkest)
+                  const sideAlpha = 0.16 + ratio * 0.1
+
+                  return (
+                    <g key={i}>
+                      <linearGradient id={`prismGrad-${i}-face`} x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor={`rgba(var(--bar-rgb), ${faceTopAlpha})`} />
+                        <stop offset="100%" stopColor={`rgba(var(--bar-rgb), ${faceBottomAlpha})`} />
+                      </linearGradient>
+                      <linearGradient id={`prismGrad-${i}-top`} x1="0%" y1="100%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor={`rgba(var(--bar-rgb), ${topAlpha * 0.85})`} />
+                        <stop offset="100%" stopColor={`rgba(var(--bar-rgb), ${topAlpha})`} />
+                      </linearGradient>
+                      <linearGradient id={`prismGrad-${i}-side`} x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor={`rgba(var(--bar-rgb), ${sideAlpha * 1.1})`} />
+                        <stop offset="100%" stopColor={`rgba(var(--bar-rgb), ${sideAlpha * 0.7})`} />
+                      </linearGradient>
+                    </g>
+                  )
+                })}
               </defs>
 
-              <polygon className={styles.plane} points={plane.points} />
+              {/* Ambient shadow beneath the grid */}
+              <ellipse
+                cx={ORIGIN_X + rowWidth / 2 + (GRID - 1) * rowShiftX / 2}
+                cy={ORIGIN_Y + 20}
+                rx={rowWidth / 2 + 40}
+                ry={30}
+                fill="rgba(0, 0, 0, 0.25)"
+                filter="url(#shadowBlur)"
+              />
+
+              <polygon className={styles.plane} points={plane.points} fill="url(#planeGradient)" />
+
+              {/* Temperature heat overlay - subtle color tint based on T */}
+              <rect
+                x={0}
+                y={0}
+                width={viewW}
+                height={viewH}
+                fill={`rgba(${safeT > 1 ? '255, 100, 50' : '50, 180, 255'}, ${Math.abs(safeT - 1) * 0.03})`}
+                pointerEvents="none"
+                className={styles.heatOverlay}
+              />
 
               <line
                 className={styles.axisArrow}
@@ -419,7 +533,7 @@ export function SoftmaxLandscapeViz() {
                 className={styles.axisLabel}
                 textAnchor="start"
               >
-                Δℓ(e)
+                'e' logit →
               </text>
               <text
                 x={plane.x3 - 6}
@@ -427,7 +541,7 @@ export function SoftmaxLandscapeViz() {
                 className={styles.axisLabel}
                 textAnchor="end"
               >
-                Δℓ(a)
+                'a' logit →
               </text>
 
             {(() => {
@@ -451,21 +565,35 @@ export function SoftmaxLandscapeViz() {
                   const isHovered = hoveredCell?.i === i && hoveredCell?.j === j && !isDragging
 
                   const dimmed = dimOthers && !isHovered && !isSelected
-                  const opacity = clamp(0.12 + p * 0.9, 0.12, 1)
+
+                  // Depth-of-field: back rows (higher j) are slightly faded
+                  const distanceFactor = j / (GRID - 1)
+                  const depthFade = 1 - distanceFactor * 0.3 // Back rows at 70% opacity
+
+                  const baseOpacity = clamp(0.12 + p * 0.9, 0.12, 1)
+                  const opacity = baseOpacity * depthFade
+
+                  // Entrance delay: back rows (higher j) appear first, front rows last
+                  // Within a row, left to right
+                  const entranceDelay = (GRID - 1 - j) * GRID + i
 
                   nodes.push(
                     <g
                       key={`${i},${j}`}
+                      className={styles.prismCell}
                       data-cell="true"
                       data-i={i}
                       data-j={j}
-                      style={{ opacity }}
+                      style={{
+                        opacity,
+                        transform: `translate(${x}px, ${yBottom}px)`,
+                      }}
                       onMouseEnter={() => (!isDragging ? setHoveredCell({ i, j }) : null)}
                       onMouseLeave={() => (!isDragging ? setHoveredCell(null) : null)}
                     >
                       <Prism
-                        x={x}
-                        yBottom={yBottom}
+                        x={0}
+                        yBottom={0}
                         width={BAR_W}
                         height={height}
                         depthX={depthX}
@@ -476,7 +604,10 @@ export function SoftmaxLandscapeViz() {
                         topClassName={styles.top}
                         sideClassName={styles.side}
                         faceClassName={styles.face}
-                        filter={isHovered ? 'url(#barGlow)' : undefined}
+                        filter={isHovered ? 'url(#barGlow)' : isSelected ? 'url(#prismShadow)' : undefined}
+                        heightRatio={p}
+                        entranceDelay={entranceDelay}
+                        showEntrance={!hasMounted}
                       />
                     </g>
                   )
@@ -486,6 +617,54 @@ export function SoftmaxLandscapeViz() {
               return nodes
             })()}
             </svg>
+          </div>
+
+          {/* Controls bar below chart - unobstructed view */}
+          <div className={styles.controlsBar}>
+            {/* Readout section */}
+            <div className={styles.readoutSection} aria-live="polite">
+              <div className={styles.readoutLogits}>
+                <span className={styles.readoutAccentCyan}>'e'={formatSigned(focus?.a ?? 0)}</span>
+                <span className={styles.readoutAccentMagenta}>'a'={formatSigned(focus?.b ?? 0)}</span>
+                <span className={styles.readoutAccentYellow}>'i'=0</span>
+              </div>
+              <div className={`${styles.readoutProb}${readoutFlash ? ` ${styles.readoutFlash}` : ''}`}>
+                P('{token.label}') = {(focus?.probs[selectedIndex] ?? 0).toFixed(3)}
+              </div>
+            </div>
+
+            {/* Temperature control */}
+            <div
+              className={styles.tempSection}
+              style={{
+                ['--temp-r' as string]: tempColorRgb.split(', ')[0],
+                ['--temp-g' as string]: tempColorRgb.split(', ')[1],
+                ['--temp-b' as string]: tempColorRgb.split(', ')[2],
+              }}
+            >
+              <div className={styles.tempRow}>
+                <span className={styles.tempLabel}>T</span>
+                <span
+                  className={styles.tempIndicatorDot}
+                  style={{ background: `rgb(${tempColorRgb})` }}
+                  aria-hidden="true"
+                />
+                <span className={`${styles.tempValue}${tempPulse ? ` ${styles.tempValuePulse}` : ''}`}>
+                  {safeT.toFixed(1)}
+                </span>
+              </div>
+              <Slider
+                wrap={false}
+                min={0.2}
+                max={5}
+                step={0.1}
+                value={temperature}
+                onValueChange={setTemperature}
+                ariaLabel="Temperature"
+                inputClassName={styles.tempSlider}
+              />
+              <div className={styles.tempHint}>sharper ← → flatter</div>
+            </div>
           </div>
         </div>
       </div>
