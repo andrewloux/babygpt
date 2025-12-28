@@ -568,14 +568,6 @@ export function Chapter2() {
           That similarity score isn't random. It's computed from the full{' '}
           <Term>P(next | c)</Term> fingerprints (all 27 probabilities) using the corpus above. The plot is just a 2‑D slice so a human can look at it.
         </Paragraph>
-        <Callout variant="insight" title="Why this definition?">
-          <Paragraph>
-            We're defining similarity based on <strong>predictive role</strong>. Two characters are similar if they make similar predictions about what comes next.
-          </Paragraph>
-          <Paragraph>
-            It's a definition you can compute from a corpus — and then ask a model to approximate.
-          </Paragraph>
-        </Callout>
       </Section>
 
       <Section number="2.4" title="Vectors Are Just Storage">
@@ -685,44 +677,23 @@ E = np.random.randn(vocab_size, embed_dim).astype(np.float32)`}</CodeBlock>
           Don't overtrust any one axis. A model can rotate the space and keep the same information as a <em>direction</em>, not a named column. The point is simpler: training turns those 6,912 bytes into a structured table you can probe.
         </Paragraph>
 
-        <Callout variant="insight" title="Why random? (Symmetry breaking is necessary)">
+        <Callout variant="warning" title="Symmetry breaking: why random init matters">
           <Paragraph>
-            You might ask: why not initialize all embeddings to zero? Or all to the same value?
+            If every embedding row starts identical, the model can't tell tokens apart. Every context produces the same logits, so softmax is uniform:
           </Paragraph>
+          <MathBlock
+            equation={String.raw`\text{softmax}([k,\ldots,k]) = \left[\frac{1}{V},\ldots,\frac{1}{V}\right]`}
+            explanation="Here V is the vocabulary size."
+          />
           <Paragraph>
-            <strong>The problem: if all embeddings start identical, they stay identical forever.</strong>
-          </Paragraph>
-          <Paragraph>
-            If <Term>E['a'] = E['b'] = E['c'] = [0, 0, ..., 0]</Term>, then every character produces identical predictions. The loss is the same for each character. So the gradients are identical. Identical gradients → identical updates → they remain identical after the update.
-          </Paragraph>
-          <Paragraph>
-            Random initialization <em>breaks the tie</em>. Then the data can do its job: <Term>'q'</Term> is usually followed by <Term>'u'</Term>, <Term>'t'</Term> is often followed by <Term>'h'</Term> or <Term>'e'</Term>, and those different training pairs pull different rows in different directions. Tiny differences accumulate into structure.
-          </Paragraph>
-        </Callout>
-
-        <Callout variant="warning" title="Zero initialization kills learning">
-          <CodeBlock filename="zero_init_disaster.py">{`import numpy as np
-
-# Zero-initialize everything
-E = np.zeros((27, 64))  # All embeddings identical
-
-# After ANY training step:
-# - All rows produce identical scores (0 · W = 0 for all)
-# - Softmax of [0, 0, ..., 0] = uniform distribution
-# - All gradients are identical (same loss everywhere)
-# - Update: E -= lr * gradient (same update to every row)
-# - Result: All rows still identical!
-
-# 1000 epochs later...
-print(E[0] == E[1])  # Still True. Forever.
-print("Loss:", 3.30)  # Stuck at log(27) ≈ 3.30 bits (uniform guessing)`}</CodeBlock>
-          <Paragraph>
-            The loss never improves because the model can't distinguish characters. Uniform predictions are the best it can do when all embeddings are the same. <strong>Random initialization breaks this symmetry</strong> — even tiny differences let the data pull rows apart.
+            When all rows are the same, every row receives the same update. The symmetry never breaks, so nothing can specialize. Random initialization breaks the tie — then the data can pull different characters in different directions.
           </Paragraph>
         </Callout>
 
         <Paragraph>
-          That smallness is the point. A lookup table for 8-character contexts needs <Term>27<sup>8</sup> × 27</Term> entries — one probability for each next-character, for each context. That's 282 trillion parameters. The embedding table has 27 rows × 64 columns = 1,728 numbers. Even adding an output layer (64 × 27 = 1,728 more), the total is 3,456 parameters. That's 80 billion times smaller.
+          That smallness is the point. A full <Term>P(next | context)</Term> table needs <Term>V<sup>T</sup></Term> contexts and <Term>V</Term> outcomes — <Term>V<sup>T+1</sup></Term> numbers.
+          For <Term>V = 27</Term> and <Term>T = 8</Term>, that's <Term>27<sup>9</sup> ≈ 7.6×10<sup>12</sup></Term> values.
+          An embedding model with <Term>D = 64</Term> stores <Term>V×D = 1,728</Term> numbers (tied embeddings), or about twice that if you keep separate output weights. Either way: <strong>billions</strong> of times smaller — exponential becomes linear.
         </Paragraph>
         <Paragraph>
           Right now it's random, which means it has no structure yet. But it's <em>consistent</em> randomness: every time the text contains <Term>'a'</Term>, you fetch the same row, so all the evidence about <Term>'a'</Term> keeps piling into the same 64 slots.
@@ -730,17 +701,10 @@ print("Loss:", 3.30)  # Stuck at log(27) ≈ 3.30 bits (uniform guessing)`}</Cod
         <Paragraph>
           So the "no more islands" win is built into the data structure: the same row gets reused in every context. If the model learns something useful about <Term>'q'</Term> in one place, that information comes along the next time <Term>'q'</Term> shows up somewhere else.
         </Paragraph>
-        <Callout variant="insight" title="So what fills the matrix?">
-          <Paragraph>
-            The data structure is the easy part. The hard part is this: <strong>what values should go in this matrix?</strong>
-          </Paragraph>
-          <Paragraph>
-            Random coordinates mean nothing. We need coordinates where <em>similar</em> characters end up <em>close together</em>. "Similar" here means "similar next‑character fingerprints."
-          </Paragraph>
-          <Paragraph>
-            The vectors are storage. The fingerprints are the target. Training is the process of moving the storage to match the target.
-          </Paragraph>
-        </Callout>
+        <Paragraph>
+          The matrix starts as noise. Training is what turns it into a map: it nudges rows so tokens with similar next‑character fingerprints end up nearby.
+          To talk about training, we need one last mechanical piece: how an integer ID selects a row from <Term>E</Term>.
+        </Paragraph>
 
       </Section>
 
@@ -1222,7 +1186,7 @@ def log_softmax(z):
           During training, we usually keep <Term>T</Term> fixed (often <Term>1</Term>) and let the model learn the logits themselves. At inference, temperature is you deciding how sharp you want those learned preferences to be.
         </Paragraph>
         <Paragraph>
-          If you want an axiomatic derivation (instead of the “scores add, probs multiply” intuition): maximum‑entropy under constraints leads to an exponential family, which is softmax with a temperature‑like scale. <Cite n={11} />
+          Axiomatic view: maximum‑entropy under constraints leads to an exponential family — softmax, with a temperature‑like scale. <Cite n={11} />
         </Paragraph>
 
         <Paragraph>
@@ -1502,8 +1466,7 @@ def log_softmax(z):
         />
 
         <Paragraph>
-          If you want the “minimum viable language model” in code, it’s basically this. One embedding lookup, one linear layer, one softmax,
-          one loss, one update:
+          Here’s a “minimum viable language model” in code. One embedding lookup, one linear layer, one softmax, one loss, one update:
         </Paragraph>
         <CodeWalkthrough filename="tiny_embedding_lm.py" lang="python">
           <Step code="import numpy as np">
@@ -1556,9 +1519,7 @@ def log_softmax(z):
           In this "tied embeddings" setup, <Term>E</Term> plays both roles: it's the lookup table <em>and</em> the set of candidate targets.
         </Paragraph>
 
-        <Paragraph>
-          Here's the punchline gradient for one training example (the calculus proof is below if you want it):
-        </Paragraph>
+        <Paragraph>Here's the punchline gradient for one training example. We'll derive it next:</Paragraph>
         <MathBlock
           equation={String.raw`\frac{\partial L}{\partial E[c]} = \underbrace{\sum_j p_j \cdot E[j]}_{\text{predicted centroid}} \;-\; \underbrace{E[\text{actual}]}_{\text{actual embedding}}`}
           explanation="Gradient = (where your probabilities say the answer 'is') minus (where the answer actually was)."
@@ -1987,9 +1948,7 @@ print(f"  cos(t, a) = {cosine_sim(embeddings[t_idx], embeddings[a_idx]):.3f}  (d
             <Paragraph>
               The satisfying part isn't the number going down. It's what the number forces the vectors to do: contexts that "want" similar next characters get pulled toward similar places.
             </Paragraph>
-            <Paragraph>
-              If you want to poke it:
-            </Paragraph>
+            <Paragraph>Try a few perturbations:</Paragraph>
             <ul>
               <li>Change the corpus to "abcabc" repeated. Do 'a', 'b', 'c' cluster?</li>
               <li>Increase <Term>d_model</Term> to 16. Does loss drop faster?</li>
@@ -2179,8 +2138,7 @@ print("\\nGradient check:", "PASS ✓" if np.abs(analytical_grad - numerical_gra
           The embedding table starts as noise. Training is what gives it structure.
         </Paragraph>
         <Paragraph>
-          If you want one sentence to hold onto: we replace "store a table for every context" with "store one reusable vector
-          per token," then learn those vectors by pushing down a single score.
+          One sentence summary: we replace "store a table for every context" with "store one reusable vector per token," then learn those vectors by pushing down a single score.
         </Paragraph>
       </Section>
 

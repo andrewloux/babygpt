@@ -60,10 +60,10 @@
   border-color: rgba(var(--primary-rgb), 0.45);
 }
 
-.emojiDisplay {
-  font-size: 4rem;
-  line-height: 1;
-  transition: transform var(--transition-fast);
+.tokenDisplay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .snapChange {
@@ -96,13 +96,68 @@
   justify-content: center;
 }
 
-.morphEmoji {
-  font-size: 4rem;
+.morphToken {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   will-change: opacity, transform, filter;
+}
+
+.tokenCard {
+  width: 136px;
+  height: 108px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  border-radius: var(--radius-lg);
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset, 0 18px 40px -32px rgba(0, 0, 0, 0.85);
+}
+
+.tokenGlyph {
+  font-family: var(--font-mono);
+  font-size: 2.35rem;
+  line-height: 1;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.tokenLabel {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.token-cyan {
+  border-color: color-mix(in srgb, var(--accent-cyan) 55%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent-cyan) 12%, transparent) inset,
+    0 18px 40px -32px rgba(0, 0, 0, 0.85);
+}
+
+.token-cyan .tokenGlyph {
+  color: var(--accent-cyan);
+}
+
+.token-magenta {
+  border-color: color-mix(in srgb, var(--accent-magenta) 55%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent-magenta) 12%, transparent) inset,
+    0 18px 40px -32px rgba(0, 0, 0, 0.85);
+}
+
+.token-magenta .tokenGlyph {
+  color: var(--accent-magenta);
+}
+
+.token-neutral {
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .caption {
@@ -128,4 +183,3 @@
     flex-direction: column;
   }
 }
-

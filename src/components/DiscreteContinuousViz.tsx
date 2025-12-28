@@ -6,15 +6,17 @@ import styles from './DiscreteContinuousViz.module.css'
 export function DiscreteContinuousViz() {
   const [discreteState, setDiscreteState] = useState(0) // 0: cat, 1: dog, 2: rabbit
   const [continuousValue, setContinuousValue] = useState(0.5) // 0.0 to 1.0
+  const morphOffsetPx = 28
 
   const items = [
-    { id: 0, label: 'Cat', emoji: '🐱' },
-    { id: 1, label: 'Dog', emoji: '🐶' },
+    { id: 0, label: 'Cat', glyph: 'C', accent: 'cyan' as const },
+    { id: 1, label: 'Dog', glyph: 'D', accent: 'magenta' as const },
   ]
 
   // We only use 2 for the morph to make it clear.
   // Discrete side can have 3 just to show "separate-ness".
-  const discreteItems = [...items, { id: 2, label: 'Rabbit', emoji: '🐰' }]
+  const discreteItems = [...items, { id: 2, label: 'Rabbit', glyph: 'R', accent: 'neutral' as const }]
+  const activeItem = discreteItems[discreteState]
 
   return (
     <VizCard title="Discrete vs Continuous" subtitle="IDs jump. Vectors can move.">
@@ -23,8 +25,11 @@ export function DiscreteContinuousViz() {
           <div className={styles.title}>Integers (tokens)</div>
 
           <div className={`inset-box ${styles.stage}`}>
-            <div key={discreteState} className={`${styles.emojiDisplay} ${styles.snapChange}`}>
-              {discreteItems[discreteState].emoji}
+            <div key={discreteState} className={`${styles.tokenDisplay} ${styles.snapChange}`}>
+              <div className={`${styles.tokenCard} ${styles[`token-${activeItem.accent}`]}`}>
+                <div className={styles.tokenGlyph}>{activeItem.glyph}</div>
+                <div className={styles.tokenLabel}>{activeItem.label}</div>
+              </div>
             </div>
           </div>
 
@@ -54,22 +59,26 @@ export function DiscreteContinuousViz() {
           <div className={`inset-box ${styles.stage}`}>
             <div className={styles.morphStage}>
               <div
-                className={styles.morphEmoji}
+                className={`${styles.tokenCard} ${styles['token-cyan']} ${styles.morphToken}`}
                 style={{
                   opacity: 1 - continuousValue,
-                  transform: `translate(-50%, -50%) scale(${0.5 + (1 - continuousValue) * 0.5}) filter(blur(${continuousValue * 2}px))`,
+                  transform: `translate(-50%, -50%) translateX(${-continuousValue * morphOffsetPx}px) scale(${0.5 + (1 - continuousValue) * 0.5})`,
+                  filter: `blur(${continuousValue * 2}px)`,
                 }}
               >
-                🐱
+                <div className={styles.tokenGlyph}>C</div>
+                <div className={styles.tokenLabel}>Cat</div>
               </div>
               <div
-                className={styles.morphEmoji}
+                className={`${styles.tokenCard} ${styles['token-magenta']} ${styles.morphToken}`}
                 style={{
                   opacity: continuousValue,
-                  transform: `translate(-50%, -50%) scale(${0.5 + continuousValue * 0.5}) filter(blur(${(1 - continuousValue) * 2}px))`,
+                  transform: `translate(-50%, -50%) translateX(${(1 - continuousValue) * morphOffsetPx}px) scale(${0.5 + continuousValue * 0.5})`,
+                  filter: `blur(${(1 - continuousValue) * 2}px)`,
                 }}
               >
-                🐶
+                <div className={styles.tokenGlyph}>D</div>
+                <div className={styles.tokenLabel}>Dog</div>
               </div>
             </div>
           </div>
