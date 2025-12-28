@@ -1957,59 +1957,106 @@ cos(t, a) = 0.1`}</CodeBlock>
           </CodeChallenge.Checkpoint>
           <CodeChallenge.Solution>
             <CodeChallenge.Answer>
-              <CodeBlock>{`def softmax(scores):
-    """Numerically stable softmax."""
-    exp_scores = np.exp(scores - np.max(scores))
-    return exp_scores / exp_scores.sum()
+              <CodeWalkthrough filename="train_bigram.py" lang="python">
+                <Step code="def softmax(scores):">
+                  Softmax turns a vector of scores into a probability distribution.
+                </Step>
+                <Step code="    scores = scores - np.max(scores)">
+                  Stability: subtract the max so <code>exp</code> doesn’t blow up.
+                </Step>
+                <Step code="    exp_scores = np.exp(scores)">
+                  Exponentiate to make everything positive.
+                </Step>
+                <Step code="    return exp_scores / exp_scores.sum()">
+                  Normalize so the probabilities sum to 1.
+                </Step>
 
-def cross_entropy(probs, target_idx):
-    """Cross-entropy loss: -log(p[target])."""
-    return -np.log(probs[target_idx] + 1e-10)  # Add epsilon for numerical stability
+                <Step code="def cross_entropy(probs, target_idx):">
+                  Cross‑entropy for one example: <code>−log(p[target])</code>.
+                </Step>
+                <Step code="    return -np.log(probs[target_idx] + 1e-10)">
+                  The <code>+ 1e-10</code> avoids <code>log(0)</code>.
+                </Step>
 
-# Training loop
-for epoch in range(num_epochs):
-    total_loss = 0.0
+                <Step code="for epoch in range(num_epochs):">
+                  Training repeats the same move: predict → score → nudge.
+                </Step>
+                <Step code="    total_loss = 0.0">
+                  Track average loss so you can see progress.
+                </Step>
 
-    for context_char, target_char in pairs:
-        # Get indices
-        ctx_idx = char_to_idx[context_char]
-        tgt_idx = char_to_idx[target_char]
+                <Step code="    for context_char, target_char in pairs:">
+                  Each pair is one bigram: context character → next character.
+                </Step>
+                <Step code="        ctx_idx = char_to_idx[context_char]">
+                  Convert the context token into an integer ID.
+                </Step>
+                <Step code="        tgt_idx = char_to_idx[target_char]">
+                  Convert the target token into an integer ID.
+                </Step>
 
-        # Forward pass
-        context_emb = embeddings[ctx_idx]
-        scores = embeddings @ context_emb  # Dot product with all embeddings
-        probs = softmax(scores)
-        loss = cross_entropy(probs, tgt_idx)
-        total_loss += loss
+                <Step code="        context_emb = embeddings[ctx_idx]">
+                  Lookup: select the one row that represents this context character.
+                </Step>
+                <Step code="        scores = embeddings @ context_emb">
+                  Dot every candidate embedding with the context embedding (one score per vocab item).
+                </Step>
+                <Step code="        probs = softmax(scores)">
+                  Turn scores into bets: a distribution over “what comes next?”
+                </Step>
+                <Step code="        loss = cross_entropy(probs, tgt_idx)">
+                  Score the bet against reality.
+                </Step>
+                <Step code="        total_loss += loss">
+                  Accumulate loss so we can print an average.
+                </Step>
 
-        # Backward pass: compute gradient
-        predicted_centroid = embeddings.T @ probs  # Weighted average of all embeddings
-        actual_emb = embeddings[tgt_idx]
-        gradient = predicted_centroid - actual_emb
+                <Step code="        predicted_centroid = embeddings.T @ probs">
+                  This is <code>∑ p_j · E[j]</code>: where your probabilities “pointed.”
+                </Step>
+                <Step code="        actual_emb = embeddings[tgt_idx]">
+                  This is <code>E[actual]</code>: where the truth was.
+                </Step>
+                <Step code="        gradient = predicted_centroid - actual_emb">
+                  The gradient is the gap: predicted − actual.
+                </Step>
+                <Step code="        embeddings[ctx_idx] -= learning_rate * gradient">
+                  Update only the context row: push it away from the wrong centroid, toward the truth.
+                </Step>
 
-        # Update: move context embedding downhill
-        embeddings[ctx_idx] -= learning_rate * gradient
+                <Step code="    if (epoch + 1) % 100 == 0:">
+                  Print every so often so you don’t have to guess whether it’s learning.
+                </Step>
+                <Step code="        avg_loss = total_loss / len(pairs)">
+                  Average loss per bigram.
+                </Step>
+                <Step code="        print(f'Epoch {epoch+1:3d}: loss = {avg_loss:.4f}')">
+                  You should see the number trend downward.
+                </Step>
 
-    # Print progress
-    if (epoch + 1) % 100 == 0:
-        avg_loss = total_loss / len(pairs)
-        print(f"Epoch {epoch+1:3d}: loss = {avg_loss:.4f}")
+                <Step code="def cosine_sim(a, b):">
+                  Cosine similarity: “are these vectors pointing the same way?”
+                </Step>
+                <Step code="    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-12)">
+                  Add a tiny epsilon so we don’t divide by zero.
+                </Step>
 
-print("\\nFinal embeddings (first 3 chars):")
-for i in range(min(3, vocab_size)):
-    print(f"  {idx_to_char[i]}: {embeddings[i][:4]}...")  # Show first 4 dims
-
-# Check clustering: chars with similar P(next|c) should be close
-print("\\nEmbedding distances (cosine similarity):")
-def cosine_sim(a, b):
-    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
-
-# 't' and 'h' both often precede 'e' - should be similar
-t_idx = char_to_idx['t']
-h_idx = char_to_idx['h']
-a_idx = char_to_idx['a']
-print(f"  cos(t, h) = {cosine_sim(embeddings[t_idx], embeddings[h_idx]):.3f}  (both often precede 'e')")
-print(f"  cos(t, a) = {cosine_sim(embeddings[t_idx], embeddings[a_idx]):.3f}  (different contexts)")`}</CodeBlock>
+                <Step code="t_idx = char_to_idx['t']">
+                  Pick two contexts that often precede the same next character (“the”).
+                </Step>
+                <Step code="h_idx = char_to_idx['h']">
+                  <Term>t</Term> and <Term>h</Term> both often precede <Term>e</Term>.
+                </Step>
+                <Step code="a_idx = char_to_idx['a']">
+                  <Term>a</Term> is a different kind of context in this tiny corpus.
+                </Step>
+                <Step code="print(f'cos(t, h) = {cosine_sim(embeddings[t_idx], embeddings[h_idx]):.3f}')">
+                  Often higher: similar “tugs” over the corpus push them into a similar direction.
+                </Step>
+                <Step code="print(f'cos(t, a) = {cosine_sim(embeddings[t_idx], embeddings[a_idx]):.3f}')">
+                  Often lower: different next‑character pressures produce different geometry.
+                </Step>
+              </CodeWalkthrough>
             </CodeChallenge.Answer>
             <Paragraph>
               The satisfying part isn't the number going down. It's what the number forces the vectors to do: contexts that "want" similar next characters get pulled toward similar places.
@@ -2045,47 +2092,80 @@ print(f"  cos(t, a) = {cosine_sim(embeddings[t_idx], embeddings[a_idx]):.3f}  (d
           </CodeChallenge.Prompt>
           <CodeChallenge.Solution>
             <CodeChallenge.Answer>
-              <CodeBlock>{`# Pick a single training example
-context_char, target_char = pairs[0]
-ctx_idx = char_to_idx[context_char]
-tgt_idx = char_to_idx[target_char]
+              <CodeWalkthrough filename="gradient_check.py" lang="python">
+                <Step code="context_char, target_char = pairs[0]">
+                  Pick one training example so the check stays small and concrete.
+                </Step>
+                <Step code="ctx_idx = char_to_idx[context_char]">
+                  Context ID (which embedding row we’ll perturb).
+                </Step>
+                <Step code="tgt_idx = char_to_idx[target_char]">
+                  Target ID (the correct next character).
+                </Step>
 
-# 1. Compute analytical gradient (your formula)
-context_emb = embeddings[ctx_idx]
-scores = embeddings @ context_emb
-probs = softmax(scores)
-predicted_centroid = embeddings.T @ probs
-actual_emb = embeddings[tgt_idx]
-analytical_grad = predicted_centroid - actual_emb
+                <Step code="context_emb = embeddings[ctx_idx]">
+                  Forward pass starts with the context row.
+                </Step>
+                <Step code="scores = embeddings @ context_emb">
+                  Scores for every candidate next token.
+                </Step>
+                <Step code="probs = softmax(scores)">
+                  Probabilities via softmax.
+                </Step>
+                <Step code="predicted_centroid = embeddings.T @ probs">
+                  <code>∑ p_j · E[j]</code> — the predicted centroid.
+                </Step>
+                <Step code="analytical_grad = predicted_centroid - embeddings[tgt_idx]">
+                  Analytical gradient from the derivation.
+                </Step>
 
-# 2. Compute numerical gradient (finite differences)
-epsilon = 1e-5
-numerical_grad = np.zeros_like(analytical_grad)
+                <Step code="epsilon = 1e-5">
+                  Tiny perturbation size (small enough to approximate a derivative).
+                </Step>
+                <Step code="numerical_grad = np.zeros_like(analytical_grad)">
+                  We’ll estimate the slope in each embedding dimension.
+                </Step>
 
-for i in range(len(numerical_grad)):
-    # Perturb +epsilon
-    embeddings[ctx_idx, i] += epsilon
-    scores_plus = embeddings @ embeddings[ctx_idx]
-    probs_plus = softmax(scores_plus)
-    loss_plus = cross_entropy(probs_plus, tgt_idx)
+                <Step
+                  code="for i in range(len(numerical_grad)):"
+                >
+                  Loop over parameters: one dimension at a time.
+                </Step>
+                <Step code="    orig = embeddings[ctx_idx, i]">
+                  Save the original value so we can restore it.
+                </Step>
 
-    # Perturb -epsilon
-    embeddings[ctx_idx, i] -= 2 * epsilon
-    scores_minus = embeddings @ embeddings[ctx_idx]
-    probs_minus = softmax(scores_minus)
-    loss_minus = cross_entropy(probs_minus, tgt_idx)
+                <Step code="    embeddings[ctx_idx, i] = orig + epsilon">
+                  Evaluate loss at <code>x + ε</code>.
+                </Step>
+                <Step code="    loss_plus = cross_entropy(softmax(embeddings @ embeddings[ctx_idx]), tgt_idx)">
+                  Recompute the loss with the perturbed row.
+                </Step>
 
-    # Restore original value
-    embeddings[ctx_idx, i] += epsilon
+                <Step code="    embeddings[ctx_idx, i] = orig - epsilon">
+                  Evaluate loss at <code>x − ε</code>.
+                </Step>
+                <Step code="    loss_minus = cross_entropy(softmax(embeddings @ embeddings[ctx_idx]), tgt_idx)">
+                  Same forward pass, just at the other side.
+                </Step>
 
-    # Finite difference: (f(x+ε) - f(x-ε)) / 2ε
-    numerical_grad[i] = (loss_plus - loss_minus) / (2 * epsilon)
+                <Step code="    embeddings[ctx_idx, i] = orig">
+                  Restore the parameter.
+                </Step>
+                <Step code="    numerical_grad[i] = (loss_plus - loss_minus) / (2 * epsilon)">
+                  Central difference approximation of <code>dL/dx</code>.
+                </Step>
 
-# 3. Compare
-print("Analytical gradient:", analytical_grad)
-print("Numerical gradient: ", numerical_grad)
-print("Max difference:     ", np.abs(analytical_grad - numerical_grad).max())
-print("\\nGradient check:", "PASS ✓" if np.abs(analytical_grad - numerical_grad).max() < 1e-5 else "FAIL ✗")`}</CodeBlock>
+                <Step code="diff = np.abs(analytical_grad - numerical_grad)">
+                  Compare the two gradients dimension‑wise.
+                </Step>
+                <Step code="print('Max difference:', diff.max())">
+                  A single number you can sanity‑check.
+                </Step>
+                <Step code="print('Gradient check:', 'PASS ✓' if diff.max() < 1e-5 else 'FAIL ✗')">
+                  If it fails, don’t trust your gradient yet.
+                </Step>
+              </CodeWalkthrough>
             </CodeChallenge.Answer>
             <Paragraph>
               <strong>Expected output</strong>: Max difference should be around 1e-7 to 1e-9. If it's larger than 1e-5, check your gradient formula or finite difference implementation.

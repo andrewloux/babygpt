@@ -267,6 +267,30 @@ export function DotProductViz({
     setDemoChar(defaultDemoChar)
   }, [defaultDemoChar])
 
+  const demoIdx = vocabIndex[demoChar] ?? 0
+  const demoPA = pa[demoIdx] ?? 0
+  const demoPB = pb[demoIdx] ?? 0
+  const demoContrib = demoPA * demoPB
+  const demoFillPercent = Math.min(100, (demoContrib / scaleMax) * 100)
+  const demoShare = demoContrib / scoreSafe
+
+  const stackLeaders = useMemo(
+    () => top.filter((term) => term.char !== demoChar).slice(0, 2),
+    [top, demoChar],
+  )
+  const stackSegments = useMemo<Contribution[]>(
+    () => [
+      { char: demoChar, pa: demoPA, pb: demoPB, contrib: demoContrib },
+      ...stackLeaders,
+    ],
+    [demoChar, demoPA, demoPB, demoContrib, stackLeaders],
+  )
+  const stackSum = useMemo(
+    () => stackSegments.reduce((acc, item) => acc + item.contrib, 0),
+    [stackSegments],
+  )
+  const stackRest = Math.max(0, matchProb - stackSum)
+
   const [guess, setGuess] = useState<'high' | 'low' | null>(null)
   const [guessLocked, setGuessLocked] = useState(false)
   const [revealed, setRevealed] = useState(false)
@@ -549,19 +573,36 @@ export function DotProductViz({
             </div>
           </div>
           <div className={`${styles.scoreValue} ${revealed ? styles.scoreValueRevealed : ''}`}>
-            {revealed ? displayedScore.toFixed(4) : '—'}
+            {revealed ? displayedScore.toFixed(4) : '?'}
           </div>
           <div className={styles.gauge}>
             <div className={styles.gaugeTrack}>
-              <div
-                className={`${styles.gaugeFill} ${revealed ? styles.gaugeFillAnimated : ''} ${revealed ? styles.gaugeFillDynamic : ''}`}
-                style={{
-                  '--target-width': `${fillPercent}%`,
-                  '--score-hue-start': `${180 - (matchProb * 80)}`,
-                  '--score-hue-end': `${330 - (matchProb * 30)}`,
-                  width: revealed ? undefined : '0%',
-                } as React.CSSProperties}
-              />
+              {revealed ? (
+                <div
+                  className={`${styles.gaugeFill} ${styles.gaugeFillStack} ${styles.gaugeFillAnimated}`}
+                  style={{ '--target-width': `${fillPercent}%` } as React.CSSProperties}
+                >
+                  {stackSegments.map((term) => (
+                    <div
+                      key={term.char}
+                      className={`${styles.gaugeSeg} ${demoChar === term.char ? styles.gaugeSegActive : ''}`}
+                      style={{ flexGrow: Math.max(1e-6, term.contrib) }}
+                      aria-label={`Contribution from ${prettyChar(term.char)}`}
+                    />
+                  ))}
+                  <div
+                    className={styles.gaugeSegRest}
+                    style={{ flexGrow: Math.max(1e-6, stackRest) }}
+                    aria-label="All other contributions"
+                  />
+                </div>
+              ) : (
+                <div
+                  className={styles.gaugePreview}
+                  style={{ width: `${demoFillPercent}%` }}
+                  aria-label="Preview of one term contribution"
+                />
+              )}
               <div className={styles.gaugeBaseline} style={{ left: `${baselinePercent}%` }} />
             </div>
             <div className={styles.gaugeMeta}>
@@ -569,19 +610,48 @@ export function DotProductViz({
               <span className={styles.gaugeMid}>
                 baseline = 1/V ({baseline.toFixed(3)})
               </span>
-              <span className={styles.gaugeRight}>≈ {scaleMax.toFixed(3)}</span>
+              <span
+                className={styles.gaugeRight}
+                title={revealed ? 'Approximate cap for this chart' : 'Chart cap is hidden until you reveal'}
+              >
+                {revealed ? <>≈ {scaleMax.toFixed(3)}</> : <>cap</>}
+              </span>
             </div>
           </div>
           <div className={styles.scoreHint}>
             {revealed ? (
               <>≈ {ratio.toFixed(1)}× baseline</>
             ) : (
-              <>Lock a guess, then reveal</>
+              <>Hover the left bins: each row is one addend. Reveal shows the full sum.</>
             )}
           </div>
+
+          <div className={styles.termPreview} aria-label="One term demonstration">
+            <div className={styles.termPreviewTitle}>One term (currently highlighted)</div>
+            <div className={styles.termPreviewRow}>
+              <span className={styles.termPreviewChar}>{prettyChar(demoChar)}</span>
+              <span className={styles.termPreviewMath}>
+                <span className={styles.probA}>{demoPA.toFixed(3)}</span>
+                <span className={styles.times}>×</span>
+                <span className={styles.probB}>{demoPB.toFixed(3)}</span>
+                <span className={styles.equals}>=</span>
+                <span className={styles.contribValue}>{demoContrib.toFixed(4)}</span>
+              </span>
+            </div>
+            <div className={styles.termPreviewNote}>
+              {revealed ? (
+                <>
+                  {(demoShare * 100).toFixed(1)}% of total
+                </>
+              ) : (
+                <>That product is one of the 27 terms in Σ p(A)·p(B).</>
+              )}
+            </div>
+          </div>
+
           {/* Top contributors integrated into score panel */}
           <div className={styles.topContribs}>
-            <div className={styles.topContribsLabel}>Top contributors</div>
+            <div className={styles.topContribsLabel}>Jump to a big term</div>
             <div className={styles.topContribsChips}>
               {top.slice(0, 3).map((x, chipIndex) => {
                 const isChipActive = demoChar === x.char
@@ -595,6 +665,7 @@ export function DotProductViz({
                       setDemoChar(x.char)
                       setHighlightedChar(x.char)
                     }}
+                    aria-label={`Highlight ${prettyChar(x.char)} (contributes ${(x.contrib / scoreSafe * 100).toFixed(1)}%)`}
                   >
                     {prettyChar(x.char)}
                   </button>
