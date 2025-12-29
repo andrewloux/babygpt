@@ -1,132 +1,550 @@
 .container {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  gap: var(--space-xl);
+}
+
+.scrolly {
+  display: grid;
+  gap: var(--space-xl);
+}
+
+@media (min-width: 960px) {
+  .scrolly {
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    align-items: start;
+  }
+}
+
+.story {
+  display: grid;
   gap: var(--space-lg);
+  min-width: 0;
 }
 
-.tokenSelector {
-  padding: var(--space-lg);
+.stepper {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-}
-
-.tokenHeader {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-md);
+  gap: var(--space-sm);
   flex-wrap: wrap;
 }
 
-.tokenLabel {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: rgba(255, 255, 255, 0.55);
+@media (min-width: 760px) {
+  .stepper {
+    flex-direction: column;
+    position: sticky;
+    top: var(--space-lg);
+    align-self: start;
+  }
 }
 
-.tokenValue {
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
-  color: var(--accent-cyan);
-}
-
-.pipeline {
-  display: flex;
-  flex-direction: column;
+.stepBtn {
+  display: inline-flex;
   align-items: center;
   gap: var(--space-sm);
-}
-
-.stageWrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-.stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--space-md) var(--space-lg);
-  min-width: 280px;
-  max-width: 100%;
-  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.stage:hover,
-.stage.highlighted {
-  border-color: rgba(var(--primary-rgb), 0.35);
-  transform: translateY(-1px);
-  box-shadow: 0 14px 28px -22px rgba(0, 0, 0, 0.8);
-}
-
-.stageName {
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(ellipse 90% 90% at 50% 0%, rgba(255, 255, 255, 0.04), transparent 60%),
+    rgba(0, 0, 0, 0.18);
   color: rgba(255, 255, 255, 0.82);
-  margin-bottom: var(--space-xs);
+  cursor: pointer;
+  min-width: 0;
 }
 
-.stageShape {
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--accent-cyan);
-  margin-bottom: var(--space-xs);
+.stepBtnActive {
+  border-color: rgba(var(--primary-rgb), 0.28);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 0 24px rgba(var(--primary-rgb), 0.12);
 }
 
-.stageValues {
+.stepDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  flex: 0 0 auto;
+}
+
+.stepBtnActive .stepDot {
+  background: var(--accent-cyan);
+  box-shadow:
+    0 0 0 1px rgba(0, 217, 255, 0.35) inset,
+    0 0 18px rgba(0, 217, 255, 0.22);
+}
+
+.stepLabel {
   font-family: var(--font-mono);
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.55);
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
-.arrow {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--space-sm) 0;
-  color: rgba(255, 255, 255, 0.35);
+.storyStep {
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+  min-width: 0;
 }
 
-.arrowHead {
-  font-size: 1.1rem;
-  line-height: 1;
+.storyStepActive {
+  border-color: rgba(var(--primary-rgb), 0.22);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 0 30px rgba(var(--primary-rgb), 0.08);
 }
 
-.operation {
-  margin-top: var(--space-xs);
+.storyHeader {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.storyKicker {
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
 }
 
-.shapeNote {
-  padding: var(--space-lg);
+.storyTitle {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.01em;
+}
+
+.storyBody {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.storyText {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.55;
+}
+
+.storyChip {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: var(--space-md);
+  padding: 0.85rem 0.9rem;
+}
+
+.storyChipLabel {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.storyChipValue {
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.82);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: baseline;
+}
+
+.storyChipMeta {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.ruleBox {
+  padding: 0.95rem 1rem;
   display: grid;
   gap: var(--space-sm);
 }
 
-.noteTitle {
+.ruleTitle {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
   color: rgba(255, 255, 255, 0.55);
 }
 
-.noteText {
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 0.9rem;
+.ruleText {
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.5;
+}
+
+.figure {
+  min-width: 0;
+}
+
+.figureSticky {
+  padding: var(--space-lg);
+  min-width: 0;
+}
+
+@media (min-width: 960px) {
+  .figureSticky {
+    position: sticky;
+    top: var(--space-lg);
+  }
+}
+
+.figureHeader {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.figureEyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.figureTopRow {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-md);
+  align-items: baseline;
+  min-width: 0;
+}
+
+@media (max-width: 520px) {
+  .figureTopRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tokenReadout {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.tokenKey {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.tokenVal {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.tokenChar {
+  color: var(--accent-cyan);
+}
+
+.shapeSummary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.4rem;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+@media (max-width: 520px) {
+  .shapeSummary {
+    justify-content: flex-start;
+  }
+}
+
+.shapeToken {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.shapeBrackets {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.shapeArrow {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.35);
+  padding: 0 0.15rem;
+}
+
+.sliderWrap {
+  padding: 0.75rem 0.85rem;
+}
+
+.pipeline {
+  display: grid;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.stageCard {
+  position: relative;
+  padding: 0.95rem 1rem;
+  display: grid;
+  gap: var(--space-sm);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.stageCard::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.75rem;
+  bottom: 0.75rem;
+  width: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  opacity: 0.7;
+}
+
+.stageActive {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 16px 28px -24px rgba(0, 0, 0, 0.8);
+}
+
+.stageActive::before {
+  opacity: 1;
+}
+
+.stageMuted {
+  opacity: 0.74;
+}
+
+.stageCyan::before {
+  background: color-mix(in oklab, var(--accent-cyan) 82%, rgba(255, 255, 255, 0.12));
+}
+
+.stageYellow::before {
+  background: color-mix(in oklab, var(--accent-yellow) 82%, rgba(255, 255, 255, 0.12));
+}
+
+.stageMagenta::before {
+  background: color-mix(in oklab, var(--accent-magenta) 82%, rgba(255, 255, 255, 0.12));
+}
+
+.stageGreen::before {
+  background: color-mix(in oklab, var(--accent-green) 82%, rgba(255, 255, 255, 0.12));
+}
+
+.stageHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+  align-items: baseline;
+}
+
+.stageName {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.stageShape {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--accent-cyan);
+}
+
+.stageBody {
+  display: grid;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.stageHint {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.72);
   line-height: 1.45;
 }
 
+.axisTag {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  letter-spacing: 0.05em;
+  color: var(--accent-yellow);
+}
+
+.stageChip {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(ellipse 100% 90% at 50% 0%, rgba(255, 255, 255, 0.04), transparent 60%),
+    rgba(0, 0, 0, 0.18);
+}
+
+.stageChipCyan {
+  border-color: rgba(var(--primary-rgb), 0.18);
+  box-shadow: 0 0 18px rgba(var(--primary-rgb), 0.08);
+}
+
+.stageChipKey {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.stageChipVal {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.stageChipMeta {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.oneHotGrid {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.oneHotCell {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1 / 1;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.18);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+}
+
+.oneHotCellActive {
+  border-color: rgba(255, 214, 10, 0.28);
+  background: color-mix(in oklab, var(--accent-yellow) 14%, rgba(0, 0, 0, 0.18));
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 0 22px rgba(255, 214, 10, 0.12);
+}
+
+.oneHotVal {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.65);
+  opacity: 0.35;
+}
+
+.oneHotCellActive .oneHotVal {
+  opacity: 1;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.vectorBars {
+  position: relative;
+  height: 78px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 0.18rem;
+  padding: 0.35rem;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+.vectorBars::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.vectorBarWrap {
+  position: relative;
+  border-radius: 0.35rem;
+  background: rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+
+.vectorBar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: 0.35rem;
+  opacity: 0.95;
+}
+
+.vectorBarPos {
+  background: color-mix(in oklab, var(--accent-magenta) 78%, rgba(255, 255, 255, 0.1));
+}
+
+.vectorBarNeg {
+  background: color-mix(in oklab, var(--accent-cyan) 78%, rgba(255, 255, 255, 0.1));
+}
+
+.miniBars {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.miniBarRow {
+  display: grid;
+  grid-template-columns: 1.2rem minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.miniBarLabel {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.82);
+  text-align: center;
+}
+
+.miniBarTrack {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.miniBarFill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.miniBarFillLogits {
+  background: color-mix(in oklab, var(--accent-cyan) 68%, rgba(255, 255, 255, 0.1));
+}
+
+.miniBarFillProbs {
+  background: color-mix(in oklab, var(--accent-green) 64%, rgba(255, 255, 255, 0.1));
+}
+
+.miniBarValue {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.62);
+}

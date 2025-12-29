@@ -275,7 +275,7 @@ export function Chapter2() {
         </Paragraph>
 
         <Paragraph>
-          Why does this work? Because reality often behaves like a grid.
+          Why does this work? Because the operations we need — mixing and scaling — obey a couple simple rules.
         </Paragraph>
         <AxiomViz />
         <Paragraph>
@@ -1255,7 +1255,8 @@ def log_softmax(z):
         </Paragraph>
 
         <Paragraph>
-          Before we dive into how gradients steer the update, let's make the forward pass concrete. Every operation transforms data with a specific shape:
+          Before we dive into how gradients steer the update, make the forward pass concrete. Scroll the steps and drag the token ID: it’s the same
+          “thing” being rewritten into different shapes so we can multiply it by matrices.
         </Paragraph>
 
         <TensorShapeViz />
