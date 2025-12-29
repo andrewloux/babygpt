@@ -4,7 +4,7 @@ import styles from './VizCard.module.css'
 interface VizCardProps {
   title: string
   figNum?: string
-  subtitle?: string
+  subtitle?: ReactNode
   footer?: ReactNode
   children: ReactNode
 }
