@@ -1,29 +1,5 @@
 .container {
   position: relative;
-  margin: 1.75rem 0;
-  padding: 1.15rem;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(18, 18, 26, 0.85), rgba(10, 10, 15, 0.92));
-  overflow: hidden;
-}
-
-.ambientGlow {
-  position: absolute;
-  inset: -60px -40px auto -40px;
-  height: 260px;
-  background:
-    radial-gradient(closest-side, rgba(0, 217, 255, var(--glow-cyan-opacity, 0.20)), transparent 70%),
-    radial-gradient(closest-side, rgba(255, 0, 110, var(--glow-magenta-opacity, 0.14)), transparent 70%);
-  filter: blur(18px);
-  pointer-events: none;
-  opacity: 0.85;
-  transition: transform 0.5s ease-out, opacity 0.3s ease-out;
-}
-
-.ambientGlowPulse {
-  opacity: 1;
-  filter: blur(16px) brightness(1.15);
 }
 
 .header {
@@ -85,6 +61,7 @@
   gap: 0.7rem;
   align-items: end;
   margin-bottom: 1.05rem;
+  padding: var(--space-md);
 }
 
 .shapeMini {
@@ -102,12 +79,12 @@
 .control {
   display: grid;
   grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  gap: 0.35rem 0.6rem;
-  padding: 0.7rem 0.8rem;
-  border-radius: 12px;
+  grid-template-rows: auto auto auto;
+  gap: 0.3rem 0.6rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-md);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.26);
+  background: rgba(0, 0, 0, 0.20);
 }
 
 .controlLabel {
@@ -117,6 +94,14 @@
   color: rgba(255, 255, 255, 0.62);
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.controlHint {
+  grid-column: 1 / -1;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.2;
 }
 
 .slider {
@@ -135,7 +120,7 @@
 .reshuffleBtn {
   height: 40px;
   padding: 0 0.95rem;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.85);
@@ -157,54 +142,13 @@
 .stage {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr) minmax(0, 1fr);
   gap: 1rem;
   align-items: start;
   margin-bottom: 1.25rem;
 }
 
-.connectionSvg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 10;
-  overflow: visible;
-}
-
-.connectionPath {
-  fill: none;
-  stroke: rgba(0, 217, 255, 0.5);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  animation: drawPath 0.4s ease-out forwards;
-}
-
-.connectionDot {
-  fill: rgba(0, 217, 255, 0.9);
-  opacity: 0;
-  animation: fadeInDot 0.2s ease-out 0.1s forwards;
-}
-
-@keyframes drawPath {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes fadeInDot {
-  to {
-    opacity: 1;
-  }
-}
-
 .card {
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.22);
   padding: 0.95rem;
 }
 
@@ -224,7 +168,7 @@
   align-items: center;
   width: 22px;
   height: 22px;
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.04);
   color: rgba(255, 255, 255, 0.8);
@@ -246,7 +190,7 @@
 .cell {
   position: relative;
   min-height: 40px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   border: 1px solid rgba(255, 255, 255, 0.10);
   background: rgba(10, 10, 15, 0.62);
   cursor: pointer;
@@ -280,20 +224,11 @@
   color: rgba(255, 255, 255, 0.45);
 }
 
-@keyframes cellPulse {
-  0%, 100% {
-    box-shadow: 0 0 0 1px rgba(0, 217, 255, 0.25), 0 0 24px rgba(0, 217, 255, 0.10);
-  }
-  50% {
-    box-shadow: 0 0 0 2px rgba(0, 217, 255, 0.4), 0 0 32px rgba(0, 217, 255, 0.2);
-  }
-}
-
 .active {
-  border-color: rgba(0, 217, 255, 0.55);
-  box-shadow: 0 0 0 1px rgba(0, 217, 255, 0.25), 0 0 24px rgba(0, 217, 255, 0.10);
-  animation: cellPulse 2s ease-in-out infinite;
-  transform: scale(1.04);
+  border-color: color-mix(in oklab, var(--accent-cyan) 70%, rgba(255, 255, 255, 0.16));
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--accent-cyan) 28%, transparent),
+    0 0 22px color-mix(in oklab, var(--accent-cyan) 14%, transparent);
   z-index: 2;
 }
 
@@ -301,27 +236,18 @@
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 11px;
-  background: radial-gradient(circle at center, rgba(0, 217, 255, 0.08), transparent 70%);
+  border-radius: calc(var(--radius-md) - 1px);
+  background: radial-gradient(
+    circle at center,
+    color-mix(in oklab, var(--accent-cyan) 16%, transparent),
+    transparent 70%
+  );
   pointer-events: none;
 }
 
-@keyframes sameTokenBreathe {
-  0%, 100% {
-    border-color: rgba(255, 0, 110, 0.22);
-    box-shadow: 0 0 0 0 rgba(255, 0, 110, 0);
-    background-color: transparent;
-  }
-  50% {
-    border-color: rgba(255, 0, 110, 0.45);
-    box-shadow: 0 0 12px rgba(255, 0, 110, 0.15);
-    background-color: rgba(255, 0, 110, 0.03);
-  }
-}
-
 .same:not(.active) {
-  border-color: rgba(255, 0, 110, 0.22);
-  animation: sameTokenBreathe 2.5s ease-in-out infinite;
+  border-color: color-mix(in oklab, var(--accent-magenta) 50%, rgba(255, 255, 255, 0.18));
+  background: color-mix(in oklab, var(--accent-magenta) 6%, rgba(10, 10, 15, 0.62));
 }
 
 .axisHint {
@@ -340,7 +266,7 @@
 }
 
 .selection {
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(0, 0, 0, 0.18);
   padding: 0.8rem 0.85rem;
@@ -374,8 +300,8 @@
 .formula {
   margin-top: 0.65rem;
   padding: 0.55rem 0.65rem;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 217, 255, 0.22);
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in oklab, var(--accent-cyan) 35%, rgba(255, 255, 255, 0.12));
   background: rgba(0, 0, 0, 0.2);
   font-family: var(--font-mono);
   color: rgba(255, 255, 255, 0.85);
@@ -392,29 +318,69 @@
   line-height: 1.35;
 }
 
+.embedTable {
+  margin-top: 0.85rem;
+}
+
+.embedHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.55rem;
+}
+
+.embedTitle {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.embedMeta {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.48);
+  text-align: right;
+}
+
+.embedGrid {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.embedChip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0.45rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.embedChipActive {
+  border-color: color-mix(in oklab, var(--accent-cyan) 55%, rgba(255, 255, 255, 0.14));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent-cyan) 18%, transparent);
+  background: color-mix(in oklab, var(--accent-cyan) 6%, rgba(0, 0, 0, 0.18));
+}
+
+.embedChipChar {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.embedChipId {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
 .embCell {
   padding: 0.4rem 0.45rem 0.55rem;
-}
-
-.vectorBars {
-  height: 28px;
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-}
-
-.coord {
-  width: 6px;
-  border-radius: 4px;
-  opacity: 0.95;
-}
-
-.pos {
-  background: linear-gradient(180deg, rgba(255, 0, 110, 0.92), rgba(255, 0, 110, 0.35));
-}
-
-.neg {
-  background: linear-gradient(180deg, rgba(0, 217, 255, 0.92), rgba(0, 217, 255, 0.30));
 }
 
 .embBadge {
@@ -434,97 +400,83 @@
 }
 
 .vectorBarsBig {
-  height: 64px;
+  height: 74px;
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   gap: 4px;
   padding: 0.55rem 0.65rem;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   background: rgba(0, 0, 0, 0.22);
+  position: relative;
 }
 
-.vectorBarsBig .coord {
+.vectorBars {
+  height: 28px;
+  display: flex;
+  align-items: stretch;
+  gap: 1px;
+  position: relative;
+  width: 100%;
+}
+
+.vectorBarsBig::before,
+.vectorBars::before {
+  content: '';
+  position: absolute;
+  left: 0.35rem;
+  right: 0.35rem;
+  top: 50%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.10);
+  pointer-events: none;
+}
+
+.coordWrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.vectorBarsBig .coordWrap {
   width: 10px;
+}
+
+.vectorBars .coordWrap {
+  flex: 1 1 0;
+  min-width: 2px;
+}
+
+.coordBar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  opacity: 0.95;
+}
+
+.vectorBarsBig .coordBar {
   border-radius: 6px;
 }
 
-/* Waveform container */
-.waveformContainer {
-  padding: 0.55rem 0.65rem;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.22);
+.vectorBars .coordBar {
+  border-radius: 4px;
 }
 
-.waveformSvg {
-  display: block;
-  width: 100%;
-  height: 64px;
-  overflow: visible;
+.coordBarPos {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--accent-magenta) 92%, transparent),
+    color-mix(in oklab, var(--accent-magenta) 30%, transparent)
+  );
 }
 
-.waveformBaseline {
-  stroke: rgba(255, 255, 255, 0.1);
-  stroke-width: 1;
-  stroke-dasharray: 4 4;
-}
-
-.waveformArea {
-  opacity: 0.8;
-}
-
-.waveformLine {
-  fill: none;
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 500;
-  stroke-dashoffset: 500;
-  animation: drawWaveform 0.6s ease-out forwards;
-}
-
-/* Morphing variant - no draw animation, just show the line */
-.waveformLineMorphing {
-  fill: none;
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.waveformAreaMorphing {
-  opacity: 0.8;
-}
-
-@keyframes drawWaveform {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-/* Subtle shimmer animation after initial draw */
-@keyframes waveformShimmer {
-  0%, 100% {
-    filter: url(#glow) brightness(1);
-  }
-  50% {
-    filter: url(#glow) brightness(1.1);
-  }
-}
-
-/* Mini waveform for grid cells */
-.miniWaveformSvg {
-  display: block;
-  width: 100%;
-  height: 28px;
-  overflow: visible;
-}
-
-.miniWaveformLine {
-  fill: none;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.coordBarNeg {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--accent-cyan) 92%, transparent),
+    color-mix(in oklab, var(--accent-cyan) 30%, transparent)
+  );
 }
 
 .vectorHint {
@@ -557,11 +509,11 @@
 }
 
 .valueChipPos {
-  border-color: rgba(255, 0, 110, 0.25);
+  border-color: color-mix(in oklab, var(--accent-magenta) 40%, rgba(255, 255, 255, 0.10));
 }
 
 .valueChipNeg {
-  border-color: rgba(0, 217, 255, 0.25);
+  border-color: color-mix(in oklab, var(--accent-cyan) 40%, rgba(255, 255, 255, 0.10));
 }
 
 .bigBarRow {
