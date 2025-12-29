@@ -1,22 +1,12 @@
-.container {
-  margin: 2rem 0;
-  position: relative;
-  font-family: var(--font-sans);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  background:
-    radial-gradient(ellipse 70% 45% at 50% 0%, rgba(0, 217, 255, 0.08), transparent 60%),
-    linear-gradient(180deg, rgba(11, 12, 21, 1), rgba(15, 17, 28, 1));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
-    0 25px 50px -12px rgba(0, 0, 0, 0.55);
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
 }
 
 .interactiveArea {
   display: flex;
   gap: 2rem;
-  margin-top: 1.5rem;
   align-items: flex-start;
   flex-wrap: wrap;
 }
@@ -30,16 +20,16 @@
 }
 
 .sliderContainer {
-  margin-top: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   width: min(520px, 100%);
+  padding: 0.85rem 0.95rem;
 }
 
 .calculation {
   text-align: center;
-  margin-bottom: 1.5rem;
+  padding: 0.85rem 0.95rem;
 }
 
 .calculation p {
@@ -58,8 +48,8 @@
   width: 100%;
   height: auto;
   background: rgba(0, 0, 0, 0.28);
-  border-radius: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.02) inset,
     0 18px 35px -25px rgba(0, 0, 0, 0.8);
@@ -92,14 +82,14 @@
   fill: none;
   stroke: var(--accent-cyan);
   stroke-width: 2.5;
-  filter: drop-shadow(0 0 8px rgba(0, 217, 255, 0.25));
+  filter: drop-shadow(0 0 10px color-mix(in oklab, var(--accent-cyan) 22%, transparent));
 }
 
 .point {
   fill: var(--accent-magenta);
   stroke: rgba(255, 255, 255, 0.85);
   stroke-width: 1.5;
-  filter: drop-shadow(0 0 10px rgba(255, 0, 110, 0.25));
+  filter: drop-shadow(0 0 12px color-mix(in oklab, var(--accent-magenta) 22%, transparent));
 }
 
 .guideLine {
@@ -112,10 +102,4 @@
   fill: rgba(255, 255, 255, 0.7);
   font-family: var(--font-mono);
   font-size: 11px;
-}
-
-.summary {
-  margin-top: 1.5rem;
-  font-style: italic;
-  color: rgba(255, 255, 255, 0.6);
 }

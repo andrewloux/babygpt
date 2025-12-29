@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import styles from './CrossEntropyViz.module.css'
 import { Slider } from './Slider'
 import { Paragraph, Term } from './Typography'
+import { VizCard } from './VizCard'
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value))
@@ -90,43 +91,46 @@ export function CrossEntropyViz() {
   const probLabel = prob < 0.01 ? prob.toFixed(3) : prob.toFixed(2)
 
   return (
-    <div className={styles.container}>
-      <Paragraph>
-        Drag the slider to see how cross-entropy loss changes with predicted probability. When the model is confident and correct (high{' '}
-        <Term>p</Term>), loss is low. When the model gives the truth low probability, loss explodes.
-      </Paragraph>
-      <div className={styles.interactiveArea}>
-        <div className={styles.lossSection}>
-          <div className={styles.calculation}>
-            <Paragraph>
-              Predicted probability for correct answer: <Term>p = {probLabel}</Term>
-            </Paragraph>
-            <Paragraph>
-              Loss = <Term>-log₂(p)</Term> = <strong>{loss.toFixed(3)} bits</strong>
-            </Paragraph>
+    <VizCard
+      title="Cross-Entropy: The Surprise Curve"
+      subtitle="Why confident wrong hurts"
+      footer={
+        <Paragraph>
+          Loss is <Term>−log₂(p_true)</Term>. The cliff is near <Term>p=0</Term>: giving the truth 1% probability costs ~6.6 bits.
+        </Paragraph>
+      }
+    >
+      <div className={styles.content}>
+        <Paragraph>
+          Drag the slider. Same formula, different intuition: you’re watching “probability of the truth” turn into “surprise.”
+        </Paragraph>
+        <div className={styles.interactiveArea}>
+          <div className={styles.lossSection}>
+            <div className={`${styles.calculation} inset-box`}>
+              <Paragraph>
+                Predicted probability of the truth: <Term>p = {probLabel}</Term>
+              </Paragraph>
+              <Paragraph>
+                Loss = <Term>-log₂(p)</Term> = <strong>{loss.toFixed(3)} bits</strong>
+              </Paragraph>
+            </div>
+            <div className={`${styles.sliderContainer} panel-dark inset-box`}>
+              <label htmlFor="prob-slider">Adjust probability</label>
+              <Slider
+                id="prob-slider"
+                wrap={false}
+                min={0.001}
+                max={0.999}
+                step={0.001}
+                value={prob}
+                onValueChange={setProb}
+                ariaLabel="Adjust probability"
+              />
+            </div>
+            <LogCurve p={prob} loss={loss} />
           </div>
-          <div className={styles.sliderContainer}>
-            <label htmlFor="prob-slider">Adjust probability</label>
-            <Slider
-              id="prob-slider"
-              wrap={false}
-              min={0.001}
-              max={0.999}
-              step={0.001}
-              value={prob}
-              onValueChange={setProb}
-              ariaLabel="Adjust probability"
-            />
-          </div>
-          <LogCurve p={prob} loss={loss} />
         </div>
       </div>
-      <div className={styles.summary}>
-        <Paragraph>
-          The cliff is near <Term>p=0</Term>. Giving the truth 1% probability costs ~6.6 bits. Giving it 50% costs 1 bit.
-          This is why the loss punishes confident wrong predictions.
-        </Paragraph>
-      </div>
-    </div>
+    </VizCard>
   )
 }

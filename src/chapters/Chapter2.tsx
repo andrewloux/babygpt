@@ -34,10 +34,8 @@ import {
   GrassmannViz,
   AxiomViz,
   AbstractionChainViz,
-  GradientDescentViz,
   DiscreteContinuousViz,
   EmbeddingInspector,
-  SoftmaxWidget,
   SoftmaxBarsViz,
   SamplingConvergenceViz,
   SoftmaxSimplexViz,
@@ -160,6 +158,10 @@ export function Chapter2() {
         ]}
       />
 
+      <Paragraph>
+        This chapter is deliberately first‑principles: we start from counts, turn them into vectors, and then train by pushing one number (loss) down. If you can read basic Python and you’re okay with “a vector is just a list of numbers,” you can pick up the rest as we go.
+      </Paragraph>
+
       <Section number="2.1" title="Grassmann's Insight">
         <Paragraph>
           In Chapter 1, we built a system that memorizes. Feed it <Term>"cat sat on the"</Term>, and it retrieves what it knows about <Term>"cat sat on the"</Term>. But ask about <Term>"dog sat on the"</Term> — a context it hasn't stored — and it has nothing. The system
@@ -239,7 +241,8 @@ export function Chapter2() {
           equation={String.raw`\text{Purple} = 0.5 \cdot \text{Red} + 0.5 \cdot \text{Blue}`}
           explanation="This is an algebra of attributes: you can average properties (redness), not identities ('red' the token). Grassmann showed that this kind of add-and-scale math works for more than just light."
         />
-        <Callout variant="info" title="How colors turn into numbers">
+        <details className="collapsible">
+          <summary>How colors turn into numbers</summary>
           <Paragraph>
             The coefficients come from a matching experiment. Put a target color patch on one side, give yourself a few "primaries" on the other, and turn the knobs until both patches look the same.
           </Paragraph>
@@ -249,7 +252,7 @@ export function Chapter2() {
           <Paragraph>
             Once you have that, you can compare, interpolate, and do geometry on colors — because you've turned a sensation into a stable vector of numbers.
           </Paragraph>
-        </Callout>
+        </details>
         <Paragraph>
           He called it the <em>Ausdehnungslehre</em> — literally "theory of extension." The name looks scary. The move is simple: once something has coordinates, you can do coordinate math on it.
         </Paragraph>
@@ -272,12 +275,15 @@ export function Chapter2() {
         </Paragraph>
 
         <Paragraph>
-          Why does this work? Two properties make the algebra possible:
+          Why does this work? Because reality often behaves like a grid.
         </Paragraph>
         <AxiomViz />
         <Paragraph>
           If the operations you care about obey these rules, you’re allowed to model your “attribute bundles” as a <em>vector space</em>.
           The objects themselves aren’t secretly vectors — we’re choosing a coordinate system that makes mixing and scaling behave predictably.
+        </Paragraph>
+        <Paragraph>
+          When we want to store many points, we stack their coordinates into a table. One row per thing. That stack of coordinates is a <strong>matrix</strong>.
         </Paragraph>
         <Paragraph>
           The missing piece is always: <em>what are the attributes?</em> For colors, they were literally knob settings from a matching
@@ -382,50 +388,17 @@ export function Chapter2() {
         <Paragraph>
           <strong>Training</strong> is a loop: make a prediction, score it, nudge the coordinates, repeat.
         </Paragraph>
-        <Citations
-          title="Grassmann sources"
-          items={[
-            {
-              n: 1,
-              href: 'https://mathshistory.st-andrews.ac.uk/Biographies/Grassmann/',
-              label: 'MacTutor — Hermann Günther Grassmann (biography + reception + later influence)',
-            },
-            {
-              n: 2,
-              href: "https://en.wikipedia.org/wiki/Grassmann%27s_law",
-              label: "Grassmann's law (linguistics) — overview + examples",
-            },
-            {
-              n: 3,
-              href: 'https://mathshistory.st-andrews.ac.uk/Extras/Grassmann_1844/',
-              label: 'Grassmann (1844) — Foreword extract (MacTutor translation)',
-            },
-            {
-              n: 4,
-              href: 'https://mathshistory.st-andrews.ac.uk/Extras/Grassmann_1862/',
-              label: 'Grassmann (1862) — Foreword extract (MacTutor translation)',
-            },
-            {
-              n: 5,
-              href: 'https://en.wikipedia.org/wiki/Hermann_Grassmann',
-              label: 'Hermann Grassmann — biography + publishing letter ("waste paper") + linguistics work',
-            },
-          ]}
-        />
-        <Callout variant="insight" title="From Colors to Characters: The Same Move">
-          <Paragraph>
-            Grassmann's move: you can't measure what a color IS, so measure what you have to DO to match it. Knob settings become coordinates.
-          </Paragraph>
-          <Paragraph>
-            Our move is the same: you can't measure what a character IS, so measure what it DOES—what tends to follow it. Count successors across a corpus and you get <Term>P(next|c)</Term>, a distribution over 27 characters. Call this the <strong>fingerprint</strong>: 27 numbers that capture how the character behaves in context.
-          </Paragraph>
-          <Paragraph>
-            That fingerprint IS coordinates—characters with similar fingerprints are functionally similar. But for real vocabularies, the fingerprint would be 50,000 numbers. Unwieldy. So we learn a <strong>compressed</strong> representation: the embedding, 64 numbers that preserve the similarity structure. Training finds the compression.
-          </Paragraph>
-          <Paragraph>
-            <Highlight>Behavior becomes geometry.</Highlight>
-          </Paragraph>
-        </Callout>
+        <Paragraph>
+          The plan from here is brutally concrete:
+        </Paragraph>
+        <ul>
+          <li>
+            <strong>Measure behavior:</strong> for each token, compute its next‑token fingerprint <Term>P(next | token)</Term> from counts.
+          </li>
+          <li>
+            <strong>Learn a compressed map:</strong> store a small vector <Term>e_token</Term> per token whose geometry matches those fingerprints well enough to predict.
+          </li>
+        </ul>
       </Section>
 
       <Section number="2.2" title="The Reuse Question">
@@ -660,11 +633,12 @@ E = np.random.randn(vocab_size, embed_dim).astype(np.float32)`}</CodeBlock>
           </li>
         </ul>
 
-        <Callout variant="info" title="Why 64 dimensions?">
+        <details className="collapsible">
+          <summary>Why 64 dimensions?</summary>
           <Paragraph>
             The fingerprint <Term>P(next|c)</Term> has 27 numbers, but we are not copying that vector. We just need a space where dot products track fingerprint overlap. Extra dimensions give gradient descent slack: enough room to arrange tokens so their similarities line up, without forcing the model to memorize full distributions. Around 64 works for this tiny vocabulary; fewer cramps, many more just waste parameters.
           </Paragraph>
-        </Callout>
+        </details>
 
         <Paragraph>
           The "adjectives" metaphor can feel a little unfair here, because right now it really is just 64 numbers.
@@ -839,12 +813,9 @@ print(X_emb.shape)  # (2, 4, 64)`}</CodeBlock>
               explanation="Same sum: multiply matching coordinates, then add them up."
             />
 
-            <Callout variant="insight" title="Grassmann's geometry made concrete">
-              <Paragraph>
-                This is Grassmann's insight from <SectionLink to="2.1">Section 2.1</SectionLink>, made usable. The dot product is the "projection"
-                tool: a single number that says how aligned two vectors are.
-              </Paragraph>
-            </Callout>
+            <Paragraph>
+              This is Grassmann's insight from <SectionLink to="2.1">Section 2.1</SectionLink>, made usable: a single number that says how aligned two vectors are.
+            </Paragraph>
 
         <Paragraph>
           Before we go further, let's see what the dot product actually <em>looks like</em>. Drag the arrows below:
@@ -918,7 +889,8 @@ score = float(np.dot(a, b))`}</CodeBlock>
           That's why the gauge shows a <Term>1/V</Term> marker.
         </Paragraph>
 
-        <Callout variant="info" title="Why dot products show up everywhere">
+        <details className="collapsible">
+          <summary>Why dot products show up everywhere</summary>
           <Paragraph>
             You could measure similarity lots of ways, but dot product is the workhorse because it hits three practical constraints at once:
           </Paragraph>
@@ -936,7 +908,7 @@ score = float(np.dot(a, b))`}</CodeBlock>
           <Paragraph>
             In transformers, attention scores are (scaled) dot products for the same reason: it’s a cheap, trainable way to ask “how aligned are these two vectors?”
           </Paragraph>
-        </Callout>
+        </details>
       </Section>
 
       <Section number="2.7" title="From Scores to Probabilities (Softmax)">
@@ -1000,23 +972,6 @@ score = float(np.dot(a, b))`}</CodeBlock>
         <Paragraph>
           That gives us permission to pick a convenient constant. In code, we almost always subtract the max logit so the largest exponent is <MathInline equation={String.raw`e^{0}=1`} /> and nothing overflows.
         </Paragraph>
-
-        <Callout variant="info" title="Softmax differences → stable code">
-          <Paragraph>
-            Softmax is shift‑invariant — adding the same constant to every logit does nothing:
-          </Paragraph>
-          <MathBlock
-            equation={String.raw`\text{Softmax}(x_i + c) = \frac{e^{x_i + c}}{\sum_j e^{x_j + c}} = \text{Softmax}(x_i)`}
-            explanation="The same exp(c) factor appears in every term, so it cancels."
-          />
-          <Paragraph>
-            So we choose a constant that makes the computation safe. In practice:
-          </Paragraph>
-          <MathBlock
-            equation={String.raw`\text{Softmax}(x_i) = \frac{e^{x_i - m}}{\sum_{j} e^{x_j - m}} \quad \text{where } m = \max_j x_j`}
-            explanation="Same probabilities, but now every exponent is ≤ 1."
-          />
-        </Callout>
 
         <WorkedExample title="Numerical stability: the overflow that max-subtraction prevents">
           <WorkedStep n="1">
@@ -1089,14 +1044,6 @@ def log_softmax(z):
         </WorkedExample>
 
         <Paragraph>
-          Drag the sliders below. Two things happen:
-        </Paragraph>
-        <ol>
-          <li><strong>No negatives:</strong> Even if you drag a logit to -5, the probability is just small, not negative.</li>
-          <li><strong>Winner takes all:</strong> Because of the exponential, the highest logit quickly dominates the others. We'd like the <em>max</em>, but we need it to be "soft" (differentiable) so we can train it. Hence: <strong>Softmax</strong>.</li>
-        </ol>
-        <SoftmaxWidget />
-        <Paragraph>
           One extra knob you'll see in basically every LLM API is <Term>temperature</Term>. It's just a scale on the logits before softmax:
         </Paragraph>
         <MathBlock
@@ -1112,7 +1059,7 @@ def log_softmax(z):
           </Paragraph>
         </Callout>
         <Paragraph>
-          In the widget above, try sliding <Term>T</Term> down toward <Term>0.1</Term> and up toward <Term>5</Term>. You're not changing which logit is biggest — you're changing how aggressively softmax concentrates probability mass on the winner.
+          In the demos below, try sliding <Term>T</Term> down toward <Term>0.1</Term> and up toward <Term>5</Term>. You're not changing which logit is biggest — you're changing how aggressively softmax concentrates probability mass on the winner.
         </Paragraph>
 
         <WorkedExample title="Temperature sharpens (same logits, different T)">
@@ -1135,12 +1082,15 @@ def log_softmax(z):
           </WorkedStep>
         </WorkedExample>
 
-        <Paragraph>
-          If the word <Term>temperature</Term> feels oddly physical here, that's because it is. Boltzmann discovered this same "exponentiate and normalize" pattern in 1877 when modeling how particles distribute across energy states.<Cite n={7} /><Cite n={8} /> The connection runs deep: in physics, low energy means high probability; in ML, high score means high probability. Swap the sign and you get the same formula.
-        </Paragraph>
-        <Paragraph>
-          Boltzmann was doing this before anyone could watch atoms directly — he argued you could infer the invisible from statistics.<Cite n={9} /> Einstein's 1905 Brownian-motion analysis helped prove him right.<Cite n={10} /> The mathematics outlived the controversy.
-        </Paragraph>
+        <details className="collapsible">
+          <summary>Why “temperature”?</summary>
+          <Paragraph>
+            If the word <Term>temperature</Term> feels oddly physical here, that's because it is. Boltzmann discovered this same "exponentiate and normalize" pattern in 1877 when modeling how particles distribute across energy states.<Cite n={7} /><Cite n={8} /> The connection runs deep: in physics, low energy means high probability; in ML, high score means high probability. Swap the sign and you get the same formula.
+          </Paragraph>
+          <Paragraph>
+            Boltzmann was doing this before anyone could watch atoms directly — he argued you could infer the invisible from statistics.<Cite n={9} /> Einstein's 1905 Brownian-motion analysis helped prove him right.<Cite n={10} /> The mathematics outlived the controversy.
+          </Paragraph>
+        </details>
         <Paragraph>
           Before we jump into the triangle view, let’s make softmax feel mechanical: three scores in, three probabilities out.
           Try the tiny challenge below — it forces you to think in ratios, not vibes.
@@ -1158,10 +1108,13 @@ def log_softmax(z):
           Watch how temperature pulls the point around: low <Term>T</Term> drives toward corners (certainty), high <Term>T</Term> drifts toward the center (uncertainty). Same logits, different confidence.
         </Paragraph>
 
-        <Paragraph>
-          The simplex is “probability space” — it shows every valid distribution you could end up with. Sometimes it’s helpful to flip the view and look at softmax itself as a function: take two logit gaps, and ask what probability comes out.
-        </Paragraph>
-        <SoftmaxLandscapeViz />
+        <details className="collapsible">
+          <summary>Optional: softmax as a surface</summary>
+          <Paragraph>
+            The simplex is “probability space” — it shows every valid distribution you could end up with. This flips the view and looks at softmax itself as a function: take two logit gaps, and ask what probability comes out.
+          </Paragraph>
+          <SoftmaxLandscapeViz />
+        </details>
 
         <Paragraph>
           There’s a reason we care about “smoothness” and not just “a way to normalize.” Later, we’re going to train by nudging numbers so a score goes down. A smooth probability map is something you can differentiate — which means it can tell you which way is uphill.
@@ -1185,9 +1138,12 @@ def log_softmax(z):
         <Paragraph>
           During training, we usually keep <Term>T</Term> fixed (often <Term>1</Term>) and let the model learn the logits themselves. At inference, temperature is you deciding how sharp you want those learned preferences to be.
         </Paragraph>
-        <Paragraph>
-          Axiomatic view: maximum‑entropy under constraints leads to an exponential family — softmax, with a temperature‑like scale. <Cite n={11} />
-        </Paragraph>
+        <details className="collapsible">
+          <summary>Optional: maximum‑entropy view</summary>
+          <Paragraph>
+            Maximum‑entropy under constraints leads to an exponential family — softmax, with a temperature‑like scale. <Cite n={11} />
+          </Paragraph>
+        </details>
 
         <Paragraph>
           We've been working with single examples: one context, one prediction, one loss. Real training runs batches — many examples at once. Before we get to training, let's set up the notation for that.
@@ -1679,7 +1635,8 @@ def log_softmax(z):
           </WorkedStep>
         </WorkedExample>
 
-        <Callout variant="info" title="Tied embeddings: one matrix, two roles">
+        <details className="collapsible">
+          <summary>Tied embeddings: one matrix, two roles</summary>
           <Paragraph>
             You can use two tables: <Term>E_context</Term> (for lookups) and <Term>E_target</Term> (for scoring candidates). Tying sets{' '}
             <Term>E_context = E_target = E</Term>. It cuts parameters and often works well.
@@ -1687,9 +1644,10 @@ def log_softmax(z):
           <Paragraph>
             With tying, each row learns from both roles: “move me toward what follows me” (context updates) and “be a good target for what precedes me” (target updates). The final geometry balances both forces.
           </Paragraph>
-        </Callout>
+        </details>
 
-        <Callout variant="info" title="Derivation: why the gradient has the form (predicted − actual)">
+        <details className="collapsible">
+          <summary>Derivation: why the gradient is (predicted − actual)</summary>
           <Paragraph>
             Softmax + cross‑entropy gives the clean “blame signal” at the logits:<Cite n={14} />
           </Paragraph>
@@ -1711,9 +1669,10 @@ def log_softmax(z):
             equation={String.raw`\frac{\partial L}{\partial E[c]} = \sum_j \left(p_j - \mathbf{1}_{j=\text{actual}}\right)\! \cdot E[j] = \left(\sum_j p_j\cdot E[j]\right) - E[\text{actual}]`}
             explanation="This is the “predicted centroid minus actual” vector."
           />
-        </Callout>
+        </details>
 
-        <Callout variant="info" title="Matrix view: the model is learning a low-rank next-token table">
+        <details className="collapsible">
+          <summary>Matrix view: a low‑rank next‑token table</summary>
           <Paragraph>
             In this minimal tied‑embedding model, the full score table is a matrix of dot products:
           </Paragraph>
@@ -1725,7 +1684,7 @@ def log_softmax(z):
           <Paragraph>
             A raw count table is <Term>V×V</Term>. An embedding table is <Term>V×D</Term>. When <Term>D \ll V</Term>, you’re forcing that big table through a low‑rank bottleneck — which is the whole point of “compression by geometry.” This family idea shows up all over classic NLP (e.g. Word2Vec).<Cite n={6} />
           </Paragraph>
-        </Callout>
+        </details>
 
         <CodeChallenge phase="2.13.1" title="Compute the gradient by hand">
           <CodeChallenge.Setup>
@@ -1809,63 +1768,11 @@ print(f"Gradient magnitude: {np.linalg.norm(gradient):.3f}")
           </CodeChallenge.Solution>
             </CodeChallenge>
 
-                <Paragraph>
-                  That "nudge" step is the mechanism. How do we know which direction makes things better?
-                </Paragraph>
-            <Paragraph>
-              Take a second to see what we're actually asking here.
-            </Paragraph>
         <Paragraph>
-          We have 1,728 numbers scattered across a 64-dimensional space. We need to adjust them — but which way? Up? Down? There's no one looking at the problem saying "oh, this coordinate should be 0.3 instead of 0.5." The model has to feel its way through the dark.
+          At this point the steering rule is no longer mysterious — we built it in <SectionLink to="2.12">Section 2.12</SectionLink>. The only new detail is where the gradient lands: it lands on a specific row of <Term>E</Term>.
         </Paragraph>
         <Paragraph>
-          Imagine you're blindfolded in a hilly landscape, trying to find the lowest point. You can't see, but you <em>can</em> feel the ground under your feet. If the ground slopes down to your left, you step left. That's the basic instinct. Training is just doing it on lots of numbers, over and over.
-        </Paragraph>
-        <Paragraph>
-          Now translate that to numbers. Say the model has just one adjustable number <Term>w</Term>, and <Term>L(w)</Term> tells us how wrong we are. To feel the slope, we wiggle:
-        </Paragraph>
-        <MathBlock
-          equation={String.raw`\text{slope} = \frac{L(w + \epsilon) - L(w)}{\epsilon}`}
-          explanation="Bump w by a tiny ε, see how much the loss changes. That ratio is the slope."
-        />
-        <Callout variant="insight" title="Backprop is the chain rule (industrialized)">
-          <Paragraph>
-            The finite-difference slope is the intuition: poke the loss and see which way it changes.
-          </Paragraph>
-          <Paragraph>
-            But real models aren't one number. They're long chains of computation. The loss depends on <Term>w</Term> through a bunch of intermediate values, and the chain rule tells you how slopes flow through a chain:
-          </Paragraph>
-          <MathBlock
-            equation={String.raw`\frac{dL}{dw} = \frac{dL}{dy} \cdot \frac{dy}{du} \cdot \frac{du}{dw}`}
-            explanation="Local slopes multiply as you move backward through the computation."
-          />
-          <Paragraph>
-            Backpropagation is just this idea repeated at scale: do one forward pass, keep the intermediates, then do one backward pass that walks the graph in reverse and accumulates <em>all</em> the slopes.
-          </Paragraph>
-          <Paragraph>
-            The mental model stays the same: find the slope, step downhill.
-          </Paragraph>
-        </Callout>
-        <Paragraph>
-          Positive slope? Increasing <Term>w</Term> makes things worse — step the other way. Negative slope? <Term>w</Term> is heading somewhere good — keep going. The update rule writes itself:
-        </Paragraph>
-        <MathBlock
-          equation={String.raw`w \leftarrow w - \eta \cdot \text{slope}`}
-          explanation="Step opposite to the slope. η controls how big a step."
-        />
-        <Paragraph>
-          That minus sign is doing all the work: it flips "uphill" into "go downhill."
-        </Paragraph>
-        <Paragraph>
-          Real models have millions of numbers. You compute a slope for every single one — that collection of slopes is called the <em>gradient</em>. Following it downhill is <em>gradient descent</em>.
-        </Paragraph>
-        <Paragraph>
-          The weird part is that nobody tells the model where to go. It only gets a loss and a gradient — local slope information. Each step asks: "which direction makes me slightly less wrong?" and takes that step. Repeat enough times, and structure emerges, even in a space you can't picture.
-        </Paragraph>
-        <GradientDescentViz />
-
-        <Paragraph>
-          Now zoom in on a single part of that gradient: how one context embedding gets pushed around.
+          The widget below zooms in on one context row. The arrow is the gradient <Term>∂L/∂E[c]</Term> (uphill). The update moves in the opposite direction (downhill).
         </Paragraph>
         <EmbeddingGradientViz />
         <Paragraph>
@@ -1874,16 +1781,22 @@ print(f"Gradient magnitude: {np.linalg.norm(gradient):.3f}")
         <Paragraph>
           Change the compare context. If it shares targets with <Term>'a'</Term>, its arrow stays aligned. If it predicts something different, it points somewhere else. Over many updates, “gets similar gradients” turns into “ends up nearby.”
         </Paragraph>
-        <Paragraph>
-          One careful note: for a single example, if you freeze the candidate vectors <Term>E[j]</Term>, the loss is convex in the context vector <Term>E[c]</Term> (scores are linear in <Term>E[c]</Term>, and the log‑sum‑exp term is convex). Training updates <em>all</em> the vectors, so the full problem is non‑convex — you don’t get a global guarantee, but you do get a reliable local steering signal.
-        </Paragraph>
+        <details className="collapsible">
+          <summary>Optional: a convexity note</summary>
+          <Paragraph>
+            For a single example, if you freeze the candidate vectors <Term>E[j]</Term>, the loss is convex in the context vector <Term>E[c]</Term> (scores are linear in <Term>E[c]</Term>, and the log‑sum‑exp term is convex). Training updates <em>all</em> the vectors, so the full problem is non‑convex — you don’t get a global guarantee, but you do get a reliable local steering signal.
+          </Paragraph>
+        </details>
         <Paragraph>
           <strong>The result:</strong> The coordinates start random, but training keeps nudging them until the geometry starts to mirror the statistics. Characters with similar next‑character fingerprints drift toward similar places.
         </Paragraph>
 
-        <Paragraph>
-          You can also get embeddings from count tables (e.g. SVD on a co‑occurrence matrix). Prediction‑based learning is doing something slightly different: it shapes vectors to make next‑token loss go down.
-        </Paragraph>
+        <details className="collapsible">
+          <summary>Optional: other ways to get embeddings</summary>
+          <Paragraph>
+            You can also get embeddings from count tables (e.g. SVD on a co‑occurrence matrix). Prediction‑based learning is doing something slightly different: it shapes vectors to make next‑token loss go down.
+          </Paragraph>
+        </details>
 
         <Paragraph>
           We've computed one gradient by hand. We've seen the visualization. Now: <strong>type the loop and watch it work.</strong>
@@ -2186,7 +2099,8 @@ cos(t, a) = 0.1`}</CodeBlock>
           And this brings us back to the schoolteacher from Stettin.
         </Paragraph>
 
-        <Callout variant="info" title="How Grassmann's Work Was Received">
+        <details className="collapsible">
+          <summary>Optional: how Grassmann’s work was received</summary>
           <Paragraph>
             <Highlight>1844</Highlight>: Grassmann publishes the <em>Ausdehnungslehre</em> while teaching high school. Möbius — one
             of the few people who might have understood it — <em>declines to review it</em>. The work <em>doesn't spread</em>.
@@ -2214,7 +2128,7 @@ cos(t, a) = 0.1`}</CodeBlock>
             Over the next century, the ideas become standard tools: vector spaces and related algebra end up as normal math.
             <Cite n={1} />
           </Paragraph>
-        </Callout>
+        </details>
 
         <Paragraph>
           Grassmann's bet was simple: if you can measure relationships between abstract things, you can treat them as coordinates.
@@ -2230,44 +2144,26 @@ cos(t, a) = 0.1`}</CodeBlock>
         <TrainingDynamicsViz corpus={corpus} />
 
         <Callout variant="insight" title="What the model discovered (without being told)">
-          <Paragraph>
-            <strong>Vowels cluster.</strong> The letters <Term>'a'</Term>, <Term>'e'</Term>, <Term>'i'</Term>, <Term>'o'</Term>, <Term>'u'</Term> tend to predict similar next-characters. Nobody labeled them "vowels." The model found this structure because it's useful for prediction.
-          </Paragraph>
-          <Paragraph>
-            <strong>'q' finds 'u'.</strong> If your corpus has English text, <Term>'q'</Term> drifts toward <Term>'u'</Term> — because <Term>'q'</Term> almost always predicts <Term>'u'</Term>. The geometry reflects the statistics.
-          </Paragraph>
-          <Paragraph>
-            <strong>Space separates.</strong> The space character often peels off from the letter cluster — its prediction pattern (start of a new word) is different from mid-word characters.
-          </Paragraph>
+          <ul>
+            <li>
+              <strong>Vowels cluster:</strong> <Term>'a'</Term>, <Term>'e'</Term>, <Term>'i'</Term>, <Term>'o'</Term>, <Term>'u'</Term> predict similar next‑characters, so training pushes them toward similar regions.
+            </li>
+            <li>
+              <strong>'q' finds 'u':</strong> in ordinary English text, <Term>'q'</Term> almost always precedes <Term>'u'</Term>, so those vectors get repeatedly tugged into alignment.
+            </li>
+            <li>
+              <strong>Space separates:</strong> space has a different role (word boundaries), so its neighborhood often splits off.
+            </li>
+          </ul>
         </Callout>
 
         <Paragraph>
           This is the surprising part of embeddings: <strong>structure emerges from prediction alone.</strong> We never told the model about vowels, consonants, or word boundaries. We only asked it to predict the next character. But prediction requires positioning — to predict similar things, you need to be in a similar place. The geometry is a side effect of doing the job well.
         </Paragraph>
 
-        <Callout variant="insight" title="Grassmann's Algebra in Motion">
-          <Paragraph>
-            1844. A high school teacher in Stettin writes down rules for moving through
-            spaces that don't exist yet. Add directions. Scale magnitudes. Flow through
-            a space of pure extension — no physical coordinates, just quantities that
-            can be combined and stretched.
-          </Paragraph>
-          <Paragraph>
-            He called it <em>Ausdehnungslehre</em>. His colleagues thought it was
-            unreadable. The publisher sold most copies as scrap paper.
-          </Paragraph>
-          <Paragraph>
-            180 years later, you're watching it happen. Each gradient is a direction.
-            Each learning rate is a scale. And the embedding vectors — those coordinates
-            for characters — drift, cluster, separate. Not in physical space. In the
-            space of "what tends to follow what."
-          </Paragraph>
-          <Paragraph>
-            Grassmann couldn't have imagined this screen. But the algebra doesn't care
-            what century it's in. <Highlight>Noise becomes neighborhoods. The structure
-            was always in the flow.</Highlight>
-          </Paragraph>
-        </Callout>
+        <Paragraph>
+          Nothing mystical happened here. We kept repeating two operations — <strong>score</strong> with dot products, then <strong>nudge</strong> with gradients — and the statistics forced a geometry that makes prediction easier.
+        </Paragraph>
 
         <Paragraph>
           <strong>Now make it speak.</strong> Slide the epoch to train, then click "Generate." Watch characters appear one at a time — each sampled from the probability distribution the model learned. Early epochs produce gibberish. Later epochs start producing fragments that look like language. That's what you just witnessed: noise became neighborhoods, and neighborhoods became language.
@@ -2659,6 +2555,36 @@ p \cdot p &= \sum_i p_i^2 \\
       </Section>
 
       <Section number="2.16" title="References">
+        <Citations
+          title="Historical sources"
+          items={[
+            {
+              n: 1,
+              href: 'https://mathshistory.st-andrews.ac.uk/Biographies/Grassmann/',
+              label: 'MacTutor — Hermann Günther Grassmann (biography + reception + later influence)',
+            },
+            {
+              n: 2,
+              href: "https://en.wikipedia.org/wiki/Grassmann%27s_law",
+              label: "Grassmann's law (linguistics) — overview + examples",
+            },
+            {
+              n: 3,
+              href: 'https://mathshistory.st-andrews.ac.uk/Extras/Grassmann_1844/',
+              label: 'Grassmann (1844) — Foreword extract (MacTutor translation)',
+            },
+            {
+              n: 4,
+              href: 'https://mathshistory.st-andrews.ac.uk/Extras/Grassmann_1862/',
+              label: 'Grassmann (1862) — Foreword extract (MacTutor translation)',
+            },
+            {
+              n: 5,
+              href: 'https://en.wikipedia.org/wiki/Hermann_Grassmann',
+              label: 'Hermann Grassmann — biography + publishing letter ("waste paper") + linguistics work',
+            },
+          ]}
+        />
         <Citations
           title="Academic references"
           items={[

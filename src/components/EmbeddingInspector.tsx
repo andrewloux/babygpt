@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Slider } from './Slider'
 import styles from './EmbeddingInspector.module.css'
 import { VOCAB, prettyChar } from '../data/characterData'
+import { VizCard } from './VizCard'
 
 type TrainedTable = {
   dim: number
@@ -301,24 +302,27 @@ export function EmbeddingInspector({ corpus }: EmbeddingInspectorProps) {
   }, [values])
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div>
-          <div className={styles.title}>Embedding Inspector</div>
-          <div className={styles.subtitle}>
-            A “detector” is a direction in embedding space. This shows a few.
-          </div>
+    <VizCard
+      title="Embedding Inspector"
+      subtitle="Directions in embedding space"
+      footer={
+        <div className={styles.footerNote}>
+          This is the honest bridge back to the “adjectives” metaphor: not “dimension 12 means vowel‑ness,” but “there exists a direction that
+          scores vowels high.”
         </div>
-        <div className={styles.meta}>
+      }
+    >
+      <div className={styles.content}>
+        <div className={styles.metaRow}>
           trained · <span className={styles.mono}>27×{trained.dim}</span> ·{' '}
           <span className={styles.mono}>
             {trained.pairsUsed}/{trained.pairsTotal}
           </span>{' '}
-          pairs
+          pairs · final loss ≈ <span className={styles.mono}>{trained.lossBits.toFixed(2)}</span> bits/char · perplexity ≈{' '}
+          <span className={styles.mono}>{trained.perplexity.toFixed(1)}</span>
         </div>
-      </div>
 
-      <div className={styles.controls}>
+      <div className={`${styles.controls} panel-dark inset-box`}>
         <div className={styles.modeRow}>
           <span className={styles.quickLabel}>View:</span>
           <button
@@ -439,11 +443,6 @@ export function EmbeddingInspector({ corpus }: EmbeddingInspectorProps) {
             </>
           )}
         </div>
-
-        <div className={styles.stats}>
-          final loss ≈ <span className={styles.mono}>{trained.lossBits.toFixed(2)}</span> bits/char · perplexity ≈{' '}
-          <span className={styles.mono}>{trained.perplexity.toFixed(1)}</span>
-        </div>
       </div>
 
       <div className={styles.heatmap} role="img" aria-label="Embedding scores by character">
@@ -468,35 +467,29 @@ export function EmbeddingInspector({ corpus }: EmbeddingInspectorProps) {
         })}
       </div>
 
-      <div className={styles.footer}>
-        <div className={styles.extremes}>
-          <div className={styles.extremeBlock}>
-            <div className={styles.extremeLabel}>High</div>
-            <div className={styles.extremeList}>
-              {extremes.high.map((x) => (
-                <span key={`hi-${x.ch}`} className={styles.extremeChip}>
-                  {prettyChar(x.ch)}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div className={styles.extremeBlock}>
-            <div className={styles.extremeLabel}>Low</div>
-            <div className={styles.extremeList}>
-              {extremes.low.map((x) => (
-                <span key={`lo-${x.ch}`} className={styles.extremeChip}>
-                  {prettyChar(x.ch)}
-                </span>
-              ))}
-            </div>
+      <div className={styles.extremes}>
+        <div className={styles.extremeBlock}>
+          <div className={styles.extremeLabel}>High</div>
+          <div className={styles.extremeList}>
+            {extremes.high.map((x) => (
+              <span key={`hi-${x.ch}`} className={styles.extremeChip}>
+                {prettyChar(x.ch)}
+              </span>
+            ))}
           </div>
         </div>
-
-        <div className={styles.caveat}>
-          This is the honest bridge back to the “adjectives” metaphor: not “dimension 12 means vowel‑ness,” but “there exists a direction that
-          scores vowels high.”
+        <div className={styles.extremeBlock}>
+          <div className={styles.extremeLabel}>Low</div>
+          <div className={styles.extremeList}>
+            {extremes.low.map((x) => (
+              <span key={`lo-${x.ch}`} className={styles.extremeChip}>
+                {prettyChar(x.ch)}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+      </div>
+    </VizCard>
   )
 }

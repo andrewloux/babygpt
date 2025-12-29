@@ -1,48 +1,13 @@
-.container {
-  margin: 1.25rem 0 1.75rem 0;
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background:
-    radial-gradient(ellipse 75% 60% at 50% 0%, rgba(255, 255, 255, 0.04), transparent 60%),
-    rgba(0, 0, 0, 0.22);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
-    0 22px 50px -35px rgba(0, 0, 0, 0.85);
-  overflow: hidden;
-  padding: 0.95rem 0.95rem 1.0rem 0.95rem;
-}
-
-.header {
+.content {
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: flex-start;
-  margin-bottom: 0.9rem;
+  flex-direction: column;
+  gap: 0.95rem;
 }
 
-.title {
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.subtitle {
-  margin-top: 0.25rem;
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 0.9rem;
-}
-
-.meta {
+.metaRow {
   font-family: var(--font-mono);
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.5);
-  padding: 0.35rem 0.55rem;
-  border-radius: 0.7rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
-  max-width: 100%;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .mono {
@@ -50,10 +15,7 @@
 }
 
 .controls {
-  border-radius: 0.9rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.18);
-  padding: 0.8rem 0.8rem 0.7rem 0.8rem;
+  padding: 0.85rem 0.9rem 0.8rem 0.9rem;
 }
 
 .modeRow {
@@ -132,7 +94,7 @@
 }
 
 .toggle:hover {
-  border-color: rgba(0, 217, 255, 0.32);
+  border-color: color-mix(in oklab, var(--accent-cyan) 35%, transparent);
   color: rgba(255, 255, 255, 0.9);
 }
 
@@ -176,14 +138,14 @@
 }
 
 .quickBtn:hover {
-  border-color: rgba(255, 0, 110, 0.35);
+  border-color: color-mix(in oklab, var(--accent-magenta) 35%, transparent);
   color: rgba(255, 255, 255, 0.9);
 }
 
 .quickBtnActive {
-  border-color: rgba(255, 0, 110, 0.6);
+  border-color: color-mix(in oklab, var(--accent-magenta) 65%, transparent);
   color: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 0 0 4px rgba(255, 0, 110, 0.12);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent-magenta) 16%, transparent);
 }
 
 .dimHint {
@@ -210,7 +172,6 @@
 }
 
 .heatmap {
-  margin-top: 1rem;
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
@@ -229,7 +190,7 @@
 
 .cell:hover {
   transform: translateY(-2px);
-  border-color: rgba(0, 217, 255, 0.35);
+  border-color: color-mix(in oklab, var(--accent-cyan) 35%, transparent);
 }
 
 .cellChar {
@@ -244,10 +205,6 @@
   font-family: var(--font-mono);
   font-size: 0.68rem;
   color: rgba(0, 0, 0, 0.72);
-}
-
-.footer {
-  margin-top: 1rem;
 }
 
 .extremes {
@@ -286,9 +243,6 @@
   color: rgba(255, 255, 255, 0.78);
 }
 
-.caveat {
-  margin-top: 0.85rem;
-  font-size: 0.9rem;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.55);
+.footerNote {
+  color: rgba(255, 255, 255, 0.72);
 }

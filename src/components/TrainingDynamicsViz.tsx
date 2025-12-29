@@ -2,6 +2,7 @@ import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import { Slider } from './Slider'
 import styles from './TrainingDynamicsViz.module.css'
 import { VOCAB, prettyChar } from '../data/characterData'
+import { VizCard } from './VizCard'
 
 type Vec2 = { x: number; y: number }
 
@@ -504,15 +505,17 @@ export function TrainingDynamicsViz({ corpus }: TrainingDynamicsVizProps) {
   }, [run.embeddings, clampedEpoch, temperature])
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.title}>Training Dynamics (Real Replay)</div>
-        <div className={styles.subtitle}>
-          Same tiny model, real gradient steps. The picture is a 2D PCA projection.
+    <VizCard
+      title="Training Dynamics"
+      subtitle="Noise → neighborhoods (2D PCA projection)"
+      footer={
+        <div className={styles.footerNote}>
+          Drag the epoch slider. Early = random. Later = structure. You’re watching the same update rule applied thousands of times.
         </div>
-      </div>
-
-      <div className={styles.controls}>
+      }
+    >
+      <div className={styles.content}>
+      <div className={`${styles.controls} panel-dark`}>
         <label className={styles.sliderLabel} htmlFor="training-epochs">
           Epoch: <span className={styles.sliderValue}>{clampedEpoch}</span>
           <span className={styles.sliderMeta}>
@@ -542,7 +545,7 @@ export function TrainingDynamicsViz({ corpus }: TrainingDynamicsVizProps) {
       </div>
 
       <div className={styles.stage}>
-        <div className={styles.scatterCard}>
+        <div className={`${styles.scatterCard} panel-dark`}>
           <svg
             className={styles.scatter}
             viewBox={`0 0 ${width} ${height}`}
@@ -625,7 +628,7 @@ export function TrainingDynamicsViz({ corpus }: TrainingDynamicsVizProps) {
           </svg>
         </div>
 
-        <div className={styles.lossCard}>
+        <div className={`${styles.lossCard} panel-dark`}>
           <div className={styles.lossHeader}>Loss over time</div>
           <svg className={styles.lossSvg} viewBox={`0 0 ${lossWidth} ${lossHeight}`} role="img" aria-label="Loss curve">
             <defs>
@@ -680,7 +683,7 @@ export function TrainingDynamicsViz({ corpus }: TrainingDynamicsVizProps) {
         </div>
       </div>
 
-      <div className={styles.generateSection}>
+      <div className={`${styles.generateSection} panel-dark`}>
         <div className={styles.generateHeader}>Make it speak</div>
         <div className={styles.generateControls}>
           <label className={styles.tempLabel}>
@@ -706,7 +709,7 @@ export function TrainingDynamicsViz({ corpus }: TrainingDynamicsVizProps) {
           </button>
         </div>
         {(displayedText || isThinking) && (
-          <div className={`${styles.generatedOutput} ${isGenerating ? styles.generatedOutputGenerating : ''}`}>
+          <div className={`${styles.generatedOutput} inset-box`}>
             <span className={styles.generatedText}>
               {displayedText.split('').map((char, i) => (
                 <span key={i} className={styles.char}>
@@ -751,6 +754,7 @@ export function TrainingDynamicsViz({ corpus }: TrainingDynamicsVizProps) {
           <span className={`${styles.swatch} ${styles.swatchSpace}`} /> space
         </div>
       </div>
-    </div>
+      </div>
+    </VizCard>
   )
 }
